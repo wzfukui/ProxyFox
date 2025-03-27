@@ -1,0 +1,334 @@
+{
+  "extName": {
+    "message": "ProxyFox",
+    "description": "拡張機能名"
+  },
+  "extDesc": {
+    "message": "シンプルで効率的なプロキシ切り替えツール",
+    "description": "拡張機能の説明"
+  },
+  "options_title": {
+    "message": "ProxyFox 設定",
+    "description": "設定ページのタイトル"
+  },
+  "nav_proxySettings": {
+    "message": "プロキシ設定",
+    "description": "ナビゲーション項目 - プロキシ設定"
+  },
+  "nav_globalWhitelist": {
+    "message": "グローバルホワイトリスト",
+    "description": "ナビゲーション項目 - グローバルホワイトリスト"
+  },
+  "nav_updateHistory": {
+    "message": "更新履歴",
+    "description": "ナビゲーション項目 - 更新履歴"
+  },
+  "nav_about": {
+    "message": "について",
+    "description": "ナビゲーション項目 - について"
+  },
+  "nav_languageSettings": {
+    "message": "言語設定",
+    "description": "ナビゲーション項目 - 言語設定"
+  },
+  "btn_addProxy": {
+    "message": "プロキシを追加",
+    "description": "プロキシ追加ボタン"
+  },
+  "btn_export": {
+    "message": "エクスポート",
+    "description": "設定エクスポートボタン"
+  },
+  "btn_import": {
+    "message": "インポート",
+    "description": "設定インポートボタン"
+  },
+  "form_title_add": {
+    "message": "プロキシ設定を追加",
+    "description": "プロキシ追加フォームのタイトル"
+  },
+  "form_title_edit": {
+    "message": "プロキシ設定を編集",
+    "description": "プロキシ編集フォームのタイトル"
+  },
+  "form_name": {
+    "message": "設定名（引用符、中括弧{}などの特殊文字を使用しないでください）",
+    "description": "プロキシ名入力欄のプレースホルダー"
+  },
+  "form_host": {
+    "message": "プロキシサーバーアドレス（IPまたはドメイン）",
+    "description": "プロキシホスト入力欄のプレースホルダー"
+  },
+  "form_port": {
+    "message": "ポート",
+    "description": "ポート入力欄のプレースホルダー"
+  },
+  "form_username": {
+    "message": "オプション",
+    "description": "ユーザー名入力欄のプレースホルダー"
+  },
+  "form_password": {
+    "message": "オプション",
+    "description": "パスワード入力欄のプレースホルダー"
+  },
+  "form_advancedOptions": {
+    "message": "詳細オプション",
+    "description": "詳細オプショントグルボタン"
+  },
+  "form_username_label": {
+    "message": "ユーザー名:",
+    "description": "ユーザー名ラベル"
+  },
+  "form_password_label": {
+    "message": "パスワード:",
+    "description": "パスワードラベル"
+  },
+  "form_ignoreCert": {
+    "message": "証明書検証を無視する",
+    "description": "証明書検証を無視するチェックボックスラベル"
+  },
+  "form_useGlobalWhitelist": {
+    "message": "グローバルホワイトリストを使用する（下のルールとマージされます）",
+    "description": "グローバルホワイトリスト使用チェックボックスラベル"
+  },
+  "form_whitelist_placeholder": {
+    "message": "ホワイトリスト（1行に1ルール），例：\n*.example.com\n192.168.1.*\ncompany.internal",
+    "description": "ホワイトリストテキストエリアのプレースホルダー"
+  },
+  "form_whitelist_hint": {
+    "message": "ホワイトリストルールに一致するウェブサイトは、プロキシを使用せずに直接接続されます。ドメイン、IPアドレス、ワイルドカードをサポートしています。",
+    "description": "ホワイトリストのヘルプテキスト"
+  },
+  "btn_delete": {
+    "message": "削除",
+    "description": "削除ボタン"
+  },
+  "btn_cancel": {
+    "message": "キャンセル",
+    "description": "キャンセルボタン"
+  },
+  "btn_save": {
+    "message": "保存",
+    "description": "保存ボタン"
+  },
+  "about_title": {
+    "message": "ProxyFoxについて",
+    "description": "について部分のタイトル"
+  },
+  "about_description": {
+    "message": "シンプルで効率的なプロキシ切り替えツール",
+    "description": "について部分の短い説明"
+  },
+  "about_copyright": {
+    "message": "© 2025 ProxyFox チーム",
+    "description": "著作権テキスト"
+  },
+  "about_long_description": {
+    "message": "ProxyFoxは、クラシックなSwitchyOmegaツールに似た、シンプルで効率的なプロキシ設定切り替え機能をユーザーに提供するためのChrome拡張機能です。最新のManifest V3標準に対応し、複数のプロキシ構成、グローバルホワイトリストとプロキシ固有のホワイトリスト管理、ワンクリック切り替え、完全なインポート/エクスポート機能と明確なステータス表示を提供します。",
+    "description": "について部分の詳細説明"
+  },
+  "about_project": {
+    "message": "プロジェクト：",
+    "description": "プロジェクトリンクラベル"
+  },
+  "about_website": {
+    "message": "公式ウェブサイト：",
+    "description": "公式ウェブサイトラベル"
+  },
+  "about_features": {
+    "message": "主な機能",
+    "description": "機能セクションのタイトル"
+  },
+  "feature_multiProxy": {
+    "message": "複数プロキシ設定管理",
+    "description": "機能項目"
+  },
+  "feature_proxyTypes": {
+    "message": "複数のプロキシタイプをサポート（HTTP、HTTPS、SOCKS4、SOCKS5）",
+    "description": "機能項目"
+  },
+  "feature_globalWhitelist": {
+    "message": "グローバルホワイトリストとプロキシ固有のホワイトリスト",
+    "description": "機能項目"
+  },
+  "feature_advancedOptions": {
+    "message": "多様な設定オプション",
+    "description": "機能項目"
+  },
+  "feature_oneClick": {
+    "message": "ワンクリック切り替え",
+    "description": "機能項目"
+  },
+  "feature_importExport": {
+    "message": "完全なインポート/エクスポート機能（グローバルホワイトリストを含む）",
+    "description": "機能項目"
+  },
+  "feature_mv3": {
+    "message": "Manifest V3互換",
+    "description": "機能項目"
+  },
+  "globalWhitelist_title": {
+    "message": "グローバルホワイトリスト",
+    "description": "グローバルホワイトリストセクションのタイトル"
+  },
+  "globalWhitelist_desc": {
+    "message": "「グローバルホワイトリストを使用する」がチェックされているすべてのプロキシ設定に適用されるグローバルホワイトリストルールを設定します。",
+    "description": "グローバルホワイトリストの説明"
+  },
+  "globalWhitelist_placeholder": {
+    "message": "ここにグローバルホワイトリストルールを入力してください、1行に1つ\n例：\n*.example.com\n192.168.1.*\n*.company.internal\n*.cdn.com",
+    "description": "グローバルホワイトリストテキストエリアのプレースホルダー"
+  },
+  "btn_saveGlobalWhitelist": {
+    "message": "グローバルホワイトリストを保存",
+    "description": "グローバルホワイトリスト保存ボタン"
+  },
+  "updateHistory_title": {
+    "message": "更新履歴",
+    "description": "更新履歴セクションのタイトル"
+  },
+  "updateHistory_firstRelease": {
+    "message": "初回リリース",
+    "description": "初回リリースタイトル"
+  },
+  "updateHistory_v1_1": {
+    "message": "国際化サポート更新",
+    "description": "v1.1アップデートタイトル"
+  },
+  "loading": {
+    "message": "読み込み中",
+    "description": "読み込みテキスト"
+  },
+  "status_configSaved": {
+    "message": "設定が保存されました",
+    "description": "設定保存成功時のステータスメッセージ"
+  },
+  "status_configDeleted": {
+    "message": "設定が削除されました",
+    "description": "設定削除成功時のステータスメッセージ"
+  },
+  "status_globalWhitelistSaved": {
+    "message": "グローバルホワイトリストが保存されました",
+    "description": "グローバルホワイトリスト保存成功時のステータスメッセージ"
+  },
+  "status_importSuccess": {
+    "message": "インポートに成功しました",
+    "description": "インポート成功時のステータスメッセージ"
+  },
+  "status_exportSuccess": {
+    "message": "エクスポートに成功しました",
+    "description": "エクスポート成功時のステータスメッセージ"
+  },
+  "status_error": {
+    "message": "エラーが発生しました",
+    "description": "一般的なエラーメッセージ"
+  },
+  "confirm_closeForm": {
+    "message": "フォームを閉じると、現在の入力がすべて失われます。閉じてもよろしいですか？",
+    "description": "変更があるフォームを閉じる確認"
+  },
+  "confirm_deleteProxy": {
+    "message": "このプロキシ設定を削除してもよろしいですか？",
+    "description": "プロキシ削除の確認"
+  },
+  "language_select": {
+    "message": "言語",
+    "description": "言語選択ラベル"
+  },
+  "current_proxy": {
+    "message": "現在のプロキシ",
+    "description": "現在のプロキシラベル"
+  },
+  "btn_settings": {
+    "message": "設定",
+    "description": "設定ボタン"
+  },
+  "btn_manageProxySettings": {
+    "message": "プロキシ設定を管理",
+    "description": "プロキシ設定管理ボタン"
+  },
+  "proxy_direct": {
+    "message": "直接モード",
+    "description": "直接モードオプション"
+  },
+  "proxy_system": {
+    "message": "システムプロキシ",
+    "description": "システムプロキシオプション"
+  },
+  "proxy_mode_direct": {
+    "message": "直接",
+    "description": "直接モード説明"
+  },
+  "proxy_mode_system": {
+    "message": "システムプロキシ",
+    "description": "システムプロキシモード説明"
+  },
+  "status_proxySwitched": {
+    "message": "プロキシが切り替えられました",
+    "description": "プロキシ切り替え成功メッセージ"
+  },
+  "status_activationFailed": {
+    "message": "アクティベーションに失敗しました",
+    "description": "プロキシアクティベーション失敗メッセージ"
+  },
+  "btn_close": {
+    "message": "閉じる",
+    "description": "閉じるボタン"
+  },
+  "btn_edit": {
+    "message": "編集",
+    "description": "編集ボタン"
+  },
+  "error_cannotDeleteSystemConfig": {
+    "message": "システム設定は削除できません",
+    "description": "システム設定を削除しようとしたときのエラーメッセージ"
+  },
+  "status_languageChanged": {
+    "message": "言語が変更されました。完全に適用するにはページを更新しています",
+    "description": "言語切り替え成功メッセージ"
+  },
+  "status_languageChangeFailed": {
+    "message": "言語の変更に失敗しました",
+    "description": "言語切り替え失敗メッセージ"
+  },
+  "languageSettings_title": {
+    "message": "言語設定",
+    "description": "言語設定ページのタイトル"
+  },
+  "languageSettings_desc": {
+    "message": "お好みのインターフェース言語を選択してください。言語を切り替えると、インターフェーステキストがすぐに更新されます。",
+    "description": "言語設定ページの説明"
+  },
+  "languageSettings_hint": {
+    "message": "上のボタンをクリックして言語を切り替えます。変更はすぐに反映され、ページが更新されます。",
+    "description": "言語設定ページのヒント"
+  },
+  "feature_i18n": {
+    "message": "完全な国際化サポート",
+    "description": "国際化機能項目"
+  },
+  "feature_i18n_languages": {
+    "message": "複数言語対応（簡体字中国語、繁体字中国語、英語、日本語、韓国語）",
+    "description": "対応言語リスト機能項目"
+  },
+  "feature_i18n_langSelector": {
+    "message": "直感的な言語切り替えインターフェイス",
+    "description": "言語選択機能項目"
+  },
+  "feature_bugfixes": {
+    "message": "複数のバグ修正とパフォーマンス最適化",
+    "description": "バグ修正機能項目"
+  },
+  "https_proxy_warning": {
+    "message": "HTTPSプロキシを使用する場合、自己署名証明書や信頼されていない証明書に遭遇すると、Chromeは証明書の警告を表示します。Chromeの証明書設定で例外を追加する必要があります。",
+    "description": "HTTPSプロキシ警告のヒント"
+  },
+  "https_help_link": {
+    "message": "Chrome証明書設定を開く",
+    "description": "Chrome証明書設定へのリンクテキスト"
+  },
+  "auth_hint": {
+    "message": "ユーザー名とパスワードは参照用です。プロキシ使用時、Chromeは資格情報の再入力を求めるプロンプトを表示します。",
+    "description": "認証ヒント情報"
+  }
+} 

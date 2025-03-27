@@ -1,0 +1,334 @@
+{
+  "extName": {
+    "message": "ProxyFox",
+    "description": "확장 프로그램 이름"
+  },
+  "extDesc": {
+    "message": "간단하고 효율적인 프록시 전환 도구",
+    "description": "확장 프로그램 설명"
+  },
+  "options_title": {
+    "message": "ProxyFox 설정",
+    "description": "설정 페이지 제목"
+  },
+  "nav_proxySettings": {
+    "message": "프록시 설정",
+    "description": "네비게이션 항목 - 프록시 설정"
+  },
+  "nav_globalWhitelist": {
+    "message": "글로벌 화이트리스트",
+    "description": "네비게이션 항목 - 글로벌 화이트리스트"
+  },
+  "nav_updateHistory": {
+    "message": "업데이트 기록",
+    "description": "네비게이션 항목 - 업데이트 기록"
+  },
+  "nav_about": {
+    "message": "정보",
+    "description": "네비게이션 항목 - 정보"
+  },
+  "nav_languageSettings": {
+    "message": "언어 설정",
+    "description": "탐색 항목 - 언어 설정"
+  },
+  "btn_addProxy": {
+    "message": "프록시 추가",
+    "description": "프록시 추가 버튼"
+  },
+  "btn_export": {
+    "message": "내보내기",
+    "description": "설정 내보내기 버튼"
+  },
+  "btn_import": {
+    "message": "가져오기",
+    "description": "설정 가져오기 버튼"
+  },
+  "form_title_add": {
+    "message": "프록시 설정 추가",
+    "description": "프록시 추가 양식 제목"
+  },
+  "form_title_edit": {
+    "message": "프록시 설정 편집",
+    "description": "프록시 편집 양식 제목"
+  },
+  "form_name": {
+    "message": "설정 이름(따옴표, 중괄호{} 등 특수문자 사용 금지)",
+    "description": "프록시 이름 입력란 플레이스홀더"
+  },
+  "form_host": {
+    "message": "프록시 서버 주소(IP 또는 도메인)",
+    "description": "프록시 호스트 입력란 플레이스홀더"
+  },
+  "form_port": {
+    "message": "포트",
+    "description": "포트 입력란 플레이스홀더"
+  },
+  "form_username": {
+    "message": "선택사항",
+    "description": "사용자 이름 입력란 플레이스홀더"
+  },
+  "form_password": {
+    "message": "선택사항",
+    "description": "비밀번호 입력란 플레이스홀더"
+  },
+  "form_advancedOptions": {
+    "message": "고급 옵션",
+    "description": "고급 옵션 토글 버튼"
+  },
+  "form_username_label": {
+    "message": "사용자 이름:",
+    "description": "사용자 이름 레이블"
+  },
+  "form_password_label": {
+    "message": "비밀번호:",
+    "description": "비밀번호 레이블"
+  },
+  "form_ignoreCert": {
+    "message": "인증서 검증 무시",
+    "description": "인증서 검증 무시 체크박스 레이블"
+  },
+  "form_useGlobalWhitelist": {
+    "message": "글로벌 화이트리스트 사용(아래 규칙과 병합됨)",
+    "description": "글로벌 화이트리스트 사용 체크박스 레이블"
+  },
+  "form_whitelist_placeholder": {
+    "message": "화이트리스트(한 줄에 한 규칙), 예시:\n*.example.com\n192.168.1.*\ncompany.internal",
+    "description": "화이트리스트 텍스트 영역 플레이스홀더"
+  },
+  "form_whitelist_hint": {
+    "message": "화이트리스트 규칙과 일치하는 웹사이트는 프록시를 사용하지 않고 직접 연결됩니다. 도메인, IP 주소 및 와일드카드를 지원합니다.",
+    "description": "화이트리스트 도움말 텍스트"
+  },
+  "btn_delete": {
+    "message": "삭제",
+    "description": "삭제 버튼"
+  },
+  "btn_cancel": {
+    "message": "취소",
+    "description": "취소 버튼"
+  },
+  "btn_save": {
+    "message": "저장",
+    "description": "저장 버튼"
+  },
+  "about_title": {
+    "message": "ProxyFox 정보",
+    "description": "정보 섹션 제목"
+  },
+  "about_description": {
+    "message": "간단하고 효율적인 프록시 전환 도구",
+    "description": "정보 섹션 간략 설명"
+  },
+  "about_copyright": {
+    "message": "© 2025 ProxyFox 팀",
+    "description": "저작권 텍스트"
+  },
+  "about_long_description": {
+    "message": "ProxyFox는 사용자에게 클래식 SwitchyOmega 도구와 유사한 간단하고 효율적인 프록시 구성 전환 기능을 제공하는 Chrome 확장 프로그램입니다. 최신 Manifest V3 표준을 준수하고, 다중 프록시 구성, 글로벌 화이트리스트 및 프록시별 화이트리스트 관리, 원클릭 전환, 완전한 가져오기/내보내기 기능과 명확한 상태 피드백을 제공합니다.",
+    "description": "정보 섹션 상세 설명"
+  },
+  "about_project": {
+    "message": "프로젝트:",
+    "description": "프로젝트 링크 레이블"
+  },
+  "about_website": {
+    "message": "공식 웹사이트:",
+    "description": "공식 웹사이트 레이블"
+  },
+  "about_features": {
+    "message": "주요 기능",
+    "description": "기능 섹션 제목"
+  },
+  "feature_multiProxy": {
+    "message": "다중 프록시 구성 관리",
+    "description": "기능 항목"
+  },
+  "feature_proxyTypes": {
+    "message": "다양한 프록시 유형 지원(HTTP, HTTPS, SOCKS4, SOCKS5)",
+    "description": "기능 항목"
+  },
+  "feature_globalWhitelist": {
+    "message": "글로벌 화이트리스트 및 프록시별 화이트리스트",
+    "description": "기능 항목"
+  },
+  "feature_advancedOptions": {
+    "message": "다양한 구성 옵션",
+    "description": "기능 항목"
+  },
+  "feature_oneClick": {
+    "message": "원클릭 전환",
+    "description": "기능 항목"
+  },
+  "feature_importExport": {
+    "message": "완전한 가져오기/내보내기 기능(글로벌 화이트리스트 포함)",
+    "description": "기능 항목"
+  },
+  "feature_mv3": {
+    "message": "Manifest V3 호환",
+    "description": "기능 항목"
+  },
+  "globalWhitelist_title": {
+    "message": "글로벌 화이트리스트",
+    "description": "글로벌 화이트리스트 섹션 제목"
+  },
+  "globalWhitelist_desc": {
+    "message": "\"글로벌 화이트리스트 사용\"이 체크된 모든 프록시 구성에 적용되는 글로벌 화이트리스트 규칙을 설정합니다.",
+    "description": "글로벌 화이트리스트 설명"
+  },
+  "globalWhitelist_placeholder": {
+    "message": "여기에 글로벌 화이트리스트 규칙을 입력하세요, 한 줄에 하나씩\n예시:\n*.example.com\n192.168.1.*\n*.company.internal\n*.cdn.com",
+    "description": "글로벌 화이트리스트 텍스트 영역 플레이스홀더"
+  },
+  "btn_saveGlobalWhitelist": {
+    "message": "글로벌 화이트리스트 저장",
+    "description": "글로벌 화이트리스트 저장 버튼"
+  },
+  "updateHistory_title": {
+    "message": "업데이트 기록",
+    "description": "업데이트 기록 섹션 제목"
+  },
+  "updateHistory_firstRelease": {
+    "message": "첫 번째 릴리스",
+    "description": "첫 번째 릴리스 제목"
+  },
+  "loading": {
+    "message": "로딩 중",
+    "description": "로딩 텍스트"
+  },
+  "status_configSaved": {
+    "message": "설정이 저장되었습니다",
+    "description": "설정 저장 성공 상태 메시지"
+  },
+  "status_configDeleted": {
+    "message": "설정이 삭제되었습니다",
+    "description": "설정 삭제 성공 상태 메시지"
+  },
+  "status_globalWhitelistSaved": {
+    "message": "글로벌 화이트리스트가 저장되었습니다",
+    "description": "글로벌 화이트리스트 저장 성공 상태 메시지"
+  },
+  "status_importSuccess": {
+    "message": "가져오기 성공",
+    "description": "가져오기 성공 상태 메시지"
+  },
+  "status_exportSuccess": {
+    "message": "내보내기 성공",
+    "description": "내보내기 성공 상태 메시지"
+  },
+  "status_error": {
+    "message": "오류가 발생했습니다",
+    "description": "일반 오류 메시지"
+  },
+  "confirm_closeForm": {
+    "message": "양식을 닫으면 현재 모든 입력이 손실됩니다. 닫으시겠습니까?",
+    "description": "변경된 양식 닫기 확인"
+  },
+  "confirm_deleteProxy": {
+    "message": "이 프록시 설정을 삭제하시겠습니까?",
+    "description": "프록시 삭제 확인"
+  },
+  "language_select": {
+    "message": "언어",
+    "description": "언어 선택 레이블"
+  },
+  "current_proxy": {
+    "message": "현재 프록시",
+    "description": "현재 프록시 레이블"
+  },
+  "btn_settings": {
+    "message": "설정",
+    "description": "설정 버튼"
+  },
+  "btn_manageProxySettings": {
+    "message": "프록시 설정 관리",
+    "description": "프록시 설정 관리 버튼"
+  },
+  "proxy_direct": {
+    "message": "직접 모드",
+    "description": "직접 모드 옵션"
+  },
+  "proxy_system": {
+    "message": "시스템 프록시",
+    "description": "시스템 프록시 옵션"
+  },
+  "proxy_mode_direct": {
+    "message": "직접",
+    "description": "직접 모드 설명"
+  },
+  "proxy_mode_system": {
+    "message": "시스템 프록시",
+    "description": "시스템 프록시 모드 설명"
+  },
+  "status_proxySwitched": {
+    "message": "프록시가 전환되었습니다",
+    "description": "프록시 전환 성공 메시지"
+  },
+  "status_activationFailed": {
+    "message": "활성화 실패",
+    "description": "프록시 활성화 실패 메시지"
+  },
+  "btn_close": {
+    "message": "닫기",
+    "description": "닫기 버튼"
+  },
+  "btn_edit": {
+    "message": "편집",
+    "description": "편집 버튼"
+  },
+  "error_cannotDeleteSystemConfig": {
+    "message": "시스템 구성은 삭제할 수 없습니다",
+    "description": "시스템 구성을 삭제하려고 할 때의 오류 메시지"
+  },
+  "status_languageChanged": {
+    "message": "언어가 변경되었습니다. 완전히 적용하기 위해 페이지를 새로 고침합니다",
+    "description": "언어 전환 성공 메시지"
+  },
+  "status_languageChangeFailed": {
+    "message": "언어 변경에 실패했습니다",
+    "description": "언어 전환 실패 메시지"
+  },
+  "languageSettings_title": {
+    "message": "언어 설정",
+    "description": "언어 설정 페이지 제목"
+  },
+  "languageSettings_desc": {
+    "message": "선호하는 인터페이스 언어를 선택하세요. 언어를 전환하면 인터페이스 텍스트가 즉시 업데이트됩니다.",
+    "description": "언어 설정 페이지 설명"
+  },
+  "languageSettings_hint": {
+    "message": "위의 버튼을 클릭하여 언어를 전환하세요. 변경 사항은 즉시 적용되고 페이지가 새로고침됩니다.",
+    "description": "언어 설정 페이지 힌트"
+  },
+  "updateHistory_v1_1": {
+    "message": "국제화 지원 업데이트",
+    "description": "v1.1 버전 업데이트 제목"
+  },
+  "feature_i18n": {
+    "message": "완전한 국제화 지원",
+    "description": "국제화 기능 항목"
+  },
+  "feature_i18n_languages": {
+    "message": "다양한 언어 지원 (간체 중국어, 번체 중국어, 영어, 일본어, 한국어)",
+    "description": "지원 언어 목록 기능 항목"
+  },
+  "feature_i18n_langSelector": {
+    "message": "직관적인 언어 전환 인터페이스",
+    "description": "언어 선택기 기능 항목"
+  },
+  "feature_bugfixes": {
+    "message": "여러 버그 수정 및 성능 최적화",
+    "description": "버그 수정 기능 항목"
+  },
+  "https_proxy_warning": {
+    "message": "HTTPS 프록시를 사용할 때 자체 서명된 인증서나 신뢰할 수 없는 인증서가 발견되면 Chrome에서 인증서 경고가 표시됩니다. Chrome 인증서 설정에서 예외를 추가해야 합니다.",
+    "description": "HTTPS 프록시 경고 팁"
+  },
+  "https_help_link": {
+    "message": "Chrome 인증서 설정 열기",
+    "description": "Chrome 인증서 설정 링크 텍스트"
+  },
+  "auth_hint": {
+    "message": "사용자 이름과 비밀번호는 참조용입니다. 프록시 사용 시 Chrome에서 자격 증명을 다시 입력하라는 메시지가 표시됩니다.",
+    "description": "인증 힌트 정보"
+  }
+} 

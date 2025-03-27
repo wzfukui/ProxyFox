@@ -1,0 +1,346 @@
+{
+  "extName": {
+    "message": "ProxyFox 代理小狐狸",
+    "description": "扩展名称"
+  },
+  "extDesc": {
+    "message": "一款轻量级的代理管理扩展，支持多种代理配置，一键切换。",
+    "description": "扩展描述"
+  },
+  "options_title": {
+    "message": "ProxyFox 代理设置",
+    "description": "选项页面标题"
+  },
+  "nav_proxySettings": {
+    "message": "代理设置",
+    "description": "导航项 - 代理设置"
+  },
+  "nav_globalWhitelist": {
+    "message": "全局白名单",
+    "description": "导航项 - 全局白名单"
+  },
+  "nav_languageSettings": {
+    "message": "语言设置",
+    "description": "导航项 - 语言设置"
+  },
+  "nav_updateHistory": {
+    "message": "更新历史",
+    "description": "导航项 - 更新历史"
+  },
+  "nav_about": {
+    "message": "关于",
+    "description": "导航项 - 关于"
+  },
+  "section_proxySettings": {
+    "message": "代理设置",
+    "description": "代理设置区域标题"
+  },
+  "section_globalWhitelist": {
+    "message": "全局白名单",
+    "description": "全局白名单区域标题"
+  },
+  "section_languageSettings": {
+    "message": "语言设置",
+    "description": "语言设置区域标题"
+  },
+  "section_updateHistory": {
+    "message": "更新历史",
+    "description": "更新历史区域标题"
+  },
+  "section_about": {
+    "message": "关于",
+    "description": "关于区域标题"
+  },
+  "btn_addProxy": {
+    "message": "添加代理",
+    "description": "添加代理按钮"
+  },
+  "btn_export": {
+    "message": "导出配置",
+    "description": "导出配置按钮"
+  },
+  "btn_import": {
+    "message": "导入配置",
+    "description": "导入配置按钮"
+  },
+  "btn_save": {
+    "message": "保存",
+    "description": "保存按钮"
+  },
+  "btn_delete": {
+    "message": "删除",
+    "description": "删除按钮"
+  },
+  "btn_cancel": {
+    "message": "取消",
+    "description": "取消按钮"
+  },
+  "btn_close": {
+    "message": "关闭",
+    "description": "关闭按钮"
+  },
+  "btn_edit": {
+    "message": "编辑",
+    "description": "编辑按钮"
+  },
+  "btn_saveGlobalWhitelist": {
+    "message": "保存全局白名单",
+    "description": "保存全局白名单按钮"
+  },
+  "https_proxy_warning": {
+    "message": "使用HTTPS代理时，如果遇到自签名证书或不受信任的证书，Chrome会显示证书警告。您需要在Chrome证书设置中添加例外。",
+    "description": "HTTPS代理警告提示"
+  },
+  "https_help_link": {
+    "message": "打开Chrome证书设置",
+    "description": "打开Chrome证书设置链接文本"
+  },
+  "auth_hint": {
+    "message": "用户名和密码仅作为参考信息。在使用代理时，Chrome会弹出窗口要求您重新输入凭据。",
+    "description": "认证提示信息"
+  },
+  "form_username_label": {
+    "message": "用户名:",
+    "description": "用户名标签"
+  },
+  "form_password_label": {
+    "message": "密码:",
+    "description": "密码标签"
+  },
+  "form_title_add": {
+    "message": "添加代理配置",
+    "description": "添加代理表单标题"
+  },
+  "form_title_edit": {
+    "message": "编辑代理配置",
+    "description": "编辑代理表单标题"
+  },
+  "form_name": {
+    "message": "配置名称(不要使用引号、大括号{}等特殊字符)",
+    "description": "代理名称字段"
+  },
+  "form_type": {
+    "message": "代理类型",
+    "description": "代理类型字段"
+  },
+  "form_host": {
+    "message": "代理主机/IP",
+    "description": "代理主机字段"
+  },
+  "form_port": {
+    "message": "代理端口",
+    "description": "代理端口字段"
+  },
+  "form_username": {
+    "message": "用户名(如需要)",
+    "description": "代理用户名字段"
+  },
+  "form_password": {
+    "message": "密码(如需要)",
+    "description": "代理密码字段"
+  },
+  "form_useGlobalWhitelist": {
+    "message": "使用全局白名单(与下方规则合并)",
+    "description": "使用全局白名单选项"
+  },
+  "form_whitelist": {
+    "message": "不使用代理的规则",
+    "description": "代理白名单字段"
+  },
+  "form_whitelist_placeholder": {
+    "message": "每行一条规则，例如:\n*.example.com\n10.0.0.0/8\nexample.org\n[::1]/128",
+    "description": "代理白名单字段的占位符"
+  },
+  "form_whitelist_hint": {
+    "message": "符合白名单规则的网站将直接连接，不经过代理。支持域名、IP地址和通配符。",
+    "description": "白名单的帮助文本"
+  },
+  "globalWhitelist_title": {
+    "message": "全局白名单",
+    "description": "全局白名单部分的标题"
+  },
+  "globalWhitelist_desc": {
+    "message": "全局白名单规则适用于所有配置。每行一个规则，可以使用通配符(*)。",
+    "description": "全局白名单说明文本"
+  },
+  "globalWhitelist_placeholder": {
+    "message": "每行一条规则，例如:\n*.example.com\n10.0.0.0/8\nexample.org\n[::1]/128",
+    "description": "全局白名单文本区域的占位符"
+  },
+  "loading": {
+    "message": "加载中...",
+    "description": "加载提示"
+  },
+  "proxy_mode_direct": {
+    "message": "直接连接",
+    "description": "直接连接模式文本"
+  },
+  "proxy_mode_system": {
+    "message": "使用系统代理",
+    "description": "系统代理模式文本"
+  },
+  "status_proxySwitched": {
+    "message": "代理已切换",
+    "description": "代理切换成功后的状态消息"
+  },
+  "status_activationFailed": {
+    "message": "激活代理失败",
+    "description": "代理激活失败的状态消息"
+  },
+  "status_configSaved": {
+    "message": "配置已保存",
+    "description": "配置保存成功后的状态消息"
+  },
+  "status_saveFailed": {
+    "message": "保存失败",
+    "description": "保存失败的状态消息"
+  },
+  "status_loadFailed": {
+    "message": "加载失败",
+    "description": "加载失败的状态消息"
+  },
+  "status_exportedTo": {
+    "message": "配置已导出至文件",
+    "description": "导出成功的状态消息"
+  },
+  "status_importSuccess": {
+    "message": "成功导入配置",
+    "description": "导入成功的状态消息"
+  },
+  "status_importFailed": {
+    "message": "导入失败",
+    "description": "导入失败的状态消息"
+  },
+  "status_deleteSuccess": {
+    "message": "配置已删除",
+    "description": "删除成功的状态消息"
+  },
+  "status_error": {
+    "message": "出错了",
+    "description": "一般错误的状态消息"
+  },
+  "status_languageChanged": {
+    "message": "语言已更改",
+    "description": "语言更改成功的状态消息"
+  },
+  "languageSettings_title": {
+    "message": "语言设置",
+    "description": "语言设置页面的标题"
+  },
+  "languageSettings_desc": {
+    "message": "选择您偏好的界面语言。切换语言后，界面文本将立即更新。",
+    "description": "语言设置页面的描述"
+  },
+  "languageSettings_hint": {
+    "message": "点击上方按钮可切换语言。更改将立即生效，并刷新页面。",
+    "description": "语言设置页面的提示"
+  },
+  "updateHistory_title": {
+    "message": "更新历史",
+    "description": "更新历史部分的标题"
+  },
+  "updateHistory_firstRelease": {
+    "message": "首次发布",
+    "description": "首次发布标题"
+  },
+  "updateHistory_v1_1": {
+    "message": "国际化支持更新",
+    "description": "v1.1版本更新标题"
+  },
+  "feature_multiProxy": {
+    "message": "多代理配置管理",
+    "description": "功能项"
+  },
+  "feature_proxyTypes": {
+    "message": "支持多种代理类型（HTTP、HTTPS、SOCKS4、SOCKS5）",
+    "description": "功能项"
+  },
+  "feature_globalWhitelist": {
+    "message": "全局白名单和代理特定白名单",
+    "description": "功能项"
+  },
+  "feature_advancedOptions": {
+    "message": "多样化配置选项",
+    "description": "功能项"
+  },
+  "feature_oneClick": {
+    "message": "一键切换",
+    "description": "功能项"
+  },
+  "feature_importExport": {
+    "message": "完整的导入/导出功能（包括全局白名单）",
+    "description": "功能项"
+  },
+  "feature_mv3": {
+    "message": "兼容 Manifest V3",
+    "description": "功能项"
+  },
+  "feature_i18n": {
+    "message": "完整的国际化支持",
+    "description": "国际化功能项"
+  },
+  "feature_i18n_languages": {
+    "message": "支持多种语言（简体中文、繁体中文、英文、日文、韩文）",
+    "description": "支持的语言列表功能项"
+  },
+  "feature_i18n_langSelector": {
+    "message": "直观的语言切换界面",
+    "description": "语言选择器功能项"
+  },
+  "feature_bugfixes": {
+    "message": "多项错误修复和性能优化",
+    "description": "错误修复功能项"
+  },
+  "about_title": {
+    "message": "关于 ProxyFox",
+    "description": "关于部分的标题"
+  },
+  "about_description": {
+    "message": "一款简单高效的代理配置切换工具",
+    "description": "关于部分的简短描述"
+  },
+  "about_copyright": {
+    "message": "© 2025 ProxyFox 团队",
+    "description": "版权文本"
+  },
+  "about_long_description": {
+    "message": "ProxyFox是一款轻量级的Chrome扩展，帮助您快速切换和管理多个代理配置。支持HTTP、HTTPS、SOCKS4和SOCKS5代理类型，支持国际化，兼容Chrome MV3标准。",
+    "description": "关于页面中的长描述"
+  },
+  "about_project": {
+    "message": "项目：",
+    "description": "项目链接标签"
+  },
+  "about_website": {
+    "message": "官方网站：",
+    "description": "官方网站标签"
+  },
+  "about_features": {
+    "message": "主要功能",
+    "description": "功能部分的标题"
+  },
+  "about_contact": {
+    "message": "联系我们",
+    "description": "联系链接"
+  },
+  "popup_title": {
+    "message": "ProxyFox",
+    "description": "弹窗标题"
+  },
+  "popup_open_options": {
+    "message": "打开设置",
+    "description": "打开设置按钮"
+  },
+  "popup_loading": {
+    "message": "加载中...",
+    "description": "弹窗加载提示"
+  },
+  "popup_no_configs": {
+    "message": "还没有代理配置",
+    "description": "无代理配置提示"
+  },
+  "popup_add_config": {
+    "message": "添加代理配置",
+    "description": "添加代理配置按钮"
+  }
+} 

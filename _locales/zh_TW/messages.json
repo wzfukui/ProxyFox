@@ -1,0 +1,334 @@
+{
+  "extName": {
+    "message": "ProxyFox",
+    "description": "擴展名稱"
+  },
+  "extDesc": {
+    "message": "一款簡單高效的代理配置切換工具",
+    "description": "擴展描述"
+  },
+  "options_title": {
+    "message": "ProxyFox 設定",
+    "description": "設定頁面標題"
+  },
+  "nav_proxySettings": {
+    "message": "代理設定",
+    "description": "導航項目 - 代理設定"
+  },
+  "nav_globalWhitelist": {
+    "message": "全局白名單",
+    "description": "導航項目 - 全局白名單"
+  },
+  "nav_updateHistory": {
+    "message": "更新歷史",
+    "description": "導航項目 - 更新歷史"
+  },
+  "nav_about": {
+    "message": "關於",
+    "description": "導航項目 - 關於"
+  },
+  "nav_languageSettings": {
+    "message": "語言設定",
+    "description": "導航項目 - 語言設定"
+  },
+  "btn_addProxy": {
+    "message": "新增代理",
+    "description": "新增代理按鈕"
+  },
+  "btn_export": {
+    "message": "匯出",
+    "description": "匯出設定按鈕"
+  },
+  "btn_import": {
+    "message": "匯入",
+    "description": "匯入設定按鈕"
+  },
+  "form_title_add": {
+    "message": "新增代理配置",
+    "description": "新增代理表單標題"
+  },
+  "form_title_edit": {
+    "message": "編輯代理配置",
+    "description": "編輯代理表單標題"
+  },
+  "form_name": {
+    "message": "配置名稱（請勿使用引號、花括號{}等特殊字符）",
+    "description": "代理名稱輸入框的佔位符"
+  },
+  "form_host": {
+    "message": "代理伺服器地址（IP或域名）",
+    "description": "代理主機輸入框的佔位符"
+  },
+  "form_port": {
+    "message": "連接埠",
+    "description": "連接埠輸入框的佔位符"
+  },
+  "form_username": {
+    "message": "可選",
+    "description": "用戶名輸入框的佔位符"
+  },
+  "form_password": {
+    "message": "可選",
+    "description": "密碼輸入框的佔位符"
+  },
+  "form_advancedOptions": {
+    "message": "進階選項",
+    "description": "進階選項切換按鈕"
+  },
+  "form_username_label": {
+    "message": "用戶名:",
+    "description": "用戶名標籤"
+  },
+  "form_password_label": {
+    "message": "密碼:",
+    "description": "密碼標籤"
+  },
+  "form_ignoreCert": {
+    "message": "忽略憑證驗證",
+    "description": "忽略憑證驗證複選框標籤"
+  },
+  "form_useGlobalWhitelist": {
+    "message": "使用全局白名單（將與下面的規則合併）",
+    "description": "使用全局白名單複選框標籤"
+  },
+  "form_whitelist_placeholder": {
+    "message": "白名單（每行一條規則），例如：\n*.example.com\n192.168.1.*\ncompany.internal",
+    "description": "白名單文本區域的佔位符"
+  },
+  "form_whitelist_hint": {
+    "message": "符合白名單規則的網站將直接連接，不經過代理。支援域名、IP地址和萬用字元。",
+    "description": "白名單的幫助文本"
+  },
+  "btn_delete": {
+    "message": "刪除",
+    "description": "刪除按鈕"
+  },
+  "btn_cancel": {
+    "message": "取消",
+    "description": "取消按鈕"
+  },
+  "btn_save": {
+    "message": "儲存",
+    "description": "儲存按鈕"
+  },
+  "about_title": {
+    "message": "關於 ProxyFox",
+    "description": "關於部分的標題"
+  },
+  "about_description": {
+    "message": "一款簡單高效的代理配置切換工具",
+    "description": "關於部分的簡短描述"
+  },
+  "about_copyright": {
+    "message": "© 2025 ProxyFox 團隊",
+    "description": "版權文本"
+  },
+  "about_long_description": {
+    "message": "ProxyFox 是一個 Chrome 擴展，旨在為用戶提供類似經典 SwitchyOmega 工具的簡單高效的代理配置切換功能。它相容最新的 Manifest V3 標準，提供多代理配置、全局白名單和代理特定白名單管理、一鍵切換、完整的匯入/匯出功能和清晰的狀態回饋。",
+    "description": "關於部分的詳細描述"
+  },
+  "about_project": {
+    "message": "專案：",
+    "description": "專案連結標籤"
+  },
+  "about_website": {
+    "message": "官方網站：",
+    "description": "官方網站標籤"
+  },
+  "about_features": {
+    "message": "主要功能",
+    "description": "功能部分的標題"
+  },
+  "feature_multiProxy": {
+    "message": "多代理配置管理",
+    "description": "功能項"
+  },
+  "feature_proxyTypes": {
+    "message": "支援多種代理類型（HTTP、HTTPS、SOCKS4、SOCKS5）",
+    "description": "功能項"
+  },
+  "feature_globalWhitelist": {
+    "message": "全局白名單和代理特定白名單",
+    "description": "功能項"
+  },
+  "feature_advancedOptions": {
+    "message": "多樣化配置選項",
+    "description": "功能項"
+  },
+  "feature_oneClick": {
+    "message": "一鍵切換",
+    "description": "功能項"
+  },
+  "feature_importExport": {
+    "message": "完整的匯入/匯出功能（包括全局白名單）",
+    "description": "功能項"
+  },
+  "feature_mv3": {
+    "message": "相容 Manifest V3",
+    "description": "功能項"
+  },
+  "globalWhitelist_title": {
+    "message": "全局白名單",
+    "description": "全局白名單部分的標題"
+  },
+  "globalWhitelist_desc": {
+    "message": "設定全局白名單規則，這些規則將應用於所有勾選了「使用全局白名單」的代理配置。",
+    "description": "全局白名單的描述"
+  },
+  "globalWhitelist_placeholder": {
+    "message": "在此輸入全局白名單規則，每行一條\n例如：\n*.example.com\n192.168.1.*\n*.company.internal\n*.cdn.com",
+    "description": "全局白名單文本區域的佔位符"
+  },
+  "btn_saveGlobalWhitelist": {
+    "message": "儲存全局白名單",
+    "description": "儲存全局白名單按鈕"
+  },
+  "updateHistory_title": {
+    "message": "更新歷史",
+    "description": "更新歷史部分的標題"
+  },
+  "updateHistory_firstRelease": {
+    "message": "首次發布",
+    "description": "首次發布標題"
+  },
+  "loading": {
+    "message": "載入中",
+    "description": "載入文本"
+  },
+  "status_configSaved": {
+    "message": "配置已儲存",
+    "description": "配置儲存成功時的狀態訊息"
+  },
+  "status_configDeleted": {
+    "message": "配置已刪除",
+    "description": "配置刪除成功時的狀態訊息"
+  },
+  "status_globalWhitelistSaved": {
+    "message": "全局白名單已儲存",
+    "description": "全局白名單儲存成功時的狀態訊息"
+  },
+  "status_importSuccess": {
+    "message": "匯入成功",
+    "description": "匯入成功時的狀態訊息"
+  },
+  "status_exportSuccess": {
+    "message": "匯出成功",
+    "description": "匯出成功時的狀態訊息"
+  },
+  "status_error": {
+    "message": "發生錯誤",
+    "description": "通用錯誤訊息"
+  },
+  "confirm_closeForm": {
+    "message": "關閉表單將丟失當前所有輸入，確定要關閉嗎？",
+    "description": "關閉有變更的表單的確認"
+  },
+  "confirm_deleteProxy": {
+    "message": "確定要刪除此代理配置嗎？",
+    "description": "刪除代理的確認"
+  },
+  "language_select": {
+    "message": "語言",
+    "description": "語言選擇標籤"
+  },
+  "current_proxy": {
+    "message": "當前代理",
+    "description": "當前代理標籤"
+  },
+  "btn_settings": {
+    "message": "設定",
+    "description": "設定按鈕"
+  },
+  "btn_manageProxySettings": {
+    "message": "管理代理設定",
+    "description": "管理代理設定按鈕"
+  },
+  "proxy_direct": {
+    "message": "直連模式",
+    "description": "直連模式選項"
+  },
+  "proxy_system": {
+    "message": "系統代理",
+    "description": "系統代理選項"
+  },
+  "proxy_mode_direct": {
+    "message": "直連",
+    "description": "直連模式描述"
+  },
+  "proxy_mode_system": {
+    "message": "系統代理",
+    "description": "系統代理模式描述"
+  },
+  "status_proxySwitched": {
+    "message": "代理已切換",
+    "description": "代理切換成功狀態訊息"
+  },
+  "status_activationFailed": {
+    "message": "啟用配置失敗",
+    "description": "代理啟用失敗狀態訊息"
+  },
+  "btn_close": {
+    "message": "關閉",
+    "description": "關閉按鈕"
+  },
+  "btn_edit": {
+    "message": "編輯",
+    "description": "編輯按鈕"
+  },
+  "error_cannotDeleteSystemConfig": {
+    "message": "系統配置不能刪除",
+    "description": "嘗試刪除系統配置時的錯誤訊息"
+  },
+  "status_languageChanged": {
+    "message": "語言已變更，重新整理頁面以完全套用",
+    "description": "語言切換成功訊息"
+  },
+  "status_languageChangeFailed": {
+    "message": "切換語言失敗",
+    "description": "語言切換失敗訊息"
+  },
+  "languageSettings_title": {
+    "message": "語言設定",
+    "description": "語言設定頁面的標題"
+  },
+  "languageSettings_desc": {
+    "message": "選擇您偏好的介面語言。切換語言後，介面文字將立即更新。",
+    "description": "語言設定頁面的描述"
+  },
+  "languageSettings_hint": {
+    "message": "點擊上方按鈕可切換語言。變更將立即生效，並重新整理頁面。",
+    "description": "語言設定頁面的提示"
+  },
+  "updateHistory_v1_1": {
+    "message": "國際化支援更新",
+    "description": "v1.1版本更新標題"
+  },
+  "feature_i18n": {
+    "message": "完整的國際化支援",
+    "description": "國際化功能項"
+  },
+  "feature_i18n_languages": {
+    "message": "支援多種語言（簡體中文、繁體中文、英文、日文、韓文）",
+    "description": "支援的語言列表功能項"
+  },
+  "feature_i18n_langSelector": {
+    "message": "直覺的語言切換界面",
+    "description": "語言選擇器功能項"
+  },
+  "feature_bugfixes": {
+    "message": "多項錯誤修復和效能優化",
+    "description": "錯誤修復功能項"
+  },
+  "https_proxy_warning": {
+    "message": "使用HTTPS代理時，如果遇到自簽名證書或不受信任的證書，Chrome會顯示證書警告。您需要在Chrome的證書設置中添加例外。",
+    "description": "HTTPS代理警告提示"
+  },
+  "https_help_link": {
+    "message": "打開Chrome證書設置",
+    "description": "打開Chrome證書設置鏈接文本"
+  },
+  "auth_hint": {
+    "message": "用戶名和密碼僅作為參考信息。在使用代理時，Chrome會彈出窗口要求您重新輸入憑據。",
+    "description": "認證提示信息"
+  }
+} 

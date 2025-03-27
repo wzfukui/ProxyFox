@@ -1,0 +1,334 @@
+{
+  "extName": {
+    "message": "ProxyFox",
+    "description": "Extension name"
+  },
+  "extDesc": {
+    "message": "A simple and efficient proxy switching tool",
+    "description": "Extension description"
+  },
+  "options_title": {
+    "message": "ProxyFox Settings",
+    "description": "Settings page title"
+  },
+  "nav_proxySettings": {
+    "message": "Proxy Settings",
+    "description": "Navigation item - Proxy Settings"
+  },
+  "nav_globalWhitelist": {
+    "message": "Global Whitelist",
+    "description": "Navigation item - Global Whitelist"
+  },
+  "nav_updateHistory": {
+    "message": "Update History",
+    "description": "Navigation item - Update History"
+  },
+  "nav_about": {
+    "message": "About",
+    "description": "Navigation item - About"
+  },
+  "nav_languageSettings": {
+    "message": "Language",
+    "description": "Navigation item - Language Settings"
+  },
+  "btn_addProxy": {
+    "message": "Add Proxy",
+    "description": "Add proxy button"
+  },
+  "btn_export": {
+    "message": "Export",
+    "description": "Export settings button"
+  },
+  "btn_import": {
+    "message": "Import",
+    "description": "Import settings button"
+  },
+  "form_title_add": {
+    "message": "Add Proxy Configuration",
+    "description": "Add proxy form title"
+  },
+  "form_title_edit": {
+    "message": "Edit Proxy Configuration",
+    "description": "Edit proxy form title"
+  },
+  "form_name": {
+    "message": "Configuration name (do not use quotes, braces {} or other special characters)",
+    "description": "Proxy name input field placeholder"
+  },
+  "form_host": {
+    "message": "Proxy server address (IP or domain)",
+    "description": "Proxy host input field placeholder"
+  },
+  "form_port": {
+    "message": "Port",
+    "description": "Port input field placeholder"
+  },
+  "form_username": {
+    "message": "Optional",
+    "description": "Username input field placeholder"
+  },
+  "form_password": {
+    "message": "Optional",
+    "description": "Password input field placeholder"
+  },
+  "form_advancedOptions": {
+    "message": "Advanced Options",
+    "description": "Advanced options toggle button"
+  },
+  "form_username_label": {
+    "message": "Username:",
+    "description": "Username label"
+  },
+  "form_password_label": {
+    "message": "Password:",
+    "description": "Password label"
+  },
+  "form_ignoreCert": {
+    "message": "Ignore certificate validation",
+    "description": "Ignore certificate validation checkbox label"
+  },
+  "form_useGlobalWhitelist": {
+    "message": "Use global whitelist (will be merged with rules below)",
+    "description": "Use global whitelist checkbox label"
+  },
+  "form_whitelist_placeholder": {
+    "message": "Whitelist (one rule per line), for example:\n*.example.com\n192.168.1.*\ncompany.internal",
+    "description": "Whitelist textarea placeholder"
+  },
+  "form_whitelist_hint": {
+    "message": "Websites matching whitelist rules will connect directly without using proxy. Supports domains, IP addresses, and wildcards.",
+    "description": "Whitelist help text"
+  },
+  "btn_delete": {
+    "message": "Delete",
+    "description": "Delete button"
+  },
+  "btn_cancel": {
+    "message": "Cancel",
+    "description": "Cancel button"
+  },
+  "btn_save": {
+    "message": "Save",
+    "description": "Save button"
+  },
+  "about_title": {
+    "message": "About ProxyFox",
+    "description": "About section title"
+  },
+  "about_description": {
+    "message": "A simple and efficient proxy switching tool",
+    "description": "About section short description"
+  },
+  "about_copyright": {
+    "message": "© 2025 ProxyFox Team",
+    "description": "Copyright text"
+  },
+  "about_long_description": {
+    "message": "ProxyFox is a Chrome extension designed to provide users with simple and efficient proxy configuration switching functionality similar to the classic SwitchyOmega tool. It is compatible with the latest Manifest V3 standard and offers multiple proxy configurations, global whitelist and proxy-specific whitelist management, one-click switching, complete import/export functionality, and clear status feedback.",
+    "description": "About section detailed description"
+  },
+  "about_project": {
+    "message": "Project:",
+    "description": "Project link label"
+  },
+  "about_website": {
+    "message": "Official Website:",
+    "description": "Official website label"
+  },
+  "about_features": {
+    "message": "Key Features",
+    "description": "Features section title"
+  },
+  "feature_multiProxy": {
+    "message": "Multiple proxy configuration management",
+    "description": "Feature item"
+  },
+  "feature_proxyTypes": {
+    "message": "Support for multiple proxy types (HTTP, HTTPS, SOCKS4, SOCKS5)",
+    "description": "Feature item"
+  },
+  "feature_globalWhitelist": {
+    "message": "Global whitelist and proxy-specific whitelist",
+    "description": "Feature item"
+  },
+  "feature_advancedOptions": {
+    "message": "Various configuration options",
+    "description": "Feature item"
+  },
+  "feature_oneClick": {
+    "message": "One-click switching",
+    "description": "Feature item"
+  },
+  "feature_importExport": {
+    "message": "Complete import/export functionality (including global whitelist)",
+    "description": "Feature item"
+  },
+  "feature_mv3": {
+    "message": "Manifest V3 compatible",
+    "description": "Feature item"
+  },
+  "globalWhitelist_title": {
+    "message": "Global Whitelist",
+    "description": "Global whitelist section title"
+  },
+  "globalWhitelist_desc": {
+    "message": "Set global whitelist rules that apply to all proxy configurations with \"Use Global Whitelist\" checked.",
+    "description": "Global whitelist description"
+  },
+  "globalWhitelist_placeholder": {
+    "message": "Enter global whitelist rules here, one per line\nFor example:\n*.example.com\n192.168.1.*\n*.company.internal\n*.cdn.com",
+    "description": "Global whitelist textarea placeholder"
+  },
+  "btn_saveGlobalWhitelist": {
+    "message": "Save Global Whitelist",
+    "description": "Save global whitelist button"
+  },
+  "updateHistory_title": {
+    "message": "Update History",
+    "description": "Update history section title"
+  },
+  "updateHistory_firstRelease": {
+    "message": "First Release",
+    "description": "First release title"
+  },
+  "loading": {
+    "message": "Loading",
+    "description": "Loading text"
+  },
+  "status_configSaved": {
+    "message": "Configuration saved",
+    "description": "Configuration save success status message"
+  },
+  "status_configDeleted": {
+    "message": "Configuration deleted",
+    "description": "Configuration delete success status message"
+  },
+  "status_globalWhitelistSaved": {
+    "message": "Global whitelist saved",
+    "description": "Global whitelist save success status message"
+  },
+  "status_importSuccess": {
+    "message": "Import successful",
+    "description": "Import success status message"
+  },
+  "status_exportSuccess": {
+    "message": "Export successful",
+    "description": "Export success status message"
+  },
+  "status_error": {
+    "message": "An error occurred",
+    "description": "Generic error message"
+  },
+  "confirm_closeForm": {
+    "message": "Closing the form will lose all current input. Are you sure you want to close?",
+    "description": "Confirmation for closing form with changes"
+  },
+  "confirm_deleteProxy": {
+    "message": "Are you sure you want to delete this proxy configuration?",
+    "description": "Confirmation for deleting proxy"
+  },
+  "language_select": {
+    "message": "Language",
+    "description": "Language selection label"
+  },
+  "current_proxy": {
+    "message": "Current Proxy",
+    "description": "Current proxy label"
+  },
+  "btn_settings": {
+    "message": "Settings",
+    "description": "Settings button"
+  },
+  "btn_manageProxySettings": {
+    "message": "Manage Proxy Settings",
+    "description": "Manage proxy settings button"
+  },
+  "proxy_direct": {
+    "message": "Direct Mode",
+    "description": "Direct mode option"
+  },
+  "proxy_system": {
+    "message": "System Proxy",
+    "description": "System proxy option"
+  },
+  "proxy_mode_direct": {
+    "message": "Direct",
+    "description": "Direct mode description"
+  },
+  "proxy_mode_system": {
+    "message": "System Proxy",
+    "description": "System proxy mode description"
+  },
+  "status_proxySwitched": {
+    "message": "Proxy switched",
+    "description": "Proxy switch success message"
+  },
+  "status_activationFailed": {
+    "message": "Activation failed",
+    "description": "Proxy activation failed message"
+  },
+  "btn_close": {
+    "message": "Close",
+    "description": "Close button"
+  },
+  "btn_edit": {
+    "message": "Edit",
+    "description": "Edit button"
+  },
+  "error_cannotDeleteSystemConfig": {
+    "message": "System configuration cannot be deleted",
+    "description": "Error message when trying to delete a system configuration"
+  },
+  "status_languageChanged": {
+    "message": "Language changed, refreshing page to fully apply",
+    "description": "Language switch success message"
+  },
+  "status_languageChangeFailed": {
+    "message": "Failed to change language",
+    "description": "Language switch failure message"
+  },
+  "languageSettings_title": {
+    "message": "Language Settings",
+    "description": "Title of the language settings page"
+  },
+  "languageSettings_desc": {
+    "message": "Select your preferred interface language. The interface text will update immediately after switching languages.",
+    "description": "Description of the language settings page"
+  },
+  "languageSettings_hint": {
+    "message": "Click on a button above to switch language. Changes will take effect immediately and refresh the page.",
+    "description": "Hint text on the language settings page"
+  },
+  "updateHistory_v1_1": {
+    "message": "Internationalization Update",
+    "description": "v1.1 update title"
+  },
+  "feature_i18n": {
+    "message": "Full internationalization support",
+    "description": "i18n feature item"
+  },
+  "feature_i18n_languages": {
+    "message": "Support for multiple languages (Simplified Chinese, Traditional Chinese, English, Japanese, Korean)",
+    "description": "Supported languages feature item"
+  },
+  "feature_i18n_langSelector": {
+    "message": "Intuitive language switching interface",
+    "description": "Language selector feature item"
+  },
+  "feature_bugfixes": {
+    "message": "Multiple bug fixes and performance improvements",
+    "description": "Bug fixes feature item"
+  },
+  "https_proxy_warning": {
+    "message": "When using HTTPS proxy, if you encounter self-signed or untrusted certificates, Chrome will display certificate warnings. You need to add exceptions in Chrome's certificate settings.",
+    "description": "HTTPS proxy warning tip"
+  },
+  "https_help_link": {
+    "message": "Open Chrome Certificate Settings",
+    "description": "Text for link to Chrome certificate settings"
+  },
+  "auth_hint": {
+    "message": "Username and password are for reference only. When using the proxy, Chrome will prompt you to enter credentials again.",
+    "description": "Authentication hint information"
+  }
+} 

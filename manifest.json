@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_extName__",
+  "version": "1.1",
+  "description": "__MSG_extDesc__",
+  "default_locale": "en",
+  "icons": {
+    "16": "images/proxyfox-logo-16.png",
+    "48": "images/proxyfox-logo-48.png",
+    "128": "images/proxyfox-logo-128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/proxyfox-logo-16.png",
+      "48": "images/proxyfox-logo-48.png",
+      "128": "images/proxyfox-logo-128.png"
+    }
+  },
+  "options_page": "options.html",
+  "permissions": [
+    "proxy",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "js/background.js"
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAy4FnH/hZS/Mytpo7O5pmcGsntYn6k4Z1dnNQ7M2+gT2UPVHyR9MXMxAUF8KuwEDc5GvD/68y0ROi4OCbLu+RkAzL+9zOg5mp8eFjP/GE4xk/lUjr3K2ePUgXco8GnuPgdu8boIiRavATEMLlmc5enrBqu6zgT16ZeZ5VQu6ppSQ61reLR1ce4WtxxrUWNMkSBgjiFJV4Dv/yea1WpGIiLSJTa2ONf4CvARsGlgHQJ+ohHTl+BnZvSh0Av7v53kXJHzqYTFB8cpszkOWo+gg5wXGTsb+mC7KYjEZe3kJA93F0Zp3wa3EX5Xzc+wzWwTWzVf+nPyi14XLVJOFgAeYicwIDAQAB"
+} 
