@@ -1,5 +1,7 @@
 # ProxyFox - Simple and Efficient Proxy Switching Tool
 
+<img src="images/proxyfox-logo.png" alt="ProxyFox Screenshot" width="50%">
+
 ProxyFox is a Chrome browser extension for proxy management, designed to provide users with simple and efficient proxy configuration switching functionality, similar to the classic SwitchyOmega tool. The project is compatible with the latest Manifest V3 standard, supporting multiple proxy configurations, global whitelist and proxy-specific whitelist management, one-click switching, and providing complete import/export functionality with clear status indicators.
 
 ProxyFox Official Website: [proxyfox.io](https://proxyfox.io)
@@ -12,6 +14,7 @@ ProxyFox Official Website: [proxyfox.io](https://proxyfox.io)
 - **Proxy-Specific Whitelist**: Each proxy configuration can have its own whitelist rules
 - **Whitelist Merging**: Optionally merge global whitelist with proxy-specific whitelist
 - **One-Click Switching**: Quickly switch between different proxy configurations
+- **Auto Refresh**: Automatically refresh the current page after switching proxies to apply new settings immediately
 - **Complete Import/Export**: Easily backup and migrate all configurations, including global whitelist
 - **Multi-language Support**:
   - Simplified Chinese
@@ -22,6 +25,7 @@ ProxyFox Official Website: [proxyfox.io](https://proxyfox.io)
 - **Intuitive Language Switching Interface**: Easily switch between different languages
 - **Status Feedback**: Clear display of current proxy status
 - **Update History**: Detailed version update records
+- **Minimal Permissions**: Requires only necessary permissions (proxy, storage, tabs)
 - **Manifest V3 Compatible**: Ensures long-term usability
 
 ## Installation Methods
@@ -42,7 +46,7 @@ ProxyFox Official Website: [proxyfox.io](https://proxyfox.io)
 ## Usage Guide
 
 1. **View Proxies**: Click the ProxyFox icon in the browser toolbar
-2. **Switch Proxies**: Click the desired proxy configuration in the popup window
+2. **Switch Proxies**: Click the desired proxy configuration in the popup window (current page will automatically refresh)
 3. **Add Proxy**: Click the "Add Configuration" button and fill in proxy information
 4. **Edit Proxy**: Click the edit button on existing configuration items
 5. **Delete Proxy**: Click the "Delete" button in the edit interface
@@ -70,7 +74,7 @@ One rule per line, traffic matching the whitelist will connect directly without 
 ## FAQ
 
 1. **How to quickly switch proxies?**  
-   Click the extension icon, then click the desired proxy configuration.
+   Click the extension icon, then click the desired proxy configuration. The current page will automatically refresh to apply the new proxy settings.
 
 2. **What to do if configurations are lost?**  
    Use the export function to regularly backup your configurations, including global whitelist settings.
@@ -90,7 +94,17 @@ One rule per line, traffic matching the whitelist will connect directly without 
 7. **How to handle HTTPS proxy certificate issues?**  
    When using HTTPS proxies, if you encounter self-signed certificates or untrusted certificates, Chrome will display certificate warnings. You need to manually add exceptions in Chrome's certificate settings.
 
+8. **Permission Request Explanation**  
+   This extension only requests the following necessary permissions:
+   - `proxy`: For managing browser proxy settings (core functionality)
+   - `storage`: For storing your proxy configurations
+   - `tabs`: For automatically refreshing the current page after switching proxies
+
 ## Update History
+
+### v1.2 (2025-04-03)
+- Added tabs permission to support automatic page refresh after proxy switching
+- Multiple bug fixes and stability improvements
 
 ### v1.1 (2025-03-27)
 - Added complete internationalization support
