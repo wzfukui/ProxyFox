@@ -39,6 +39,7 @@ async function preloadMessages() {
             
             const messages = JSON.parse(cleanedText);
             window.cachedMessages[lang] = messages;
+            console.log(`成功加载 ${lang} 语言数据，包含 ${Object.keys(messages).length} 条消息`);
           } catch (parseError) {
             console.error(`解析 ${lang} 语言数据JSON失败:`, parseError);
           }
@@ -49,9 +50,33 @@ async function preloadMessages() {
         console.error(`加载 ${lang} 语言数据时出错:`, err);
       }
     }
+    
+    // 全部加载完成后，再次本地化界面
+    console.log('所有语言数据加载完成，刷新界面文本');
+    refreshTranslations();
   } catch (error) {
     console.error('预加载语言数据失败:', error);
   }
+}
+
+// 刷新翻译
+function refreshTranslations() {
+  chrome.storage.local.get('userLanguage', function(data) {
+    const currentLang = data.userLanguage || 'zh_CN';
+    console.log(`正在刷新界面文本，当前语言: ${currentLang}`);
+    
+    // 强制重新调用本地化函数
+    localizeHtml();
+    
+    // 刷新所有带有data-i18n属性的元素
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      const translated = fetchMessage(key, currentLang);
+      if (translated) {
+        el.textContent = translated;
+      }
+    });
+  });
 }
 
 // 获取国际化消息的函数，优先使用缓存的语言文件

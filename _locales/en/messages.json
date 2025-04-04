@@ -191,6 +191,14 @@
     "message": "First Release",
     "description": "First release title"
   },
+  "updateHistory_v1_1": {
+    "message": "Internationalization Update",
+    "description": "v1.1 update title"
+  },
+  "updateHistory_v1_2": {
+    "message": "Feature Enhancement Update",
+    "description": "v1.2 update title"
+  },
   "loading": {
     "message": "Loading",
     "description": "Loading text"
@@ -299,9 +307,9 @@
     "message": "Click on a button above to switch language. Changes will take effect immediately and refresh the page.",
     "description": "Hint text on the language settings page"
   },
-  "updateHistory_v1_1": {
-    "message": "Internationalization Update",
-    "description": "v1.1 update title"
+  "feature_autoRefresh": {
+    "message": "Automatic page refresh after proxy switching",
+    "description": "Auto refresh feature item"
   },
   "feature_i18n": {
     "message": "Full internationalization support",

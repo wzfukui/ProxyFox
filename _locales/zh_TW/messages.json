@@ -191,6 +191,18 @@
     "message": "首次發布",
     "description": "首次發布標題"
   },
+  "updateHistory_v1_1": {
+    "message": "國際化支援更新",
+    "description": "v1.1版本更新標題"
+  },
+  "updateHistory_v1_2": {
+    "message": "功能改進更新",
+    "description": "v1.2版本更新標題"
+  },
+  "feature_autoRefresh": {
+    "message": "代理切換後自動重新整理頁面",
+    "description": "自動重新整理功能項"
+  },
   "loading": {
     "message": "載入中",
     "description": "載入文本"
@@ -298,10 +310,6 @@
   "languageSettings_hint": {
     "message": "點擊上方按鈕可切換語言。變更將立即生效，並重新整理頁面。",
     "description": "語言設定頁面的提示"
-  },
-  "updateHistory_v1_1": {
-    "message": "國際化支援更新",
-    "description": "v1.1版本更新標題"
   },
   "feature_i18n": {
     "message": "完整的國際化支援",

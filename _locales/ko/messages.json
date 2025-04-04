@@ -191,6 +191,14 @@
     "message": "첫 번째 릴리스",
     "description": "첫 번째 릴리스 제목"
   },
+  "updateHistory_v1_1": {
+    "message": "국제화 지원 업데이트",
+    "description": "v1.1 업데이트 제목"
+  },
+  "updateHistory_v1_2": {
+    "message": "기능 개선 업데이트",
+    "description": "v1.2 업데이트 제목"
+  },
   "loading": {
     "message": "로딩 중",
     "description": "로딩 텍스트"
@@ -299,10 +307,6 @@
     "message": "위의 버튼을 클릭하여 언어를 전환하세요. 변경 사항은 즉시 적용되고 페이지가 새로고침됩니다.",
     "description": "언어 설정 페이지 힌트"
   },
-  "updateHistory_v1_1": {
-    "message": "국제화 지원 업데이트",
-    "description": "v1.1 버전 업데이트 제목"
-  },
   "feature_i18n": {
     "message": "완전한 국제화 지원",
     "description": "국제화 기능 항목"
@@ -330,5 +334,9 @@
   "auth_hint": {
     "message": "사용자 이름과 비밀번호는 참조용입니다. 프록시 사용 시 Chrome에서 자격 증명을 다시 입력하라는 메시지가 표시됩니다.",
     "description": "인증 힌트 정보"
+  },
+  "feature_autoRefresh": {
+    "message": "프록시 전환 후 자동 페이지 새로고침",
+    "description": "자동 새로고침 기능 항목"
   }
 } 

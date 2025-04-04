@@ -247,6 +247,14 @@
     "message": "国际化支持更新",
     "description": "v1.1版本更新标题"
   },
+  "updateHistory_v1_2": {
+    "message": "功能改进更新",
+    "description": "v1.2版本更新标题"
+  },
+  "feature_autoRefresh": {
+    "message": "代理切换后自动刷新页面",
+    "description": "自动刷新功能项"
+  },
   "feature_multiProxy": {
     "message": "多代理配置管理",
     "description": "功能项"
@@ -342,5 +350,21 @@
   "popup_add_config": {
     "message": "添加代理配置",
     "description": "添加代理配置按钮"
+  },
+  "current_proxy": {
+    "message": "当前代理",
+    "description": "当前代理标签"
+  },
+  "btn_settings": {
+    "message": "设置",
+    "description": "设置按钮"
+  },
+  "btn_manageProxySettings": {
+    "message": "管理代理设置",
+    "description": "管理代理设置按钮"
+  },
+  "proxy_direct": {
+    "message": "直接连接",
+    "description": "直接连接选项"
   }
 } 

@@ -195,6 +195,14 @@
     "message": "国際化サポート更新",
     "description": "v1.1アップデートタイトル"
   },
+  "updateHistory_v1_2": {
+    "message": "機能強化アップデート",
+    "description": "v1.2アップデートタイトル"
+  },
+  "feature_autoRefresh": {
+    "message": "プロキシ切り替え後に自動的にページを再読み込み",
+    "description": "自動再読み込み機能項目"
+  },
   "loading": {
     "message": "読み込み中",
     "description": "読み込みテキスト"
