@@ -58,6 +58,9 @@ key.pem
 *.backup
 *.old
 
+# Distribution files
+dist/
+
 # Editor backup files
 *~
 .#*
