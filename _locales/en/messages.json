@@ -92,11 +92,11 @@
     "description": "Use global whitelist checkbox label"
   },
   "form_whitelist_placeholder": {
-    "message": "Whitelist (one rule per line), for example:\n*.example.com\n192.168.1.*\ncompany.internal",
+    "message": "Whitelist (one rule per line), supports comments with #:\n# Corporate networks\n*.company.com # Main domain\n192.168.1.* # Local network\n# CDN services\n*.cdn.example.com",
     "description": "Whitelist textarea placeholder"
   },
   "form_whitelist_hint": {
-    "message": "Websites matching whitelist rules will connect directly without using proxy. Supports domains, IP addresses, and wildcards.",
+    "message": "Websites matching whitelist rules will connect directly without using proxy. Supports domains, IP addresses, wildcards, and comments (# comment).",
     "description": "Whitelist help text"
   },
   "btn_delete": {
@@ -176,7 +176,7 @@
     "description": "Global whitelist description"
   },
   "globalWhitelist_placeholder": {
-    "message": "Enter global whitelist rules here, one per line\nFor example:\n*.example.com\n192.168.1.*\n*.company.internal\n*.cdn.com",
+    "message": "Enter global whitelist rules here, one per line, supports comments with #:\n# Local networks\n192.168.*.*\n10.0.0.* # Company VPN\n\n# Common services\n*.example.com # Main site\n*.cdn.example.com # CDN\n\n# Development\nlocalhost # Local server\n127.0.0.1",
     "description": "Global whitelist textarea placeholder"
   },
   "btn_saveGlobalWhitelist": {
@@ -194,6 +194,10 @@
   "updateHistory_v1_1": {
     "message": "Internationalization Update",
     "description": "v1.1 update title"
+  },
+  "updateHistory_v1_3": {
+    "message": "Whitelist Enhancement Update",
+    "description": "v1.3 update title"
   },
   "updateHistory_v1_2": {
     "message": "Feature Enhancement Update",
@@ -338,5 +342,41 @@
   "auth_hint": {
     "message": "Username and password are for reference only. When using the proxy, Chrome will prompt you to enter credentials again.",
     "description": "Authentication hint information"
+  },
+  "whitelist_comment_help_title": {
+    "message": "Whitelist Comment Syntax",
+    "description": "Title for whitelist comment help section"
+  },
+  "whitelist_comment_help_desc": {
+    "message": "You can add comments to organize your whitelist rules:",
+    "description": "Description for whitelist comment help"
+  },
+  "whitelist_comment_help_line": {
+    "message": "# Full line comment - this entire line is ignored",
+    "description": "Example of full line comment"
+  },
+  "whitelist_comment_help_inline": {
+    "message": "*.example.com # Inline comment - text after # is ignored",
+    "description": "Example of inline comment"
+  },
+  "whitelist_comment_help_organize": {
+    "message": "Use comments to organize rules by category, add notes, or explain special cases.",
+    "description": "Tips for organizing with comments"
+  },
+  "feature_commentSupport": {
+    "message": "Added comment support in whitelist rules using # syntax",
+    "description": "v1.3 feature - comment support"
+  },
+  "feature_enhancedWhitelist": {
+    "message": "Enhanced whitelist management with better organization",
+    "description": "v1.3 feature - enhanced whitelist"
+  },
+  "feature_improvedHelp": {
+    "message": "Added interactive help sections with examples",
+    "description": "v1.3 feature - improved help"
+  },
+  "feature_betterUX": {
+    "message": "Improved user experience with enhanced documentation",
+    "description": "v1.3 feature - better UX"
   }
 } 

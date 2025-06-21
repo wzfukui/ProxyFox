@@ -567,6 +567,21 @@ async function applyProxyConfig(configId) {
       updateExtensionIcon(true);
     } 
     else {
+      // 解析带注释的白名单输入
+      function parseWhitelistWithComments(input) {
+        if (!input || typeof input !== 'string') return [];
+        
+        return input.split('\n')
+          .map(line => line.trim())
+          .filter(line => line.length > 0 && !line.startsWith('#')) // 过滤空行和注释行
+          .map(line => {
+            // 移除行内注释 (例如: *.example.com # CDN servers)
+            const commentIndex = line.indexOf('#');
+            return commentIndex !== -1 ? line.substring(0, commentIndex).trim() : line;
+          })
+          .filter(rule => rule.length > 0); // 移除处理后的空行
+      }
+      
       // 处理白名单规则
       let bypassList = [...(config.whitelist || [])];
       

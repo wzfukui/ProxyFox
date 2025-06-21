@@ -9,10 +9,14 @@
   <div class="container">
     <div class="sidebar">
       <div class="sidebar-header">
-        <img src="images/proxyfox-logo-128.png" alt="ProxyFox">
+        <a href="https://proxyfox.io" target="_blank" class="logo-link">
+          <img src="images/proxyfox-logo-128.png" alt="ProxyFox">
+        </a>
         <div class="app-info">
-          <h1>ProxyFox</h1>
-          <div class="version">v1.1</div>
+          <a href="https://proxyfox.io" target="_blank" class="title-link">
+            <h1>ProxyFox</h1>
+          </a>
+          <div class="version">v1.3</div>
         </div>
       </div>
 
@@ -123,6 +127,19 @@
               </div>
               <textarea id="whitelist" rows="4" placeholder="__MSG_form_whitelist_placeholder__"></textarea>
               <p class="form-hint">__MSG_form_whitelist_hint__</p>
+              
+              <!-- Whitelist Comment Help Section -->
+              <details class="help-section">
+                <summary class="help-title">__MSG_whitelist_comment_help_title__</summary>
+                <div class="help-content">
+                  <p>__MSG_whitelist_comment_help_desc__</p>
+                  <ul class="help-examples">
+                    <li><code>__MSG_whitelist_comment_help_line__</code></li>
+                    <li><code>__MSG_whitelist_comment_help_inline__</code></li>
+                  </ul>
+                  <p class="help-tip">__MSG_whitelist_comment_help_organize__</p>
+                </div>
+              </details>
             </div>
             <input type="hidden" id="proxyId">
             
@@ -149,6 +166,19 @@
             <textarea id="globalWhitelistInput" rows="10" placeholder="__MSG_globalWhitelist_placeholder__"></textarea>
           </div>
           <p class="form-hint">__MSG_form_whitelist_hint__</p>
+          
+          <!-- Global Whitelist Comment Help Section -->
+          <details class="help-section">
+            <summary class="help-title">__MSG_whitelist_comment_help_title__</summary>
+            <div class="help-content">
+              <p>__MSG_whitelist_comment_help_desc__</p>
+              <ul class="help-examples">
+                <li><code>__MSG_whitelist_comment_help_line__</code></li>
+                <li><code>__MSG_whitelist_comment_help_inline__</code></li>
+              </ul>
+              <p class="help-tip">__MSG_whitelist_comment_help_organize__</p>
+            </div>
+          </details>
           
           <div class="form-actions">
             <button id="saveGlobalWhitelistBtn" class="button primary">__MSG_btn_saveGlobalWhitelist__</button>
@@ -193,6 +223,20 @@
         <h2>__MSG_updateHistory_title__</h2>
         
         <div class="history-container">
+          <div class="history-item">
+            <div class="history-date">2025-06-21</div>
+            <div class="history-version">v1.3</div>
+            <div class="history-content">
+              <h3>__MSG_updateHistory_v1_3__</h3>
+              <ul>
+                <li>__MSG_feature_commentSupport__</li>
+                <li>__MSG_feature_enhancedWhitelist__</li>
+                <li>__MSG_feature_improvedHelp__</li>
+                <li>__MSG_feature_betterUX__</li>
+              </ul>
+            </div>
+          </div>
+          
           <div class="history-item">
             <div class="history-date">2025-04-03</div>
             <div class="history-version">v1.2</div>
@@ -246,7 +290,7 @@
           <div class="app-info">
             <img src="images/proxyfox-logo-128.png" alt="ProxyFox Logo" class="about-logo">
             <div>
-              <h3>ProxyFox v1.1</h3>
+              <h3>ProxyFox v1.3</h3>
               <p>__MSG_about_description__</p>
               <p>__MSG_about_copyright__</p>
             </div>

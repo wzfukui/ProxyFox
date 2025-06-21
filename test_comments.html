@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Comment Parsing</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        .input { background: #f5f5f5; padding: 10px; margin: 10px 0; }
+        .output { background: #e8f5e9; padding: 10px; margin: 10px 0; }
+        .error { background: #ffebee; color: red; }
+        .success { background: #e8f5e9; color: green; }
+    </style>
+</head>
+<body>
+    <h1>ProxyFox Comment Parsing Test</h1>
+    
+    <div class="test-section">
+        <h3>Test Input:</h3>
+        <div class="input" id="testInput">
+# Local networks<br>
+192.168.*.* # Home network<br>
+10.0.0.* # Company VPN<br>
+<br>
+# Common services<br>
+*.example.com # Main site<br>
+*.cdn.example.com # CDN<br>
+<br>
+# Development<br>
+localhost # Local server<br>
+127.0.0.1<br>
+# This is a comment line that should be ignored<br>
+*.github.com # Git repository
+        </div>
+        
+        <h3>Expected Output:</h3>
+        <div class="output" id="expectedOutput">
+192.168.*.*<br>
+10.0.0.*<br>
+*.example.com<br>
+*.cdn.example.com<br>
+localhost<br>
+127.0.0.1<br>
+*.github.com
+        </div>
+        
+        <h3>Actual Output:</h3>
+        <div class="output" id="actualOutput"></div>
+        
+        <h3>Test Result:</h3>
+        <div id="testResult"></div>
+        
+        <button onclick="runTest()">Run Test</button>
+    </div>
+
+    <script>
+        // Copy the parseWhitelistWithComments function from options.js
+        function parseWhitelistWithComments(input) {
+            if (!input || typeof input !== 'string') return [];
+            
+            return input.split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0 && !line.startsWith('#')) // 过滤空行和注释行
+                .map(line => {
+                    // 移除行内注释 (例如: *.example.com # CDN servers)
+                    const commentIndex = line.indexOf('#');
+                    return commentIndex !== -1 ? line.substring(0, commentIndex).trim() : line;
+                })
+                .filter(rule => rule.length > 0); // 移除处理后的空行
+        }
+
+        function runTest() {
+            const testInput = `# Local networks
+192.168.*.* # Home network
+10.0.0.* # Company VPN
+
+# Common services
+*.example.com # Main site
+*.cdn.example.com # CDN
+
+# Development
+localhost # Local server
+127.0.0.1
+# This is a comment line that should be ignored
+*.github.com # Git repository`;
+
+            const expected = [
+                "192.168.*.*",
+                "10.0.0.*",
+                "*.example.com", 
+                "*.cdn.example.com",
+                "localhost",
+                "127.0.0.1",
+                "*.github.com"
+            ];
+
+            const actual = parseWhitelistWithComments(testInput);
+            
+            // Display actual output
+            document.getElementById('actualOutput').innerHTML = actual.map(rule => rule + '<br>').join('');
+            
+            // Check if test passes
+            const testPassed = JSON.stringify(expected) === JSON.stringify(actual);
+            const resultEl = document.getElementById('testResult');
+            
+            if (testPassed) {
+                resultEl.className = 'success';
+                resultEl.textContent = '✅ Test PASSED! Comment parsing works correctly.';
+            } else {
+                resultEl.className = 'error';
+                resultEl.innerHTML = `❌ Test FAILED!<br>Expected: ${JSON.stringify(expected)}<br>Actual: ${JSON.stringify(actual)}`;
+            }
+            
+            console.log('Test Input:', testInput);
+            console.log('Expected:', expected);
+            console.log('Actual:', actual);
+            console.log('Test Passed:', testPassed);
+        }
+        
+        // Run test on page load
+        window.onload = runTest;
+    </script>
+</body>
+</html>

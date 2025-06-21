@@ -148,11 +148,11 @@
     "description": "代理白名单字段"
   },
   "form_whitelist_placeholder": {
-    "message": "每行一条规则，例如:\n*.example.com\n10.0.0.0/8\nexample.org\n[::1]/128",
+    "message": "每行一条规则，支持用 # 添加注释：\n# 公司网络\n*.company.com # 主域名\n192.168.1.* # 本地网络\n# CDN服务\n*.cdn.example.com",
     "description": "代理白名单字段的占位符"
   },
   "form_whitelist_hint": {
-    "message": "符合白名单规则的网站将直接连接，不经过代理。支持域名、IP地址和通配符。",
+    "message": "符合白名单规则的网站将直接连接，不经过代理。支持域名、IP地址、通配符和注释（# 注释）。",
     "description": "白名单的帮助文本"
   },
   "globalWhitelist_title": {
@@ -164,7 +164,7 @@
     "description": "全局白名单说明文本"
   },
   "globalWhitelist_placeholder": {
-    "message": "每行一条规则，例如:\n*.example.com\n10.0.0.0/8\nexample.org\n[::1]/128",
+    "message": "每行一条规则，支持用 # 添加注释：\n# 本地网络\n192.168.*.*\n10.0.0.* # 公司VPN\n\n# 常用服务\n*.example.com # 主站\n*.cdn.example.com # CDN\n\n# 开发环境\nlocalhost # 本地服务器\n127.0.0.1",
     "description": "全局白名单文本区域的占位符"
   },
   "loading": {
@@ -366,5 +366,45 @@
   "proxy_direct": {
     "message": "直接连接",
     "description": "直接连接选项"
+  },
+  "whitelist_comment_help_title": {
+    "message": "白名单注释语法",
+    "description": "白名单注释帮助部分标题"
+  },
+  "whitelist_comment_help_desc": {
+    "message": "您可以添加注释来组织白名单规则：",
+    "description": "白名单注释帮助说明"
+  },
+  "whitelist_comment_help_line": {
+    "message": "# 整行注释 - 整行会被忽略",
+    "description": "整行注释示例"
+  },
+  "whitelist_comment_help_inline": {
+    "message": "*.example.com # 行内注释 - # 后的文本会被忽略",
+    "description": "行内注释示例"
+  },
+  "whitelist_comment_help_organize": {
+    "message": "使用注释按类别组织规则、添加说明或解释特殊情况。",
+    "description": "使用注释组织规则的提示"
+  },
+  "updateHistory_v1_3": {
+    "message": "白名单增强更新",
+    "description": "v1.3更新标题"
+  },
+  "feature_commentSupport": {
+    "message": "新增白名单规则注释支持，使用 # 语法",
+    "description": "v1.3功能 - 注释支持"
+  },
+  "feature_enhancedWhitelist": {
+    "message": "增强白名单管理，支持更好的规则组织",
+    "description": "v1.3功能 - 增强白名单"
+  },
+  "feature_improvedHelp": {
+    "message": "新增交互式帮助部分和示例",
+    "description": "v1.3功能 - 改进帮助"
+  },
+  "feature_betterUX": {
+    "message": "改进用户体验，增强文档说明",
+    "description": "v1.3功能 - 更好的用户体验"
   }
 } 

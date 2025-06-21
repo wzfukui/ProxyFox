@@ -138,27 +138,47 @@ function renderProxyList() {
 // 加载全局白名单
 async function loadGlobalWhitelist() {
   try {
-    const data = await chrome.storage.local.get('globalWhitelist');
+    const data = await chrome.storage.local.get(['globalWhitelist', 'globalWhitelistRaw']);
     globalWhitelist = data.globalWhitelist || [];
     
-    // 将全局白名单规则填入输入框
-    globalWhitelistInputEl.value = globalWhitelist.join('\n');
+    // 优先显示原始输入（包含注释），否则显示处理后的规则
+    const displayValue = data.globalWhitelistRaw || globalWhitelist.join('\n');
+    globalWhitelistInputEl.value = displayValue;
   } catch (error) {
     console.error('加载全局白名单失败:', error);
     showStatusMessage('加载全局白名单失败', 'error');
   }
 }
 
+// 解析带注释的白名单输入
+function parseWhitelistWithComments(input) {
+  if (!input || typeof input !== 'string') return [];
+  
+  return input.split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0 && !line.startsWith('#')) // 过滤空行和注释行
+    .map(line => {
+      // 移除行内注释 (例如: *.example.com # CDN servers)
+      const commentIndex = line.indexOf('#');
+      return commentIndex !== -1 ? line.substring(0, commentIndex).trim() : line;
+    })
+    .filter(rule => rule.length > 0); // 移除处理后的空行
+}
+
 // 保存全局白名单
 async function saveGlobalWhitelist() {
   try {
-    // 从输入框获取规则并处理
-    const rules = globalWhitelistInputEl.value.split('\n')
-      .map(line => line.trim())
-      .filter(line => line.length > 0);
+    // 从输入框获取原始输入（保留注释）
+    const rawInput = globalWhitelistInputEl.value;
     
-    // 保存到存储
-    await chrome.storage.local.set({ globalWhitelist: rules });
+    // 解析有效规则（去除注释）
+    const rules = parseWhitelistWithComments(rawInput);
+    
+    // 保存原始输入和处理后的规则
+    await chrome.storage.local.set({ 
+      globalWhitelist: rules,
+      globalWhitelistRaw: rawInput // 保存原始输入以便编辑时显示
+    });
     globalWhitelist = rules;
     
     showStatusMessage('全局白名单已保存');
@@ -400,9 +420,7 @@ async function handleSaveProxy() {
     username: proxyUsernameEl.value.trim(),
     password: proxyPasswordEl.value.trim(),
     useGlobalWhitelist: useGlobalWhitelistEl.checked,
-    whitelist: whitelistEl.value.split('\n')
-      .map(line => line.trim())
-      .filter(line => line.length > 0)
+    whitelist: parseWhitelistWithComments(whitelistEl.value)
   };
   
   // 检查是否为编辑模式
@@ -463,12 +481,13 @@ async function handleDeleteProxy() {
 async function handleExportConfig() {
   try {
     // 获取全局设置
-    const data = await chrome.storage.local.get(['globalWhitelist', 'activeConfigId']);
+    const data = await chrome.storage.local.get(['globalWhitelist', 'globalWhitelistRaw', 'activeConfigId']);
     
     // 创建完整导出数据，包括代理配置、全局白名单和当前激活的配置ID
     const exportData = JSON.stringify({
       proxyConfigs: proxyConfigs,
       globalWhitelist: data.globalWhitelist || [],
+      globalWhitelistRaw: data.globalWhitelistRaw || '', // 导出原始输入（包含注释）
       activeConfigId: data.activeConfigId || 'direct'
     }, null, 2);
     
@@ -504,17 +523,20 @@ async function handleImportConfig(event) {
     // 检查导入的数据格式
     let importedConfigs;
     let importedWhitelist;
+    let importedWhitelistRaw;
     let importedActiveId;
     
     if (Array.isArray(importedData)) {
       // 兼容旧版格式，只有代理配置数组
       importedConfigs = importedData;
       importedWhitelist = null;
+      importedWhitelistRaw = null;
       importedActiveId = null;
     } else if (importedData && typeof importedData === 'object') {
       // 新版格式，包含代理配置、全局白名单和激活ID
       importedConfigs = importedData.proxyConfigs || [];
       importedWhitelist = importedData.globalWhitelist || null;
+      importedWhitelistRaw = importedData.globalWhitelistRaw || null;
       importedActiveId = importedData.activeConfigId || null;
     } else {
       throw new Error('导入的数据格式无效');
@@ -543,9 +565,13 @@ async function handleImportConfig(event) {
         confirm('是否替换全局白名单？\n点击"确定"替换，点击"取消"保留当前设置。');
       
       if (importWhitelist) {
-        await chrome.storage.local.set({ globalWhitelist: importedWhitelist });
+        await chrome.storage.local.set({ 
+          globalWhitelist: importedWhitelist,
+          globalWhitelistRaw: importedWhitelistRaw || importedWhitelist.join('\n')
+        });
         globalWhitelist = importedWhitelist;
-        globalWhitelistInputEl.value = globalWhitelist.join('\n');
+        // 优先显示原始输入（包含注释），否则显示处理后的规则
+        globalWhitelistInputEl.value = importedWhitelistRaw || importedWhitelist.join('\n');
       }
     }
     

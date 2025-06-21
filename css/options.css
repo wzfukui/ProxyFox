@@ -39,11 +39,24 @@ body {
   margin-bottom: 10px;
 }
 
+/* Logo link styling */
+.logo-link {
+  display: inline-block;
+  margin-bottom: 10px;
+  text-decoration: none;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.logo-link:hover {
+  transform: scale(1.05);
+  opacity: 0.8;
+}
+
 .sidebar-header img {
   width: 90px;
   height: 90px;
-  margin-bottom: 10px;
   object-fit: contain;
+  cursor: pointer;
 }
 
 .sidebar-header .app-info {
@@ -60,12 +73,28 @@ body {
   align-items: center;
 }
 
+/* Title link styling */
+.title-link {
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.title-link:hover {
+  opacity: 0.8;
+}
+
 h1 {
   font-size: 22px;
   font-weight: 500;
   color: #ff6600;
   margin-bottom: 5px;
   line-height: 1.2;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.title-link h1:hover {
+  color: #e55c00;
 }
 
 .version {
@@ -956,6 +985,66 @@ h3 {
   padding: 10px 15px;
   border-radius: 4px;
   margin-bottom: 15px;
+}
+
+/* 帮助部分样式 */
+.help-section {
+  margin-top: 10px;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+.help-title {
+  padding: 8px 12px;
+  cursor: pointer;
+  background-color: #f1f1f1;
+  border-radius: 4px 4px 0 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  user-select: none;
+  transition: background-color 0.2s;
+}
+
+.help-title:hover {
+  background-color: #e8e8e8;
+}
+
+.help-section[open] .help-title {
+  border-radius: 4px 4px 0 0;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.help-content {
+  padding: 12px;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.help-examples {
+  margin: 8px 0;
+  padding-left: 16px;
+}
+
+.help-examples li {
+  margin: 4px 0;
+}
+
+.help-examples code {
+  background-color: #f5f5f5;
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
+  font-size: 11px;
+  color: #d63384;
+}
+
+.help-tip {
+  margin-top: 8px;
+  font-style: italic;
+  color: #888;
 }
 
 /* 响应式设计 */
