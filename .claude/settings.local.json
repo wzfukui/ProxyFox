@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(git add:*)",
+      "Bash(git rm:*)",
+      "Bash(rm:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(find:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(zip:*)",
+      "Bash(for key in updateHistory_v1_3 feature_commentSupport feature_enhancedWhitelist feature_improvedHelp feature_betterUX whitelist_comment_help_title whitelist_comment_help_desc whitelist_comment_help_line whitelist_comment_help_inline whitelist_comment_help_organize)",
+      "Bash(do grep -q \"\"\"$key\"\":\" _locales/ko/messages.json)",
+      "Bash(echo \"✓ $key found\")",
+      "Bash(echo:*)",
+      "Bash(done)",
+      "Bash(do grep -q \"__MSG_$key__\" options.html)",
+      "Bash(chmod:*)",
+      "Bash(./build.sh)",
+      "Bash(unzip:*)",
+      "Bash(node:*)"
+    ],
+    "deny": []
+  }
+}

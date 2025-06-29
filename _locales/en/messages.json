@@ -378,5 +378,17 @@
   "feature_betterUX": {
     "message": "Improved user experience with enhanced documentation",
     "description": "v1.3 feature - better UX"
+  },
+  "updateHistory_v1_3_2": {
+    "message": "Instant Whitelist Effect Fix",
+    "description": "v1.3.2 update title"
+  },
+  "feature_instantWhitelist": {
+    "message": "Fixed global whitelist not taking effect immediately after saving",
+    "description": "v1.3.2 feature - instant whitelist effect"
+  },
+  "feature_improvedConfiguration": {
+    "message": "Improved proxy configuration reapplication mechanism to ensure whitelist updates take effect immediately",
+    "description": "v1.3.2 feature - improved configuration mechanism"
   }
 } 

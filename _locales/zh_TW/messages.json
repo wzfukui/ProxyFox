@@ -338,5 +338,17 @@
   "auth_hint": {
     "message": "用戶名和密碼僅作為參考信息。在使用代理時，Chrome會彈出窗口要求您重新輸入憑據。",
     "description": "認證提示信息"
+  },
+  "updateHistory_v1_3_2": {
+    "message": "白名單立即生效修復",
+    "description": "v1.3.2更新標題"
+  },
+  "feature_instantWhitelist": {
+    "message": "修復全局白名單保存後立即生效問題",
+    "description": "v1.3.2功能 - 白名單立即生效"
+  },
+  "feature_improvedConfiguration": {
+    "message": "改進代理配置重新應用機制，確保白名單更新後立即生效",
+    "description": "v1.3.2功能 - 改進配置機制"
   }
 } 

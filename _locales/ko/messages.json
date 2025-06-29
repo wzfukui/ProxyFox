@@ -338,5 +338,57 @@
   "feature_autoRefresh": {
     "message": "프록시 전환 후 자동 페이지 새로고침",
     "description": "자동 새로고침 기능 항목"
+  },
+  "updateHistory_v1_3": {
+    "message": "화이트리스트 강화 업데이트",
+    "description": "v1.3 업데이트 제목"
+  },
+  "feature_commentSupport": {
+    "message": "화이트리스트 규칙 주석 기능 신규 추가, # 구문 사용",
+    "description": "v1.3 기능 - 주석 지원"
+  },
+  "feature_enhancedWhitelist": {
+    "message": "화이트리스트 관리 강화, 더 나은 규칙 정리 지원",
+    "description": "v1.3 기능 - 강화된 화이트리스트"
+  },
+  "feature_improvedHelp": {
+    "message": "대화형 도움말 섹션과 예제 신규 추가",
+    "description": "v1.3 기능 - 개선된 도움말"
+  },
+  "feature_betterUX": {
+    "message": "사용자 경험 개선, 문서 설명 강화",
+    "description": "v1.3 기능 - 더 나은 UX"
+  },
+  "whitelist_comment_help_title": {
+    "message": "화이트리스트 주석 구문",
+    "description": "화이트리스트 주석 도움말 섹션 제목"
+  },
+  "whitelist_comment_help_desc": {
+    "message": "화이트리스트 규칙을 정리하기 위해 주석을 추가할 수 있습니다:",
+    "description": "화이트리스트 주석 도움말 설명"
+  },
+  "whitelist_comment_help_line": {
+    "message": "# 전체 줄 주석 - 전체 줄이 무시됩니다",
+    "description": "전체 줄 주석 예시"
+  },
+  "whitelist_comment_help_inline": {
+    "message": "*.example.com # 인라인 주석 - # 이후의 텍스트가 무시됩니다",
+    "description": "인라인 주석 예시"
+  },
+  "whitelist_comment_help_organize": {
+    "message": "주석을 사용하여 규칙을 카테고리별로 정리하고, 설명을 추가하거나 특별한 상황을 설명할 수 있습니다.",
+    "description": "주석을 사용하여 규칙을 정리하는 힌트"
+  },
+  "updateHistory_v1_3_2": {
+    "message": "화이트리스트 즉시 효과 수정",
+    "description": "v1.3.2 업데이트 제목"
+  },
+  "feature_instantWhitelist": {
+    "message": "글로벌 화이트리스트 저장 후 즉시 효과가 적용되지 않는 문제 수정",
+    "description": "v1.3.2 기능 - 화이트리스트 즉시 효과"
+  },
+  "feature_improvedConfiguration": {
+    "message": "프록시 구성 재적용 메커니즘을 개선하여 화이트리스트 업데이트가 즉시 효과를 발휘하도록 함",
+    "description": "v1.3.2 기능 - 개선된 구성 메커니즘"
   }
 } 

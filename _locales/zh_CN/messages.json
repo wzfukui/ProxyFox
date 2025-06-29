@@ -406,5 +406,17 @@
   "feature_betterUX": {
     "message": "改进用户体验，增强文档说明",
     "description": "v1.3功能 - 更好的用户体验"
+  },
+  "updateHistory_v1_3_2": {
+    "message": "白名单立即生效修复",
+    "description": "v1.3.2更新标题"
+  },
+  "feature_instantWhitelist": {
+    "message": "修复全局白名单保存后立即生效问题",
+    "description": "v1.3.2功能 - 白名单立即生效"
+  },
+  "feature_improvedConfiguration": {
+    "message": "改进代理配置重新应用机制，确保白名单更新后立即生效",
+    "description": "v1.3.2功能 - 改进配置机制"
   }
 } 

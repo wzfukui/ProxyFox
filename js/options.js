@@ -42,11 +42,44 @@ let activeConfigId = 'direct';
 let editMode = false;
 let globalWhitelist = [];
 
+// 获取并更新版本号
+async function updateVersionNumbers() {
+  try {
+    // 获取manifest文件中的版本号
+    const manifestUrl = chrome.runtime.getURL('manifest.json');
+    const response = await fetch(manifestUrl);
+    const manifest = await response.json();
+    const version = manifest.version;
+    
+    // 更新所有版本号显示位置
+    const sidebarVersionEl = document.getElementById('sidebarVersion');
+    const aboutVersionEl = document.getElementById('aboutVersion');
+    const currentVersionEl = document.getElementById('currentVersion');
+    
+    if (sidebarVersionEl) {
+      sidebarVersionEl.textContent = `v${version}`;
+    }
+    if (aboutVersionEl) {
+      aboutVersionEl.textContent = `ProxyFox v${version}`;
+    }
+    if (currentVersionEl) {
+      currentVersionEl.textContent = `v${version}`;
+    }
+    
+    console.log(`版本号已更新为: ${version}`);
+  } catch (error) {
+    console.error('获取版本号失败:', error);
+  }
+}
+
 // 初始化
 document.addEventListener('DOMContentLoaded', async () => {
   // 首先加载国际化文本和语言数据
   await preloadMessages();
   localizeHtml();
+  
+  // 更新版本号
+  await updateVersionNumbers();
   
   await loadProxyConfigs();
   await loadGlobalWhitelist();
@@ -181,7 +214,22 @@ async function saveGlobalWhitelist() {
     });
     globalWhitelist = rules;
     
-    showStatusMessage('全局白名单已保存');
+    // 重新应用当前激活的代理配置，使新的全局白名单立即生效
+    try {
+      const response = await chrome.runtime.sendMessage({
+        action: 'activateConfig',
+        configId: activeConfigId
+      });
+      
+      if (response && response.success) {
+        showStatusMessage('全局白名单已保存并应用');
+      } else {
+        showStatusMessage('全局白名单已保存，但应用配置时出错', 'warning');
+      }
+    } catch (activateError) {
+      console.error('重新应用代理配置失败:', activateError);
+      showStatusMessage('全局白名单已保存，但应用配置时出错', 'warning');
+    }
   } catch (error) {
     console.error('保存全局白名单失败:', error);
     showStatusMessage('保存全局白名单失败', 'error');

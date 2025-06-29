@@ -338,5 +338,57 @@
   "auth_hint": {
     "message": "ユーザー名とパスワードは参照用です。プロキシ使用時、Chromeは資格情報の再入力を求めるプロンプトを表示します。",
     "description": "認証ヒント情報"
+  },
+  "updateHistory_v1_3": {
+    "message": "ホワイトリスト拡張アップデート",
+    "description": "v1.3アップデートタイトル"
+  },
+  "feature_commentSupport": {
+    "message": "ホワイトリストルールのコメント機能を新追加、# 記法を使用",
+    "description": "v1.3機能 - コメントサポート"
+  },
+  "feature_enhancedWhitelist": {
+    "message": "ホワイトリスト管理を強化、より良いルール整理をサポート",
+    "description": "v1.3機能 - 拡張ホワイトリスト"
+  },
+  "feature_improvedHelp": {
+    "message": "インタラクティブヘルプセクションと例を新追加",
+    "description": "v1.3機能 - 改善されたヘルプ"
+  },
+  "feature_betterUX": {
+    "message": "ユーザーエクスペリエンスを改善、ドキュメント説明を強化",
+    "description": "v1.3機能 - より良いUX"
+  },
+  "whitelist_comment_help_title": {
+    "message": "ホワイトリストコメント記法",
+    "description": "ホワイトリストコメントヘルプセクションタイトル"
+  },
+  "whitelist_comment_help_desc": {
+    "message": "ホワイトリストルールを整理するためのコメントを追加できます：",
+    "description": "ホワイトリストコメントヘルプ説明"
+  },
+  "whitelist_comment_help_line": {
+    "message": "# 行全体コメント - 行全体が無視されます",
+    "description": "行全体コメント例"
+  },
+  "whitelist_comment_help_inline": {
+    "message": "*.example.com # 行内コメント - # 以降のテキストが無視されます",
+    "description": "行内コメント例"
+  },
+  "whitelist_comment_help_organize": {
+    "message": "コメントを使用してルールをカテゴリ別に整理、説明を追加、または特殊な状況を説明できます。",
+    "description": "コメントを使用してルールを整理するヒント"
+  },
+  "updateHistory_v1_3_2": {
+    "message": "ホワイトリスト即座効果修正",
+    "description": "v1.3.2アップデートタイトル"
+  },
+  "feature_instantWhitelist": {
+    "message": "グローバルホワイトリスト保存後に即座に効果が反映されない問題を修正",
+    "description": "v1.3.2機能 - ホワイトリスト即座効果"
+  },
+  "feature_improvedConfiguration": {
+    "message": "プロキシ設定の再適用メカニズムを改善し、ホワイトリスト更新が即座に効果を発揮するようにしました",
+    "description": "v1.3.2機能 - 改善された設定メカニズム"
   }
 } 
