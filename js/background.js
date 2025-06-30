@@ -599,6 +599,34 @@ async function applyProxyConfig(configId) {
         }
       }
       
+      // 智能域名展开：为 *.domain.com 模式自动添加根域名 domain.com
+      // 这样可以让行为与SwitchyOmega等主流插件保持一致
+      const expandedBypassList = [];
+      for (const rule of bypassList) {
+        expandedBypassList.push(rule);
+        
+        // 检测 *.domain.com 或 .domain.com 模式
+        if (rule.startsWith('*.') || rule.startsWith('.')) {
+          const rootDomain = rule.startsWith('*.') ? rule.substring(2) : rule.substring(1);
+          
+          // 验证是否为有效域名格式（包含至少一个点）
+          if (rootDomain && rootDomain.includes('.') && !rootDomain.startsWith('.')) {
+            expandedBypassList.push(rootDomain);
+          }
+        }
+      }
+      
+      // 去重并更新bypassList
+      bypassList = [...new Set(expandedBypassList)];
+      console.log('智能域名展开后，白名单规则共 ' + bypassList.length + ' 条');
+      
+      // 显示展开详情用于调试
+      const originalCount = [...new Set([...(config.whitelist || []), ...(config.useGlobalWhitelist !== false ? (await chrome.storage.local.get('globalWhitelist')).globalWhitelist || [] : [])])].length;
+      if (bypassList.length > originalCount) {
+        console.log('智能域名展开生效：原始规则 ' + originalCount + ' 条，展开后 ' + bypassList.length + ' 条');
+        console.log('完整白名单规则：', bypassList);
+      }
+      
       // 自定义代理模式
       const proxyConfig = {
         mode: 'fixed_servers',

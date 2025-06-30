@@ -1,0 +1,181 @@
+ProxyFox - Chrome Web Store Product Description
+
+========================================
+🇨🇳 CHINESE VERSION
+========================================
+
+ProxyFox - 智能代理管理专家
+
+ProxyFox 是一款功能强大且易于使用的 Chrome 代理管理扩展，专为需要频繁切换网络环境的用户设计。无论您是开发人员、安全专家，还是需要访问不同地区内容的用户，ProxyFox 都能为您提供高效、安全的代理管理解决方案。
+
+核心功能特色：
+• 一键切换 - 在多个代理配置间快速切换，无需复杂设置
+• 智能白名单 - 支持全局和代理专用白名单，*.domain.com 自动匹配根域名
+• 多协议支持 - 完整支持 HTTP、HTTPS、SOCKS4、SOCKS5 代理协议
+• 认证管理 - 安全存储代理用户名和密码，自动处理认证
+• 配置导入导出 - 轻松备份和分享代理配置，支持批量管理
+• 国际化界面 - 支持简体中文、繁体中文、英文、日文、韩文五种语言
+
+安全与隐私：
+• 本地存储 - 所有配置和凭据仅存储在本地，保护隐私安全
+• 最小权限 - 仅请求必要的扩展权限，符合 Chrome MV3 安全标准
+• 开源透明 - 代码开源，接受社区审查和贡献
+
+智能特性：
+• 自动域名展开 - 输入 *.example.com 自动包含 example.com 根域名
+• 代理健康检测 - 实时监控代理连接状态
+• 注释支持 - 白名单支持行内和整行注释，便于管理大型规则集
+• 状态同步 - 自动验证和同步代理状态，确保配置正确生效
+
+适用场景：
+✓ 开发测试不同网络环境
+✓ 安全研究和渗透测试  
+✓ 访问地区限制内容
+✓ 网络隐私保护
+✓ 企业网络环境切换
+
+========================================
+🇺🇸 ENGLISH VERSION
+========================================
+
+ProxyFox - Smart Proxy Management Expert
+
+ProxyFox is a powerful and user-friendly Chrome proxy management extension designed for users who need to frequently switch network environments. Whether you're a developer, security expert, or user needing access to geo-restricted content, ProxyFox provides an efficient and secure proxy management solution.
+
+Core Features:
+• One-Click Switching - Quickly switch between multiple proxy configurations without complex setup
+• Smart Whitelist - Supports global and proxy-specific whitelists, *.domain.com automatically matches root domains
+• Multi-Protocol Support - Full support for HTTP, HTTPS, SOCKS4, SOCKS5 proxy protocols
+• Authentication Management - Securely store proxy credentials and handle authentication automatically
+• Import/Export - Easy backup and sharing of proxy configurations with batch management support
+• Internationalization - Supports 5 languages: Simplified Chinese, Traditional Chinese, English, Japanese, Korean
+
+Security & Privacy:
+• Local Storage - All configurations and credentials stored locally only, protecting privacy
+• Minimal Permissions - Requests only necessary extension permissions, compliant with Chrome MV3 security standards
+• Open Source - Transparent code open for community review and contribution
+
+Smart Features:
+• Auto Domain Expansion - Input *.example.com automatically includes example.com root domain
+• Proxy Health Detection - Real-time monitoring of proxy connection status
+• Comment Support - Whitelist supports inline and full-line comments for managing large rule sets
+• State Synchronization - Automatic validation and synchronization of proxy states
+
+Use Cases:
+✓ Development testing in different network environments
+✓ Security research and penetration testing
+✓ Accessing geo-restricted content
+✓ Network privacy protection
+✓ Enterprise network environment switching
+
+========================================
+🇯🇵 JAPANESE VERSION
+========================================
+
+ProxyFox - スマートプロキシ管理エキスパート
+
+ProxyFoxは、ネットワーク環境を頻繁に切り替える必要があるユーザー向けに設計された、強力で使いやすいChromeプロキシ管理拡張機能です。開発者、セキュリティエキスパート、または地域制限コンテンツにアクセスする必要があるユーザーであっても、ProxyFoxは効率的で安全なプロキシ管理ソリューションを提供します。
+
+主な機能：
+• ワンクリック切替 - 複雑な設定なしで複数のプロキシ設定間を素早く切り替え
+• スマートホワイトリスト - グローバルおよびプロキシ専用ホワイトリストをサポート、*.domain.comが自動的にルートドメインにマッチ
+• マルチプロトコル対応 - HTTP、HTTPS、SOCKS4、SOCKS5プロキシプロトコルを完全サポート
+• 認証管理 - プロキシ認証情報を安全に保存し、認証を自動処理
+• インポート/エクスポート - プロキシ設定の簡単なバックアップと共有、バッチ管理をサポート
+• 国際化 - 簡体字中国語、繁体字中国語、英語、日本語、韓国語の5言語をサポート
+
+セキュリティとプライバシー：
+• ローカル保存 - すべての設定と認証情報はローカルのみに保存、プライバシーを保護
+• 最小権限 - 必要な拡張権限のみを要求、Chrome MV3セキュリティ基準に準拠
+• オープンソース - 透明性のあるコードでコミュニティレビューと貢献を受け入れ
+
+使用シーン：
+✓ 異なるネットワーク環境での開発テスト
+✓ セキュリティ研究とペネトレーションテスト
+✓ 地域制限コンテンツへのアクセス
+✓ ネットワークプライバシー保護
+
+========================================
+🇰🇷 KOREAN VERSION
+========================================
+
+ProxyFox - 스마트 프록시 관리 전문가
+
+ProxyFox는 네트워크 환경을 자주 전환해야 하는 사용자를 위해 설계된 강력하고 사용하기 쉬운 Chrome 프록시 관리 확장 프로그램입니다. 개발자, 보안 전문가 또는 지역 제한 콘텐츠에 액세스해야 하는 사용자든 관계없이 ProxyFox는 효율적이고 안전한 프록시 관리 솔루션을 제공합니다.
+
+핵심 기능：
+• 원클릭 전환 - 복잡한 설정 없이 여러 프록시 구성 간 빠른 전환
+• 스마트 화이트리스트 - 글로벌 및 프록시 전용 화이트리스트 지원, *.domain.com이 자동으로 루트 도메인에 매치
+• 다중 프로토콜 지원 - HTTP, HTTPS, SOCKS4, SOCKS5 프록시 프로토콜 완전 지원
+• 인증 관리 - 프록시 자격 증명을 안전하게 저장하고 인증을 자동 처리
+• 가져오기/내보내기 - 프록시 구성의 쉬운 백업 및 공유, 배치 관리 지원
+• 국제화 - 간체 중국어, 번체 중국어, 영어, 일본어, 한국어 5개 언어 지원
+
+보안 및 개인정보：
+• 로컬 저장 - 모든 구성 및 자격 증명은 로컬에만 저장하여 개인정보 보호
+• 최소 권한 - 필요한 확장 권한만 요청, Chrome MV3 보안 표준 준수
+• 오픈 소스 - 투명한 코드로 커뮤니티 검토 및 기여 수용
+
+사용 사례：
+✓ 다양한 네트워크 환경에서의 개발 테스트
+✓ 보안 연구 및 침투 테스트
+✓ 지역 제한 콘텐츠 액세스
+✓ 네트워크 개인정보 보호
+
+========================================
+🇹🇼 TRADITIONAL CHINESE VERSION
+========================================
+
+ProxyFox - 智慧代理管理專家
+
+ProxyFox 是一款功能強大且易於使用的 Chrome 代理管理擴展程式，專為需要頻繁切換網路環境的使用者設計。無論您是開發人員、安全專家，還是需要訪問不同地區內容的使用者，ProxyFox 都能為您提供高效、安全的代理管理解決方案。
+
+核心功能特色：
+• 一鍵切換 - 在多個代理配置間快速切換，無需複雜設定
+• 智慧白名單 - 支援全域和代理專用白名單，*.domain.com 自動匹配根域名
+• 多協定支援 - 完整支援 HTTP、HTTPS、SOCKS4、SOCKS5 代理協定
+• 認證管理 - 安全儲存代理使用者名稱和密碼，自動處理認證
+• 配置匯入匯出 - 輕鬆備份和分享代理配置，支援批次管理
+• 國際化介面 - 支援簡體中文、繁體中文、英文、日文、韓文五種語言
+
+安全與隱私：
+• 本機儲存 - 所有配置和憑據僅儲存在本機，保護隱私安全
+• 最小權限 - 僅請求必要的擴展權限，符合 Chrome MV3 安全標準
+• 開源透明 - 程式碼開源，接受社群審查和貢獻
+
+適用場景：
+✓ 開發測試不同網路環境
+✓ 安全研究和滲透測試
+✓ 訪問地區限制內容
+✓ 網路隱私保護
+✓ 企業網路環境切換
+
+========================================
+📝 CHROME WEB STORE USAGE GUIDE
+========================================
+
+SHORT DESCRIPTIONS (132 character limit):
+
+Chinese: ProxyFox智能代理管理，一键切换多配置，智能白名单自动匹配根域名，支持HTTP/HTTPS/SOCKS，本地存储保护隐私。
+
+English: ProxyFox smart proxy manager. One-click switching, intelligent whitelist auto-matches root domains. HTTP/HTTPS/SOCKS support.
+
+Japanese: ProxyFoxスマートプロキシ管理。ワンクリック切替、スマートホワイトリスト自動ルートドメインマッチ。HTTP/HTTPS/SOCKS対応。
+
+Korean: ProxyFox 스마트 프록시 관리. 원클릭 전환, 스마트 화이트리스트 자동 루트 도메인 매치. HTTP/HTTPS/SOCKS 지원.
+
+Traditional Chinese: ProxyFox智慧代理管理，一鍵切換多配置，智慧白名單自動匹配根域名，支援HTTP/HTTPS/SOCKS，本機儲存保護隱私。
+
+RECOMMENDED USAGE:
+1. Use English version as primary description for global audience
+2. Use appropriate language version for specific regional markets
+3. Combine sections as needed to fit within 16,000 character limit
+4. Highlight the smart domain expansion feature as a key differentiator
+
+KEY SELLING POINTS TO EMPHASIZE:
+• Smart domain expansion (unique feature)
+• One-click proxy switching
+• Privacy-focused local storage
+• Chrome MV3 compliance
+• Multi-language support
+• Open source transparency

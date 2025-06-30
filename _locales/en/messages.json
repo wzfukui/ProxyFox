@@ -390,5 +390,45 @@
   "feature_improvedConfiguration": {
     "message": "Improved proxy configuration reapplication mechanism to ensure whitelist updates take effect immediately",
     "description": "v1.3.2 feature - improved configuration mechanism"
+  },
+  "domain_pattern_help_title": {
+    "message": "Domain Pattern Matching Rules",
+    "description": "Domain pattern matching help section title"
+  },
+  "domain_pattern_help_desc": {
+    "message": "ProxyFox intelligently recognizes wildcard domain patterns, consistent with mainstream proxy extensions:",
+    "description": "Domain pattern matching description"
+  },
+  "domain_pattern_help_wildcard": {
+    "message": "Matches both qq.com root domain and all subdomains (e.g., www.qq.com, mail.qq.com)",
+    "description": "Wildcard domain explanation"
+  },
+  "domain_pattern_help_exact": {
+    "message": "Matches only the specified domain",
+    "description": "Exact domain explanation"
+  },
+  "domain_pattern_help_example": {
+    "message": "Matches both gtimg.com root domain and all subdomains (e.g., mat1.gtimg.com, inews.gtimg.com)",
+    "description": "Wildcard domain example explanation"
+  },
+  "domain_pattern_help_smart": {
+    "message": "💡 When you input *.domain.com, the system automatically adds domain.com rule to ensure the root domain also bypasses the proxy correctly.",
+    "description": "Smart domain expansion tip"
+  },
+  "updateHistory_v1_3_3": {
+    "message": "v1.3.3 - Smart Domain Matching",
+    "description": "v1.3.3 version title"
+  },
+  "feature_smartDomainExpansion": {
+    "message": "Implemented smart domain expansion feature, *.domain.com automatically matches root domain",
+    "description": "v1.3.3 feature - smart domain expansion"
+  },
+  "feature_improvedPatternMatching": {
+    "message": "Improved domain matching logic, consistent with mainstream proxy extensions",
+    "description": "v1.3.3 feature - improved pattern matching"
+  },
+  "feature_enhancedCompatibility": {
+    "message": "Enhanced user experience with detailed domain matching rule explanations",
+    "description": "v1.3.3 feature - enhanced compatibility"
   }
 } 

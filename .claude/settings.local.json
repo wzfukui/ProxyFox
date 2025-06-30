@@ -21,7 +21,9 @@
       "Bash(chmod:*)",
       "Bash(./build.sh)",
       "Bash(unzip:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "WebFetch(domain:developer.chrome.com)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": []
   }

@@ -418,5 +418,45 @@
   "feature_improvedConfiguration": {
     "message": "改进代理配置重新应用机制，确保白名单更新后立即生效",
     "description": "v1.3.2功能 - 改进配置机制"
+  },
+  "domain_pattern_help_title": {
+    "message": "域名匹配规则说明",
+    "description": "域名匹配规则帮助部分标题"
+  },
+  "domain_pattern_help_desc": {
+    "message": "ProxyFox智能识别通配符域名模式，与主流代理插件行为保持一致：",
+    "description": "域名匹配规则说明"
+  },
+  "domain_pattern_help_wildcard": {
+    "message": "匹配 qq.com 根域名和所有子域名（如 www.qq.com、mail.qq.com）",
+    "description": "通配符域名说明"
+  },
+  "domain_pattern_help_exact": {
+    "message": "仅匹配指定的域名",
+    "description": "精确域名说明"
+  },
+  "domain_pattern_help_example": {
+    "message": "匹配 gtimg.com 根域名和所有子域名（如 mat1.gtimg.com、inews.gtimg.com）",
+    "description": "通配符域名示例说明"
+  },
+  "domain_pattern_help_smart": {
+    "message": "💡 当您输入 *.domain.com 时，系统会自动添加 domain.com 规则，确保根域名也能正确绕过代理。",
+    "description": "智能域名展开提示"
+  },
+  "updateHistory_v1_3_3": {
+    "message": "v1.3.3 - 智能域名匹配",
+    "description": "v1.3.3版本标题"
+  },
+  "feature_smartDomainExpansion": {
+    "message": "实现智能域名展开功能，*.domain.com 自动匹配根域名",
+    "description": "v1.3.3功能 - 智能域名展开"
+  },
+  "feature_improvedPatternMatching": {
+    "message": "改进域名匹配逻辑，与主流代理插件行为保持一致",
+    "description": "v1.3.3功能 - 改进模式匹配"
+  },
+  "feature_enhancedCompatibility": {
+    "message": "增强用户体验，添加详细的域名匹配规则说明",
+    "description": "v1.3.3功能 - 增强兼容性"
   }
 } 

@@ -390,5 +390,45 @@
   "feature_improvedConfiguration": {
     "message": "プロキシ設定の再適用メカニズムを改善し、ホワイトリスト更新が即座に効果を発揮するようにしました",
     "description": "v1.3.2機能 - 改善された設定メカニズム"
+  },
+  "domain_pattern_help_title": {
+    "message": "ドメインパターンマッチングルール",
+    "description": "ドメインパターンマッチングヘルプセクションのタイトル"
+  },
+  "domain_pattern_help_desc": {
+    "message": "ProxyFoxは主流のプロキシ拡張機能と一致するワイルドカードドメインパターンを賢く認識します：",
+    "description": "ドメインパターンマッチングの説明"
+  },
+  "domain_pattern_help_wildcard": {
+    "message": "qq.comルートドメインとすべてのサブドメイン（例：www.qq.com、mail.qq.com）にマッチします",
+    "description": "ワイルドカードドメインの説明"
+  },
+  "domain_pattern_help_exact": {
+    "message": "指定されたドメインのみにマッチします",
+    "description": "正確なドメインの説明"
+  },
+  "domain_pattern_help_example": {
+    "message": "gtimg.comルートドメインとすべてのサブドメイン（例：mat1.gtimg.com、inews.gtimg.com）にマッチします",
+    "description": "ワイルドカードドメインの例の説明"
+  },
+  "domain_pattern_help_smart": {
+    "message": "💡 *.domain.comを入力すると、システムが自動的にdomain.comルールを追加し、ルートドメインも正しくプロキシをバイパスするようにします。",
+    "description": "スマートドメイン展開のヒント"
+  },
+  "updateHistory_v1_3_3": {
+    "message": "v1.3.3 - スマートドメインマッチング",
+    "description": "v1.3.3バージョンタイトル"
+  },
+  "feature_smartDomainExpansion": {
+    "message": "スマートドメイン展開機能を実装、*.domain.comが自動的にルートドメインにマッチします",
+    "description": "v1.3.3機能 - スマートドメイン展開"
+  },
+  "feature_improvedPatternMatching": {
+    "message": "ドメインマッチングロジックを改善、主流のプロキシ拡張機能と一致する動作",
+    "description": "v1.3.3機能 - 改善されたパターンマッチング"
+  },
+  "feature_enhancedCompatibility": {
+    "message": "詳細なドメインマッチングルールの説明でユーザーエクスペリエンスを向上",
+    "description": "v1.3.3機能 - 互換性の向上"
   }
 } 
