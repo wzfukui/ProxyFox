@@ -430,5 +430,25 @@
   "feature_enhancedCompatibility": {
     "message": "Enhanced user experience with detailed domain matching rule explanations",
     "description": "v1.3.3 feature - enhanced compatibility"
+  },
+  "updateHistory_v1_3_4": {
+    "message": "Performance Optimization Update",
+    "description": "v1.3.4 version update title"
+  },
+  "feature_codeRefactor": {
+    "message": "Refactored language loading logic, eliminated code duplication",
+    "description": "v1.3.4 feature - code refactoring"
+  },
+  "feature_perfOptimization": {
+    "message": "Optimized DOM operations and timer usage, improved extension performance",
+    "description": "v1.3.4 feature - performance optimization"
+  },
+  "feature_modularDesign": {
+    "message": "Adopted modular design, improved code maintainability",
+    "description": "v1.3.4 feature - modular design"
+  },
+  "feature_smartTimer": {
+    "message": "Smart adaptive timers that adjust check frequency based on page state",
+    "description": "v1.3.4 feature - smart timers"
   }
 } 

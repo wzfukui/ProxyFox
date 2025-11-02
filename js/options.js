@@ -106,66 +106,84 @@ async function loadProxyConfigs() {
   }
 }
 
-// 渲染代理配置列表
+// 渲染代理配置列表（优化版本）
 function renderProxyList() {
-  // 清空列表
-  proxyListEl.innerHTML = '';
-  
   // 获取当前语言
   chrome.storage.local.get('userLanguage', function(data) {
     const currentLang = data.userLanguage || 'zh_CN';
     
-    // 添加代理配置项
+    // 使用DocumentFragment优化DOM操作
+    const fragment = document.createDocumentFragment();
+    
+    // 批量创建代理项
     proxyConfigs.forEach(config => {
-      const proxyItemEl = document.createElement('div');
-      proxyItemEl.className = `proxy-item ${config.id === activeConfigId ? 'active' : ''}`;
-      proxyItemEl.dataset.id = config.id;
-      
-      const statusEl = document.createElement('div');
-      statusEl.className = `proxy-status ${config.id === activeConfigId ? 'active' : 'inactive'}`;
-      
-      const nameEl = document.createElement('div');
-      nameEl.className = 'proxy-name';
-      nameEl.textContent = config.name;
-      
-      let infoText = '';
-      if (config.type === 'direct') {
-        infoText = fetchMessage('proxy_mode_direct', currentLang);
-      } else if (config.type === 'system') {
-        infoText = fetchMessage('proxy_mode_system', currentLang);
-      } else {
-        infoText = `${config.type.toUpperCase()} ${config.host}:${config.port}`;
-      }
-      
-      const infoEl = document.createElement('div');
-      infoEl.className = 'proxy-info';
-      infoEl.textContent = infoText;
-      
-      // 添加操作按钮
-      const actionsEl = document.createElement('div');
-      actionsEl.className = 'proxy-actions';
-      
-      if (!config.isSystem) {
-        const editBtn = document.createElement('button');
-        editBtn.className = 'proxy-action-btn edit-btn';
-        editBtn.title = fetchMessage('btn_edit', currentLang) || '编辑';
-        editBtn.innerHTML = '✏️';
-        editBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          openEditForm(config);
-        });
-        
-        actionsEl.appendChild(editBtn);
-      }
-      
-      proxyItemEl.appendChild(statusEl);
-      proxyItemEl.appendChild(nameEl);
-      proxyItemEl.appendChild(infoEl);
-      proxyItemEl.appendChild(actionsEl);
-      
-      proxyListEl.appendChild(proxyItemEl);
+      const proxyItemEl = createProxyItemElement(config, currentLang);
+      fragment.appendChild(proxyItemEl);
     });
+    
+    // 一次性更新DOM，减少重绘
+    proxyListEl.textContent = ''; // 比innerHTML更快
+    proxyListEl.appendChild(fragment);
   });
+}
+
+// 创建代理项元素（提取为独立函数以提高可读性）
+function createProxyItemElement(config, currentLang) {
+  const proxyItemEl = document.createElement('div');
+  proxyItemEl.className = `proxy-item ${config.id === activeConfigId ? 'active' : ''}`;
+  proxyItemEl.dataset.id = config.id;
+  
+  const statusEl = document.createElement('div');
+  statusEl.className = `proxy-status ${config.id === activeConfigId ? 'active' : 'inactive'}`;
+  
+  const nameEl = document.createElement('div');
+  nameEl.className = 'proxy-name';
+  nameEl.textContent = config.name;
+  
+  const infoEl = document.createElement('div');
+  infoEl.className = 'proxy-info';
+  infoEl.textContent = getProxyInfoText(config, currentLang);
+  
+  const actionsEl = createProxyActions(config, currentLang);
+  
+  proxyItemEl.appendChild(statusEl);
+  proxyItemEl.appendChild(nameEl);
+  proxyItemEl.appendChild(infoEl);
+  proxyItemEl.appendChild(actionsEl);
+  
+  return proxyItemEl;
+}
+
+// 获取代理信息文本
+function getProxyInfoText(config, currentLang) {
+  if (config.type === 'direct') {
+    return fetchMessage('proxy_mode_direct', currentLang);
+  } else if (config.type === 'system') {
+    return fetchMessage('proxy_mode_system', currentLang);
+  } else {
+    return `${config.type.toUpperCase()} ${config.host}:${config.port}`;
+  }
+}
+
+// 创建代理操作按钮
+function createProxyActions(config, currentLang) {
+  const actionsEl = document.createElement('div');
+  actionsEl.className = 'proxy-actions';
+  
+  if (!config.isSystem) {
+    const editBtn = document.createElement('button');
+    editBtn.className = 'proxy-action-btn edit-btn';
+    editBtn.title = fetchMessage('btn_edit', currentLang) || '编辑';
+    editBtn.textContent = '✏️'; // 使用textContent代替innerHTML
+    editBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openEditForm(config);
+    });
+    
+    actionsEl.appendChild(editBtn);
+  }
+  
+  return actionsEl;
 }
 
 // 加载全局白名单
@@ -411,8 +429,13 @@ function openAddForm() {
     // 隐藏HTTPS提示（因为默认是HTTP）
     httpsProxyWarningEl.style.display = 'none';
     
-    // 聚焦到第一个输入框
-    setTimeout(() => proxyNameEl.focus(), 0);
+    // 聚焦到第一个输入框（使用优化定时器）
+    const useOptimizedTimer = typeof window.timerManager !== 'undefined';
+    if (useOptimizedTimer) {
+      window.timerManager.setTimeout(() => proxyNameEl.focus(), 0);
+    } else {
+      setTimeout(() => proxyNameEl.focus(), 0);
+    }
   });
 }
 
@@ -440,8 +463,13 @@ function openEditForm(config) {
     // 根据代理类型显示或隐藏HTTPS提示
     httpsProxyWarningEl.style.display = config.type === 'https' ? 'block' : 'none';
     
-    // 聚焦到第一个输入框
-    setTimeout(() => proxyNameEl.focus(), 0);
+    // 聚焦到第一个输入框（使用优化定时器）
+    const useOptimizedTimer = typeof window.timerManager !== 'undefined';
+    if (useOptimizedTimer) {
+      window.timerManager.setTimeout(() => proxyNameEl.focus(), 0);
+    } else {
+      setTimeout(() => proxyNameEl.focus(), 0);
+    }
   });
 }
 
@@ -548,8 +576,13 @@ async function handleExportConfig() {
     a.download = 'proxyfox-config.json';
     a.click();
     
-    // 清理 URL 对象
-    setTimeout(() => URL.revokeObjectURL(url), 0);
+    // 清理 URL 对象（使用优化定时器）
+    const useOptimizedTimer = typeof window.timerManager !== 'undefined';
+    if (useOptimizedTimer) {
+      window.timerManager.setTimeout(() => URL.revokeObjectURL(url), 0);
+    } else {
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+    }
     
     showStatusMessage('配置已导出');
   } catch (error) {
@@ -693,15 +726,18 @@ function showStatusMessage(message, type = 'success') {
   messageEl.textContent = message;
   messageEl.className = `status-message ${type === 'error' ? 'error' : 'success'}`;
   
+  // 使用优化的定时器（如果可用）
+  const useOptimizedTimer = typeof window.timerManager !== 'undefined';
+  
   // 显示消息
-  setTimeout(() => {
-    messageEl.classList.add('show');
-  }, 10);
+  const showTimer = useOptimizedTimer ? 
+    window.timerManager.setTimeout(() => messageEl.classList.add('show'), 10) :
+    setTimeout(() => messageEl.classList.add('show'), 10);
   
   // 2秒后隐藏
-  setTimeout(() => {
-    messageEl.classList.remove('show');
-  }, 2000);
+  const hideTimer = useOptimizedTimer ?
+    window.timerManager.setTimeout(() => messageEl.classList.remove('show'), 2000) :
+    setTimeout(() => messageEl.classList.remove('show'), 2000);
 }
 
 // 初始化语言设置
@@ -900,90 +936,12 @@ function localizeHtml() {
   }
 }
 
-// 获取国际化消息的函数，优先使用缓存的语言文件
+// 获取国际化消息的函数（使用共享模块）
 function fetchMessage(messageName, language) {
-  // 优先从缓存获取指定语言的消息
-  const cachedMessages = window.cachedMessages || {};
-  if (cachedMessages[language] && cachedMessages[language][messageName]) {
-    const cachedMessage = cachedMessages[language][messageName].message;
-    return cachedMessage;
-  }
-  
-  // 如果缓存中没有找到，尝试使用chrome.i18n.getMessage
-  const message = chrome.i18n.getMessage(messageName);
-  if (message && message.trim() !== '') {
-    // 如果指定了语言且不是浏览器语言，再次尝试从缓存获取其他语言的备选项
-    if (language) {
-      // 尝试在其他语言中寻找
-      const fallbackLangs = ['zh_CN', 'en'];
-      for (const fallbackLang of fallbackLangs) {
-        if (fallbackLang !== language && 
-            cachedMessages[fallbackLang] && 
-            cachedMessages[fallbackLang][messageName]) {
-          const fallbackMessage = cachedMessages[fallbackLang][messageName].message;
-          return fallbackMessage;
-        }
-      }
-    }
-    
-    return message; // 如果没有找到指定语言的消息，最后才返回chrome.i18n的消息
-  }
-  
-  // 尝试在其他语言中寻找
-  const fallbackLangs = ['zh_CN', 'en'];
-  for (const fallbackLang of fallbackLangs) {
-    if (fallbackLang !== language && 
-        cachedMessages[fallbackLang] && 
-        cachedMessages[fallbackLang][messageName]) {
-      const fallbackMessage = cachedMessages[fallbackLang][messageName].message;
-      return fallbackMessage;
-    }
-  }
-  
-  console.error(`无法获取 [${messageName}] 的任何翻译`);
-  return messageName; // 如果无法获取翻译，返回消息名称
+  return window.i18nManager.fetchMessage(messageName, language);
 }
 
-// 预加载所有语言数据
+// 使用共享的i18n模块（已优化性能）
 async function preloadMessages() {
-  window.cachedMessages = {};
-  
-  // 支持的语言列表
-  const languages = ['zh_CN', 'zh_TW', 'en', 'ja', 'ko'];
-  
-  try {
-    // 直接加载语言文件的路径
-    const basePath = chrome.runtime.getURL('_locales/');
-    
-    // 为每种语言加载消息
-    for (const lang of languages) {
-      try {
-        const url = `${basePath}${lang}/messages.json`;
-        
-        const response = await fetch(url);
-        if (response.ok) {
-          const text = await response.text();
-          
-          try {
-            // 移除JSON中的注释（// 和 /* */ 格式）
-            const cleanedText = text
-              .replace(/\/\/.*?$/gm, '') // 移除单行注释
-              .replace(/\/\*[\s\S]*?\*\//g, '') // 移除多行注释
-              .trim();
-            
-            const messages = JSON.parse(cleanedText);
-            window.cachedMessages[lang] = messages;
-          } catch (parseError) {
-            console.error(`解析 ${lang} 语言数据JSON失败:`, parseError);
-          }
-        } else {
-          console.error(`无法加载 ${lang} 语言数据: ${response.status} ${response.statusText}`);
-        }
-      } catch (err) {
-        console.error(`加载 ${lang} 语言数据时出错:`, err);
-      }
-    }
-  } catch (error) {
-    console.error('预加载语言数据失败:', error);
-  }
+  await window.i18nManager.preloadMessages();
 } 

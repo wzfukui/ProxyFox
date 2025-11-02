@@ -809,16 +809,23 @@ async function validateProxyState() {
   }
 }
 
-// 设置代理健康检查
+// 设置代理健康检查（优化版本）
 function setupProxyHealthCheck() {
-  // 使用setTimeout替代alarms API，每10分钟检查一次代理状态
-  console.log('已设置代理健康检查（使用setTimeout）');
+  console.log('已设置代理健康检查（优化定时器）');
   
-  // 立即执行一次健康检查
-  checkProxyHealth();
-  
-  // 设置定时器，每10分钟执行一次
-  setInterval(checkProxyHealth, 10 * 60 * 1000);
+  // 使用自适应间隔：正常10分钟，后台40分钟
+  if (typeof window !== 'undefined' && window.timerManager) {
+    // 在扩展页面环境中使用优化的定时器
+    window.timerManager.setAdaptiveInterval(
+      checkProxyHealth,
+      10 * 60 * 1000,  // 正常间隔：10分钟
+      40 * 60 * 1000   // 后台间隔：40分钟
+    );
+  } else {
+    // Service Worker环境中使用普通定时器
+    checkProxyHealth(); // 立即执行一次
+    setInterval(checkProxyHealth, 10 * 60 * 1000);
+  }
 }
 
 // 检查代理健康状态

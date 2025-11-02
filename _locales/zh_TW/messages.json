@@ -390,5 +390,25 @@
   "feature_enhancedCompatibility": {
     "message": "增強用戶體驗，添加詳細的域名匹配規則說明",
     "description": "v1.3.3功能 - 增強兼容性"
+  },
+  "updateHistory_v1_3_4": {
+    "message": "性能優化更新",
+    "description": "v1.3.4版本更新標題"
+  },
+  "feature_codeRefactor": {
+    "message": "重構語言載入邏輯，消除代碼重複",
+    "description": "v1.3.4功能 - 代碼重構"
+  },
+  "feature_perfOptimization": {
+    "message": "優化DOM操作和定時器使用，提升擴展性能",
+    "description": "v1.3.4功能 - 性能優化"
+  },
+  "feature_modularDesign": {
+    "message": "採用模組化設計，提高代碼可維護性",
+    "description": "v1.3.4功能 - 模組化設計"
+  },
+  "feature_smartTimer": {
+    "message": "智能自適應定時器，根據頁面狀態調整檢查頻率",
+    "description": "v1.3.4功能 - 智能定時器"
   }
 } 

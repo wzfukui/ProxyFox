@@ -10,117 +10,27 @@ let proxyConfigs = [];
 let activeConfigId = 'direct';
 let userSettings = {};
 
-// 预加载所有语言数据
+// 使用共享的i18n模块（已优化性能）
 async function preloadMessages() {
-  window.cachedMessages = {};
-  
-  // 支持的语言列表
-  const languages = ['zh_CN', 'zh_TW', 'en', 'ja', 'ko'];
-  
-  try {
-    // 直接加载语言文件的路径
-    const basePath = chrome.runtime.getURL('_locales/');
-    
-    // 为每种语言加载消息
-    for (const lang of languages) {
-      try {
-        const url = `${basePath}${lang}/messages.json`;
-        
-        const response = await fetch(url);
-        if (response.ok) {
-          const text = await response.text();
-          
-          try {
-            // 移除JSON中的注释（// 和 /* */ 格式）
-            const cleanedText = text
-              .replace(/\/\/.*?$/gm, '') // 移除单行注释
-              .replace(/\/\*[\s\S]*?\*\//g, '') // 移除多行注释
-              .trim();
-            
-            const messages = JSON.parse(cleanedText);
-            window.cachedMessages[lang] = messages;
-            console.log(`成功加载 ${lang} 语言数据，包含 ${Object.keys(messages).length} 条消息`);
-          } catch (parseError) {
-            console.error(`解析 ${lang} 语言数据JSON失败:`, parseError);
-          }
-        } else {
-          console.error(`无法加载 ${lang} 语言数据: ${response.status} ${response.statusText}`);
-        }
-      } catch (err) {
-        console.error(`加载 ${lang} 语言数据时出错:`, err);
-      }
-    }
-    
-    // 全部加载完成后，再次本地化界面
-    console.log('所有语言数据加载完成，刷新界面文本');
-    refreshTranslations();
-  } catch (error) {
-    console.error('预加载语言数据失败:', error);
-  }
+  await window.i18nManager.preloadMessages();
+  refreshTranslations();
 }
 
-// 刷新翻译
+// 刷新翻译（优化版本）
 function refreshTranslations() {
   chrome.storage.local.get('userLanguage', function(data) {
     const currentLang = data.userLanguage || 'zh_CN';
-    console.log(`正在刷新界面文本，当前语言: ${currentLang}`);
+    window.i18nManager.setCurrentLanguage(currentLang);
     
-    // 强制重新调用本地化函数
+    // 使用优化的批量更新
     localizeHtml();
-    
-    // 刷新所有带有data-i18n属性的元素
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.getAttribute('data-i18n');
-      const translated = fetchMessage(key, currentLang);
-      if (translated) {
-        el.textContent = translated;
-      }
-    });
+    window.i18nManager.refreshInterfaceText(currentLang);
   });
 }
 
-// 获取国际化消息的函数，优先使用缓存的语言文件
+// 获取国际化消息的函数（使用共享模块）
 function fetchMessage(messageName, language) {
-  // 优先从缓存获取指定语言的消息
-  const cachedMessages = window.cachedMessages || {};
-  if (cachedMessages[language] && cachedMessages[language][messageName]) {
-    const cachedMessage = cachedMessages[language][messageName].message;
-    return cachedMessage;
-  }
-  
-  // 如果缓存中没有找到，尝试使用chrome.i18n.getMessage
-  const message = chrome.i18n.getMessage(messageName);
-  if (message && message.trim() !== '') {
-    // 如果指定了语言且不是浏览器语言，再次尝试从缓存获取其他语言的备选项
-    if (language) {
-      // 尝试在其他语言中寻找
-      const fallbackLangs = ['zh_CN', 'en'];
-      for (const fallbackLang of fallbackLangs) {
-        if (fallbackLang !== language && 
-            cachedMessages[fallbackLang] && 
-            cachedMessages[fallbackLang][messageName]) {
-          const fallbackMessage = cachedMessages[fallbackLang][messageName].message;
-          return fallbackMessage;
-        }
-      }
-    }
-    
-    return message; // 如果没有找到指定语言的消息，最后才返回chrome.i18n的消息
-  }
-  
-  // 尝试在其他语言中寻找
-  const fallbackLangs = ['zh_CN', 'en'];
-  for (const fallbackLang of fallbackLangs) {
-    if (fallbackLang !== language && 
-        cachedMessages[fallbackLang] && 
-        cachedMessages[fallbackLang][messageName]) {
-      const fallbackMessage = cachedMessages[fallbackLang][messageName].message;
-      return fallbackMessage;
-    }
-  }
-  
-  console.error(`无法获取 [${messageName}] 的任何翻译`);
-  return messageName; // 如果无法获取翻译，返回消息名称
+  return window.i18nManager.fetchMessage(messageName, language);
 }
 
 // 初始化
@@ -310,14 +220,14 @@ async function loadProxyConfigs() {
   }
 }
 
-// 渲染代理列表
+// 渲染代理列表（优化版本）
 function renderProxyList(configs, activeConfigId) {
-  // 清空列表
-  proxyListEl.innerHTML = '';
-  
   // 获取当前用户语言
   chrome.storage.local.get('userLanguage', function(data) {
     const currentLang = data.userLanguage || 'zh_CN';
+    
+    // 使用DocumentFragment优化DOM操作
+    const fragment = document.createDocumentFragment();
     
     // 添加直连模式
     const directItem = createProxyItem({
@@ -325,7 +235,7 @@ function renderProxyList(configs, activeConfigId) {
       name: fetchMessage('proxy_direct', currentLang),
       type: 'direct'
     }, activeConfigId === 'direct', currentLang);
-    proxyListEl.appendChild(directItem);
+    fragment.appendChild(directItem);
     
     // 添加系统代理
     const systemItem = createProxyItem({
@@ -333,13 +243,17 @@ function renderProxyList(configs, activeConfigId) {
       name: fetchMessage('proxy_system', currentLang),
       type: 'system'
     }, activeConfigId === 'system', currentLang);
-    proxyListEl.appendChild(systemItem);
+    fragment.appendChild(systemItem);
     
     // 添加自定义代理
     configs.filter(c => !c.isSystem).forEach(config => {
       const item = createProxyItem(config, activeConfigId === config.id, currentLang);
-      proxyListEl.appendChild(item);
+      fragment.appendChild(item);
     });
+    
+    // 一次性更新DOM，减少重绘
+    proxyListEl.textContent = ''; // 比innerHTML更快
+    proxyListEl.appendChild(fragment);
   });
 }
 
@@ -454,13 +368,16 @@ function showStatusMessage(message, type = 'success') {
   messageEl.textContent = message;
   messageEl.className = `status-message ${type === 'error' ? 'error' : 'success'}`;
   
+  // 使用优化的定时器（如果可用）
+  const useOptimizedTimer = typeof window.timerManager !== 'undefined';
+  
   // 显示消息
-  setTimeout(() => {
-    messageEl.classList.add('show');
-  }, 10);
+  const showTimer = useOptimizedTimer ? 
+    window.timerManager.setTimeout(() => messageEl.classList.add('show'), 10) :
+    setTimeout(() => messageEl.classList.add('show'), 10);
   
   // 2秒后隐藏
-  setTimeout(() => {
-    messageEl.classList.remove('show');
-  }, 2000);
+  const hideTimer = useOptimizedTimer ?
+    window.timerManager.setTimeout(() => messageEl.classList.remove('show'), 2000) :
+    setTimeout(() => messageEl.classList.remove('show'), 2000);
 } 

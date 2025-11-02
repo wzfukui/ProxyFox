@@ -430,5 +430,25 @@
   "feature_enhancedCompatibility": {
     "message": "상세한 도메인 매칭 규칙 설명으로 사용자 경험 향상",
     "description": "v1.3.3 기능 - 호환성 향상"
+  },
+  "updateHistory_v1_3_4": {
+    "message": "성능 최적화 업데이트",
+    "description": "v1.3.4 버전 업데이트 제목"
+  },
+  "feature_codeRefactor": {
+    "message": "언어 로딩 로직 리팩토링, 코드 중복 제거",
+    "description": "v1.3.4 기능 - 코드 리팩토링"
+  },
+  "feature_perfOptimization": {
+    "message": "DOM 조작 및 타이머 사용 최적화, 확장 프로그램 성능 향상",
+    "description": "v1.3.4 기능 - 성능 최적화"
+  },
+  "feature_modularDesign": {
+    "message": "모듈러 설계 채택, 코드 유지보수성 향상",
+    "description": "v1.3.4 기능 - 모듈러 설계"
+  },
+  "feature_smartTimer": {
+    "message": "페이지 상태에 따라 확인 빈도를 조정하는 스마트 적응형 타이머",
+    "description": "v1.3.4 기능 - 스마트 타이머"
   }
 } 

@@ -430,5 +430,25 @@
   "feature_enhancedCompatibility": {
     "message": "詳細なドメインマッチングルールの説明でユーザーエクスペリエンスを向上",
     "description": "v1.3.3機能 - 互換性の向上"
+  },
+  "updateHistory_v1_3_4": {
+    "message": "パフォーマンス最適化アップデート",
+    "description": "v1.3.4バージョンアップデートタイトル"
+  },
+  "feature_codeRefactor": {
+    "message": "言語読み込みロジックをリファクタリング、コードの重複を排除",
+    "description": "v1.3.4機能 - コードリファクタリング"
+  },
+  "feature_perfOptimization": {
+    "message": "DOM操作とタイマー使用を最適化、拡張機能のパフォーマンスを向上",
+    "description": "v1.3.4機能 - パフォーマンス最適化"
+  },
+  "feature_modularDesign": {
+    "message": "モジュラー設計を採用、コードの保守性を向上",
+    "description": "v1.3.4機能 - モジュラー設計"
+  },
+  "feature_smartTimer": {
+    "message": "ページ状態に基づいてチェック頻度を調整するスマート適応タイマー",
+    "description": "v1.3.4機能 - スマートタイマー"
   }
 } 
