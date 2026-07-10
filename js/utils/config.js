@@ -135,11 +135,48 @@
       return value.mode === config.type;
     }
 
-    const proxy = value.rules && value.rules.singleProxy;
-    if (value.mode !== 'fixed_servers' || !proxy) return false;
-    return String(proxy.scheme || 'http').toLowerCase() === config.type
-      && normalizeHost(proxy.host) === normalizeHost(config.host)
-      && Number(proxy.port) === Number(config.port);
+    return proxyValuesMatch(value, {
+      mode: 'fixed_servers',
+      rules: {
+        singleProxy: {
+          scheme: config.type,
+          host: config.host,
+          port: config.port
+        },
+        bypassList: expandWhitelist(config.whitelist || [])
+      }
+    });
+  }
+
+  function proxyValuesMatch(actual, expected) {
+    if (!actual || !expected || actual.mode !== expected.mode) return false;
+    if (expected.mode !== 'fixed_servers') return true;
+
+    const actualRules = actual.rules || {};
+    const expectedRules = expected.rules || {};
+    const actualProxy = actualRules.singleProxy;
+    const expectedProxy = expectedRules.singleProxy;
+    if (!actualProxy || !expectedProxy) return false;
+
+    try {
+      if (String(actualProxy.scheme || 'http').toLowerCase() !== String(expectedProxy.scheme || 'http').toLowerCase()
+          || normalizeHost(actualProxy.host) !== normalizeHost(expectedProxy.host)
+          || normalizePort(actualProxy.port) !== normalizePort(expectedProxy.port)) {
+        return false;
+      }
+    } catch (_error) {
+      return false;
+    }
+
+    if (actualRules.proxyForHttp || actualRules.proxyForHttps || actualRules.proxyForFtp || actualRules.fallbackProxy) {
+      return false;
+    }
+
+    const normalizeBypassList = value => [...new Set(normalizeWhitelist(value || []))].sort();
+    const actualBypass = normalizeBypassList(actualRules.bypassList);
+    const expectedBypass = normalizeBypassList(expectedRules.bypassList);
+    return actualBypass.length === expectedBypass.length
+      && actualBypass.every((rule, index) => rule === expectedBypass[index]);
   }
 
   function authChallengeMatches(details, config) {
@@ -164,6 +201,7 @@
     expandWhitelist,
     normalizeConfig,
     proxySettingsMatch,
+    proxyValuesMatch,
     authChallengeMatches
   };
 

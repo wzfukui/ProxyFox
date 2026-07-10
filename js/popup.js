@@ -3,6 +3,7 @@ const proxyCountEl = document.getElementById('proxyCount');
 const currentProxyEl = document.getElementById('currentProxy');
 const currentProxyInfoEl = document.getElementById('currentProxyInfo');
 const connectionStateEl = document.getElementById('connectionState');
+const liveIndicatorEl = document.getElementById('liveIndicator');
 const popupTitleEl = document.getElementById('popupTitle');
 const popupVersionEl = document.getElementById('popupVersion');
 const openSettingsBtn = document.getElementById('openSettingsBtn');
@@ -15,6 +16,7 @@ let userSettings = {};
 let statusShowTimer = null;
 let statusHideTimer = null;
 let switchingConfigId = null;
+let proxyRefreshTimer = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -28,6 +30,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('Failed to initialize popup:', error);
     showStatusMessage(`${fetchMessage('status_error')}: ${error.message}`, 'error');
   }
+});
+
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== 'local') return;
+  if (!changes.proxyConfigs && !changes.activeConfigId && !changes.lastProxyConfig && !changes.proxyControlLevel) return;
+  clearTimeout(proxyRefreshTimer);
+  proxyRefreshTimer = setTimeout(() => {
+    if (switchingConfigId === null) loadProxyConfigs().catch(error => {
+      console.error('Failed to refresh popup proxy state:', error);
+    });
+  }, 40);
 });
 
 async function preloadMessages() {
@@ -57,7 +70,7 @@ async function loadUserSettings() {
 
 async function loadProxyConfigs() {
   proxyListEl.setAttribute('aria-busy', 'true');
-  const response = await chrome.runtime.sendMessage({ action: 'getConfigs' });
+  const response = await chrome.runtime.sendMessage({ action: 'getConfigSummaries' });
   if (!response || response.success === false) {
     throw new Error(response?.error || 'Failed to load proxy configurations');
   }
@@ -131,6 +144,12 @@ function getConfigName(config) {
 }
 
 function getConfigInfo(config) {
+  if (config.id === 'external' || config.isExternal) {
+    if (config.host && config.port) {
+      return `${String(config.type || 'proxy').toUpperCase()} · ${config.host}:${config.port}`;
+    }
+    return String(config.type || fetchMessage('status_externalProxy')).replaceAll('_', ' ').toUpperCase();
+  }
   if (config.type === 'direct') return fetchMessage('proxy_mode_direct');
   if (config.type === 'system') return fetchMessage('proxy_mode_system');
   return `${String(config.type).toUpperCase()} · ${config.host}:${config.port}`;
@@ -150,6 +169,7 @@ function updateCurrentProxy() {
     : fetchMessage('status_externalProxy');
   connectionStateEl.textContent = fetchMessage(isExternal ? 'status_externalProxy' : 'status_active');
   connectionStateEl.classList.toggle('external', isExternal);
+  liveIndicatorEl.classList.toggle('external', isExternal);
 }
 
 function bindEvents() {

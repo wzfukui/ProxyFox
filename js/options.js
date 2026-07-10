@@ -65,6 +65,8 @@ let pendingSelectionId = null;
 let globalWhitelist = [];
 let statusShowTimer = null;
 let statusHideTimer = null;
+let proxyStateRefreshTimer = null;
+let userSettingsWriteQueue = Promise.resolve();
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -84,6 +86,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('Failed to initialize options page:', error);
     showStatusMessage(`${fetchMessage('status_error', window.currentLang)}: ${error.message}`, 'error');
   }
+});
+
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== 'local') return;
+  const relevantKeys = ['proxyConfigs', 'activeConfigId', 'lastProxyConfig', 'proxyControlLevel'];
+  if (!relevantKeys.some(key => changes[key])) return;
+  clearTimeout(proxyStateRefreshTimer);
+  proxyStateRefreshTimer = setTimeout(() => {
+    refreshProxyState().catch(handleActionError);
+  }, 40);
 });
 
 window.addEventListener('beforeunload', event => {
@@ -129,6 +141,20 @@ async function loadProxyConfigs() {
   lastProxyConfig = response.lastProxyConfig || null;
   renderProxyList();
   updateActiveSummary();
+}
+
+async function refreshProxyState() {
+  const preserveEditor = isFormDirty();
+  const previousSelection = selectedConfigId;
+  await loadProxyConfigs();
+  if (preserveEditor) {
+    updateDirtyState();
+    return;
+  }
+  const nextSelection = proxyConfigs.some(config => config.id === previousSelection)
+    ? previousSelection
+    : proxyConfigs.some(config => config.id === activeConfigId) ? activeConfigId : 'direct';
+  selectConfig(nextSelection);
 }
 
 function renderProxyList() {
@@ -376,7 +402,17 @@ function updateDirtyState() {
     ? 'btn_saveAndKeepActive'
     : (dirty || isNewDraft) ? 'btn_saveAndActivate' : 'btn_activateProxy';
   saveAndActivateBtn.textContent = fetchMessage(primaryActionKey);
-  if (isNewDraft) renderProxyList();
+  if (isNewDraft) updateDraftListItem();
+}
+
+function updateDraftListItem() {
+  const item = proxyListEl.querySelector('.proxy-item[data-id="__draft__"]');
+  if (!item) {
+    renderProxyList();
+    return;
+  }
+  item.querySelector('.proxy-name').textContent = proxyNameEl.value.trim() || fetchMessage('status_draft');
+  item.querySelector('.proxy-info').textContent = fetchMessage('status_draft');
 }
 
 function collectValidatedFormConfig() {
@@ -413,17 +449,12 @@ async function saveCurrentConfig(activateAfterSave) {
   setFormBusy(true);
 
   try {
-    const saveResponse = await chrome.runtime.sendMessage({ action: 'saveConfig', config });
+    const saveResponse = await chrome.runtime.sendMessage({
+      action: activateAfterSave ? 'saveAndActivateConfig' : 'saveConfig',
+      config
+    });
     if (!saveResponse?.success) throw new Error(saveResponse?.error || 'Failed to save proxy configuration');
     const savedConfig = saveResponse.config;
-
-    if (activateAfterSave && activeConfigId !== savedConfig.id) {
-      const activateResponse = await chrome.runtime.sendMessage({
-        action: 'activateConfig',
-        configId: savedConfig.id
-      });
-      if (!activateResponse?.success) throw new Error(activateResponse?.error || 'Failed to activate proxy configuration');
-    }
 
     isNewDraft = false;
     selectedConfigId = savedConfig.id;
@@ -452,6 +483,7 @@ async function testCurrentProxy() {
   testProxyBtn.textContent = fetchMessage('status_testingProxy');
   connectionTestResult.textContent = fetchMessage('status_testingProxy');
   connectionTestResult.className = '';
+  setFormBusy(true);
 
   try {
     const response = await chrome.runtime.sendMessage({ action: 'testConfig', config });
@@ -477,7 +509,7 @@ async function testCurrentProxy() {
     connectionTestResult.className = 'error';
     showStatusMessage(`${fetchMessage('status_proxyTestFailed')}: ${error.message}`, 'error');
   } finally {
-    testProxyBtn.disabled = false;
+    setFormBusy(false);
     testProxyBtn.textContent = fetchMessage('btn_testProxy');
   }
 }
@@ -553,14 +585,23 @@ async function deleteCurrentConfig() {
 
 async function activateSelectedSystemConfig() {
   const configId = systemConfigPanel.dataset.configId;
-  const response = await chrome.runtime.sendMessage({ action: 'activateConfig', configId });
-  if (!response?.success) {
-    showStatusMessage(`${fetchMessage('status_error')}: ${response?.error || ''}`, 'error');
-    return;
+  activateSystemBtn.disabled = true;
+  systemConfigPanel.setAttribute('aria-busy', 'true');
+  try {
+    const response = await chrome.runtime.sendMessage({ action: 'activateConfig', configId });
+    if (!response?.success) {
+      showStatusMessage(`${fetchMessage('status_error')}: ${response?.error || ''}`, 'error');
+      return;
+    }
+    await loadProxyConfigs();
+    selectConfig(configId);
+    showStatusMessage(fetchMessage('status_proxySwitched'));
+  } finally {
+    systemConfigPanel.setAttribute('aria-busy', 'false');
+    const currentConfig = proxyConfigs.find(config => config.id === configId);
+    if (currentConfig && selectedConfigId === configId) showSystemEditor(currentConfig);
+    else activateSystemBtn.disabled = false;
   }
-  await loadProxyConfigs();
-  selectConfig(configId);
-  showStatusMessage(fetchMessage('status_proxySwitched'));
 }
 
 async function loadGlobalWhitelist() {
@@ -571,13 +612,18 @@ async function loadGlobalWhitelist() {
 
 async function saveGlobalWhitelist() {
   const rawInput = globalWhitelistInputEl.value;
-  const response = await chrome.runtime.sendMessage({ action: 'saveGlobalWhitelist', rawInput });
-  if (!response?.success) {
-    showStatusMessage(`${fetchMessage('status_error')}: ${response?.error || ''}`, 'error');
-    return;
+  saveGlobalWhitelistBtn.disabled = true;
+  try {
+    const response = await chrome.runtime.sendMessage({ action: 'saveGlobalWhitelist', rawInput });
+    if (!response?.success) {
+      showStatusMessage(`${fetchMessage('status_error')}: ${response?.error || ''}`, 'error');
+      return;
+    }
+    globalWhitelist = response.rules || [];
+    showStatusMessage(fetchMessage('status_globalWhitelistSaved'));
+  } finally {
+    saveGlobalWhitelistBtn.disabled = false;
   }
-  globalWhitelist = response.rules || [];
-  showStatusMessage(fetchMessage('status_globalWhitelistSaved'));
 }
 
 async function loadBehaviorSettings() {
@@ -591,11 +637,19 @@ async function loadBehaviorSettings() {
 }
 
 async function saveAutoRefreshSetting() {
-  const data = await chrome.storage.local.get('userSettings');
-  await chrome.storage.local.set({
-    userSettings: { ...(data.userSettings || {}), autoRefresh: autoRefreshToggleEl.checked }
-  });
+  await updateUserSettings({ autoRefresh: autoRefreshToggleEl.checked });
   showStatusMessage(fetchMessage('status_behaviorSaved'));
+}
+
+function updateUserSettings(patch) {
+  const operation = userSettingsWriteQueue.then(async () => {
+    const data = await chrome.storage.local.get('userSettings');
+    await chrome.storage.local.set({
+      userSettings: { ...(data.userSettings || {}), ...patch }
+    });
+  });
+  userSettingsWriteQueue = operation.catch(() => {});
+  return operation;
 }
 
 function getValidatedProxyTestSettings() {
@@ -632,10 +686,7 @@ function updateProxyTestSummary() {
 async function saveProxyTestSettings() {
   const settings = getValidatedProxyTestSettings();
   if (!settings) return;
-  const data = await chrome.storage.local.get('userSettings');
-  await chrome.storage.local.set({
-    userSettings: { ...(data.userSettings || {}), ...settings }
-  });
+  await updateUserSettings(settings);
   updateProxyTestSummary();
   proxyTestSettingsPopover.hidePopover?.();
   showStatusMessage(fetchMessage('status_testSettingsSaved'));

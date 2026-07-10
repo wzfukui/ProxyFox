@@ -9,10 +9,141 @@ const {
   parseWhitelistText,
   expandWhitelist,
   proxySettingsMatch,
+  proxyValuesMatch,
   authChallengeMatches
 } = require('../js/utils/config.js');
 
 const projectRoot = path.resolve(__dirname, '..');
+
+function createBackgroundHarness(options = {}) {
+  const listeners = {};
+  const event = name => ({
+    addListener(callback, ...args) { listeners[name] = { callback, args }; }
+  });
+  const defaultConfigs = [
+    { id: 'direct', name: 'Direct', type: 'direct', isSystem: true, whitelist: [] },
+    { id: 'system', name: 'System', type: 'system', isSystem: true, whitelist: [] },
+    { id: 'a', name: 'A', type: 'http', host: 'a.example.com', port: 8001, whitelist: [] },
+    { id: 'b', name: 'B', type: 'http', host: 'b.example.com', port: 8002, whitelist: [] }
+  ];
+  const configs = structuredClone(options.configs || defaultConfigs);
+  const initialActiveId = options.activeConfigId || 'direct';
+  const initialActiveConfig = configs.find(config => config.id === initialActiveId) || configs[0];
+  const storageData = {
+    proxyConfigs: configs,
+    activeConfigId: initialActiveId,
+    lastProxyConfig: structuredClone(initialActiveConfig),
+    userLanguage: 'en',
+    globalWhitelist: [],
+    userSettings: {},
+    ...(structuredClone(options.storageData || {}))
+  };
+  let currentProxyValue = structuredClone(options.currentProxyValue || { mode: 'direct' });
+  let levelOfControl = options.levelOfControl || 'controlled_by_this_extension';
+  let failNextStoragePredicate = null;
+  const timeline = [];
+  const backgroundErrors = [];
+  const appliedValues = [];
+  let clearCount = 0;
+
+  const chrome = {
+    action: { setIcon(_details, callback) { callback(); } },
+    i18n: { getMessage: key => key, getUILanguage: () => 'en' },
+    runtime: {
+      getURL: value => value,
+      onInstalled: event('runtime.onInstalled'),
+      onMessage: event('runtime.onMessage'),
+      onStartup: event('runtime.onStartup'),
+      lastError: null
+    },
+    proxy: {
+      onProxyError: event('proxy.onProxyError'),
+      settings: {
+        get(_details, callback) {
+          callback({ value: structuredClone(currentProxyValue), levelOfControl });
+        },
+        set({ value }, callback) {
+          const apply = () => {
+            currentProxyValue = structuredClone(value);
+            levelOfControl = 'controlled_by_this_extension';
+            appliedValues.push(structuredClone(value));
+            timeline.push(`proxy:${value.rules?.singleProxy?.host || value.mode}`);
+            callback();
+          };
+          const delay = options.proxySetDelay?.(value) || 0;
+          delay > 0 ? setTimeout(apply, delay) : apply();
+        },
+        clear(_details, callback) {
+          currentProxyValue = structuredClone(options.clearedProxyValue || { mode: 'system' });
+          levelOfControl = 'controllable_by_this_extension';
+          clearCount += 1;
+          timeline.push('proxy:clear');
+          callback();
+        },
+        onChange: event('proxy.settings.onChange')
+      }
+    },
+    storage: {
+      local: {
+        async get(keys) {
+          const requested = Array.isArray(keys)
+            ? keys
+            : typeof keys === 'string' ? [keys] : Object.keys(keys || {});
+          return Object.fromEntries(
+            requested.filter(key => key in storageData).map(key => [key, structuredClone(storageData[key])])
+          );
+        },
+        async set(values) {
+          if (failNextStoragePredicate?.(values)) {
+            failNextStoragePredicate = null;
+            throw new Error('Simulated storage failure');
+          }
+          const delay = options.storageSetDelay?.(values) || 0;
+          if (delay > 0) await new Promise(resolve => setTimeout(resolve, delay));
+          Object.assign(storageData, structuredClone(values));
+          if (values.activeConfigId) timeline.push(`storage:${values.activeConfigId}`);
+        },
+        async remove(keys) {
+          for (const key of Array.isArray(keys) ? keys : [keys]) delete storageData[key];
+        }
+      }
+    },
+    tabs: { query: async () => [], reload: async () => {} },
+    webRequest: { onAuthRequired: event('webRequest.onAuthRequired') }
+  };
+  const context = {
+    AbortController,
+    TextEncoder,
+    URL,
+    chrome,
+    console: {
+      ...console,
+      error(...args) { backgroundErrors.push(args); }
+    },
+    crypto: { randomUUID: () => 'generated-id' },
+    fetch: options.fetch || (async () => ({ status: 204 })),
+    performance,
+    setTimeout,
+    clearTimeout,
+    importScripts() { context.ProxyFoxConfig = require('../js/utils/config.js'); }
+  };
+  vm.runInNewContext(fs.readFileSync(path.join(projectRoot, 'js/background.js'), 'utf8'), context);
+
+  return {
+    listeners,
+    storageData,
+    timeline,
+    backgroundErrors,
+    appliedValues,
+    send(message) {
+      return new Promise(resolve => listeners['runtime.onMessage'].callback(message, {}, resolve));
+    },
+    failNextStorageSet(predicate = () => true) { failNextStoragePredicate = predicate; },
+    getCurrentProxyValue() { return structuredClone(currentProxyValue); },
+    getLevelOfControl() { return levelOfControl; },
+    getClearCount() { return clearCount; }
+  };
+}
 
 test('normalizes a valid custom proxy configuration', () => {
   const config = normalizeConfig({
@@ -61,6 +192,11 @@ test('matches effective proxy settings exactly', () => {
   };
   assert.equal(proxySettingsMatch(value, config), true);
   assert.equal(proxySettingsMatch({ ...value, rules: { singleProxy: { ...value.rules.singleProxy, port: 8081 } } }, config), false);
+  assert.equal(proxySettingsMatch({
+    ...value,
+    rules: { ...value.rules, bypassList: ['unexpected.example.com'] }
+  }, config), false);
+  assert.equal(proxyValuesMatch(value, value), true);
 });
 
 test('does not leak credentials to a partial host match', () => {
@@ -121,6 +257,7 @@ test('proxy management uses a single-screen selection and editor workspace', () 
   assert.match(html, /id="proxyTestSettingsPopover"/);
   assert.match(popupHtml, /class="active-connection"/);
   assert.match(popupHtml, /class="quick-switch"/);
+  assert.doesNotMatch(html, /value="30000"/);
   assert.match(script, /requestSelectConfig\(item\.dataset\.id\)/);
   assert.match(script, /showUndoMessage\(/);
 });
@@ -128,6 +265,7 @@ test('proxy management uses a single-screen selection and editor workspace', () 
 test('manifest declares the authentication API permissions and omits tabs', () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(projectRoot, 'manifest.json'), 'utf8'));
   assert.equal(manifest.manifest_version, 3);
+  assert.equal(Number(manifest.minimum_chrome_version), 114);
   assert.ok(manifest.permissions.includes('webRequest'));
   assert.ok(manifest.permissions.includes('webRequestAuthProvider'));
   assert.equal(manifest.permissions.includes('tabs'), false);
@@ -230,6 +368,11 @@ test('unsaved proxy test restores the previous mode after success and probe fail
           appliedValues.push(structuredClone(value));
           callback();
         },
+        clear(_details, callback) {
+          currentProxyValue = { mode: 'system' };
+          appliedValues.push({ mode: 'system' });
+          callback();
+        },
         onChange: event('proxy.settings.onChange')
       }
     },
@@ -239,7 +382,10 @@ test('unsaved proxy test restores the previous mode after success and probe fail
           const requested = Array.isArray(keys) ? keys : [keys];
           return Object.fromEntries(requested.filter(key => key in storageData).map(key => [key, structuredClone(storageData[key])]));
         },
-        async set(values) { Object.assign(storageData, structuredClone(values)); }
+        async set(values) { Object.assign(storageData, structuredClone(values)); },
+        async remove(keys) {
+          for (const key of Array.isArray(keys) ? keys : [keys]) delete storageData[key];
+        }
       }
     },
     tabs: { query: async () => [], reload: async () => {} },
@@ -247,6 +393,7 @@ test('unsaved proxy test restores the previous mode after success and probe fail
   };
   const context = {
     AbortController,
+    TextEncoder,
     URL,
     chrome,
     console: {
@@ -298,4 +445,193 @@ test('unsaved proxy test restores the previous mode after success and probe fail
   assert.equal(currentProxyValue.mode, 'system');
   assert.equal(backgroundErrors.length, 1);
   assert.match(String(backgroundErrors[0][0]), /Background action failed/);
+});
+
+test('serializes concurrent proxy switches so Chrome and storage agree', async () => {
+  const harness = createBackgroundHarness({
+    proxySetDelay(value) {
+      return value.rules?.singleProxy?.host === 'b.example.com' ? 10 : 0;
+    },
+    storageSetDelay(values) {
+      if (values.activeConfigId === 'a') return 50;
+      if (values.activeConfigId === 'b') return 5;
+      return 0;
+    }
+  });
+  await harness.send({ action: 'getConfigs' });
+
+  const [aResult, bResult] = await Promise.all([
+    harness.send({ action: 'activateConfig', configId: 'a' }),
+    harness.send({ action: 'activateConfig', configId: 'b' })
+  ]);
+
+  assert.equal(aResult.success, true);
+  assert.equal(bResult.success, true);
+  assert.equal(harness.getCurrentProxyValue().rules.singleProxy.host, 'b.example.com');
+  assert.equal(harness.storageData.activeConfigId, 'b');
+  assert.equal(harness.storageData.lastProxyConfig.host, 'b.example.com');
+  assert.ok(harness.timeline.indexOf('storage:a') < harness.timeline.indexOf('proxy:b.example.com'));
+});
+
+test('rolls Chrome and storage back when deleting the active proxy fails', async () => {
+  const currentProxyValue = {
+    mode: 'fixed_servers',
+    rules: {
+      singleProxy: { scheme: 'http', host: 'a.example.com', port: 8001 },
+      bypassList: []
+    }
+  };
+  const harness = createBackgroundHarness({ activeConfigId: 'a', currentProxyValue });
+  await harness.send({ action: 'getConfigs' });
+  harness.failNextStorageSet(values => Boolean(values.proxyConfigs));
+
+  const response = await harness.send({ action: 'deleteConfig', configId: 'a' });
+
+  assert.equal(response.success, false);
+  assert.match(response.error, /Simulated storage failure/);
+  assert.equal(harness.getCurrentProxyValue().rules.singleProxy.host, 'a.example.com');
+  assert.equal(harness.storageData.activeConfigId, 'a');
+  assert.ok(harness.storageData.proxyConfigs.some(config => config.id === 'a'));
+});
+
+test('reports matching settings as external when another extension controls them', async () => {
+  const harness = createBackgroundHarness({
+    activeConfigId: 'direct',
+    levelOfControl: 'controlled_by_other_extensions',
+    currentProxyValue: {
+      mode: 'fixed_servers',
+      rules: {
+        singleProxy: { scheme: 'http', host: 'a.example.com', port: 8001 },
+        bypassList: []
+      }
+    }
+  });
+
+  const response = await harness.send({ action: 'getConfigs' });
+
+  assert.equal(response.activeConfigId, 'external');
+  assert.equal(response.proxyControlLevel, 'controlled_by_other_extensions');
+  assert.equal(response.lastProxyConfig.host, 'a.example.com');
+});
+
+test('popup summaries omit credentials and whitelist payloads', async () => {
+  const configs = [
+    { id: 'direct', name: 'Direct', type: 'direct', isSystem: true, whitelist: [] },
+    { id: 'system', name: 'System', type: 'system', isSystem: true, whitelist: [] },
+    {
+      id: 'secret',
+      name: 'Secret',
+      type: 'http',
+      host: 'proxy.example.com',
+      port: 8080,
+      username: 'user',
+      password: 'password',
+      whitelist: ['internal.example.com']
+    }
+  ];
+  const harness = createBackgroundHarness({ configs });
+
+  const response = await harness.send({ action: 'getConfigSummaries' });
+  const summary = response.configs.find(config => config.id === 'secret');
+
+  assert.equal(summary.host, 'proxy.example.com');
+  assert.equal('username' in summary, false);
+  assert.equal('password' in summary, false);
+  assert.equal('whitelist' in summary, false);
+});
+
+test('temporary tests restore unowned proxy settings by clearing extension control', async () => {
+  const harness = createBackgroundHarness({
+    activeConfigId: 'system',
+    currentProxyValue: { mode: 'system' },
+    clearedProxyValue: { mode: 'system' },
+    levelOfControl: 'controllable_by_this_extension'
+  });
+
+  const response = await harness.send({
+    action: 'testConfig',
+    config: { name: 'Candidate', type: 'http', host: 'proxy.example.com', port: 8080 }
+  });
+
+  assert.equal(response.success, true);
+  assert.equal(harness.getCurrentProxyValue().mode, 'system');
+  assert.equal(harness.getLevelOfControl(), 'controllable_by_this_extension');
+  assert.equal(harness.getClearCount(), 1);
+  assert.equal('proxyTestRecovery' in harness.storageData, false);
+});
+
+test('recovers a temporary proxy left behind by an interrupted service worker', async () => {
+  const testValue = {
+    mode: 'fixed_servers',
+    rules: {
+      singleProxy: { scheme: 'http', host: 'proxy.example.com', port: 8080 },
+      bypassList: []
+    }
+  };
+  const harness = createBackgroundHarness({
+    activeConfigId: 'system',
+    currentProxyValue: testValue,
+    levelOfControl: 'controlled_by_this_extension',
+    storageData: {
+      proxyTestRecovery: {
+        snapshot: { levelOfControl: 'controlled_by_this_extension', value: { mode: 'system' } },
+        testValue,
+        createdAt: Date.now()
+      }
+    }
+  });
+
+  const response = await harness.send({ action: 'getConfigs' });
+
+  assert.equal(response.activeConfigId, 'system');
+  assert.equal(harness.getCurrentProxyValue().mode, 'system');
+  assert.equal('proxyTestRecovery' in harness.storageData, false);
+});
+
+test('save and activate is one queued background operation', async () => {
+  const harness = createBackgroundHarness();
+
+  const response = await harness.send({
+    action: 'saveAndActivateConfig',
+    config: { name: 'New', type: 'http', host: 'new.example.com', port: 9000 }
+  });
+
+  assert.equal(response.success, true);
+  assert.equal(harness.storageData.activeConfigId, response.config.id);
+  assert.equal(harness.getCurrentProxyValue().rules.singleProxy.host, 'new.example.com');
+  assert.ok(harness.storageData.proxyConfigs.some(config => config.id === response.config.id));
+});
+
+test('rejects oversized imports before changing proxy or storage state', async () => {
+  const harness = createBackgroundHarness();
+  const configs = Array.from({ length: 1001 }, (_value, index) => ({
+    id: `import_${index}`,
+    name: `Imported ${index}`,
+    type: 'http',
+    host: 'proxy.example.com',
+    port: 8080
+  }));
+
+  const response = await harness.send({ action: 'importConfigs', mode: 'replace', configs });
+
+  assert.equal(response.success, false);
+  assert.match(response.error, /cannot exceed 1000/);
+  assert.equal(harness.storageData.activeConfigId, 'direct');
+  assert.equal(harness.getCurrentProxyValue().mode, 'direct');
+  assert.equal(harness.storageData.proxyConfigs.length, 4);
+});
+
+test('rejects an oversized global whitelist before applying it', async () => {
+  const harness = createBackgroundHarness();
+
+  const response = await harness.send({
+    action: 'saveGlobalWhitelist',
+    rawInput: 'x'.repeat((1024 * 1024) + 1)
+  });
+
+  assert.equal(response.success, false);
+  assert.match(response.error, /too large to store safely/);
+  assert.equal('globalWhitelistRaw' in harness.storageData, false);
+  assert.deepEqual(harness.storageData.globalWhitelist, []);
+  assert.equal(harness.getCurrentProxyValue().mode, 'direct');
 });
