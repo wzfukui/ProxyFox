@@ -38,6 +38,8 @@ ProxyFox Official Website: [proxyfox.io](https://proxyfox.io)
 
 ### Manual Installation (Development Version)
 
+Chrome 114 or later is required.
+
 1. Download the repository code
 2. Open Chrome browser and go to the extensions management page (chrome://extensions/)
 3. Enable "Developer mode" in the top right corner
@@ -116,12 +118,21 @@ npm run check
 
 ### v1.4.0 (2026-07-10)
 - Fixed proxy authentication and strict host matching
-- Reworked the MV3 service worker lifecycle and proxy state transactions
+- Reworked the MV3 service worker lifecycle and proxy state transactions with serialized switching and rollback protection
 - Added safe exports, optional page reload, and background configuration validation
 - Rebuilt proxy management as a single-screen workspace with explicit select, save, activate, and undo flows
-- Added pre-save connection testing with configurable URL and timeout, split apply/network timing, and automatic restoration
+- Added pre-save connection testing with configurable URL and timeout, split apply/network timing, and recovery after service worker interruption
 - Rebuilt the popup as a status panel and quick switcher consistent with the management workspace
 - Added automated tests, locale coverage checks, and release package validation
+
+### v1.3.4 (2025-11-02)
+- Refactored locale loading and page scripts to reduce repeated DOM and storage work
+- Improved popup and management-page rendering performance and status feedback
+
+### v1.3.0 (2025-06-21)
+- Added full-line and inline comments for bypass rules
+- Fixed wildcard root-domain matching and applied global bypass changes immediately
+- Improved bypass-rule editing and localized copy
 
 ### v1.2 (2025-04-03)
 - Added tabs permission to support automatic page refresh after proxy switching

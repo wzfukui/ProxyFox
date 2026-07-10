@@ -4,9 +4,9 @@ ProxyFox - Chrome Web Store Product Description
 🇨🇳 CHINESE VERSION
 ========================================
 
-ProxyFox - 智能代理管理专家
+ProxyFox - 轻量代理配置管理工具
 
-ProxyFox 是一款功能强大且易于使用的 Chrome 代理管理扩展，专为需要频繁切换网络环境的用户设计。无论您是开发人员、安全专家，还是需要访问不同地区内容的用户，ProxyFox 都能为您提供高效、安全的代理管理解决方案。
+ProxyFox 是一款轻量、易用的 Chrome 代理配置管理扩展，适合需要在开发、测试和企业网络环境之间快速切换的用户。
 
 核心功能特色：
 • 一键切换 - 在多个代理配置间快速切换，无需复杂设置
@@ -29,18 +29,17 @@ ProxyFox 是一款功能强大且易于使用的 Chrome 代理管理扩展，专
 
 适用场景：
 ✓ 开发测试不同网络环境
-✓ 安全研究和渗透测试  
-✓ 访问地区限制内容
-✓ 网络隐私保护
+✓ 调试不同代理协议与认证配置
+✓ 在办公和测试网络间切换
 ✓ 企业网络环境切换
 
 ========================================
 🇺🇸 ENGLISH VERSION
 ========================================
 
-ProxyFox - Smart Proxy Management Expert
+ProxyFox - Lightweight Proxy Configuration Manager
 
-ProxyFox is a powerful and user-friendly Chrome proxy management extension designed for users who need to frequently switch network environments. Whether you're a developer, security expert, or user needing access to geo-restricted content, ProxyFox provides an efficient and secure proxy management solution.
+ProxyFox is a lightweight Chrome proxy configuration manager for developers, testers, and users who need to switch between trusted network environments.
 
 Core Features:
 • One-Click Switching - Quickly switch between multiple proxy configurations without complex setup
@@ -63,9 +62,8 @@ Smart Features:
 
 Use Cases:
 ✓ Development testing in different network environments
-✓ Security research and penetration testing
-✓ Accessing geo-restricted content
-✓ Network privacy protection
+✓ Debugging proxy protocols and authentication
+✓ Switching between office and test networks
 ✓ Enterprise network environment switching
 
 ========================================
@@ -179,3 +177,21 @@ KEY SELLING POINTS TO EMPHASIZE:
 • Chrome MV3 compliance
 • Multi-language support
 • Open source transparency
+
+========================================
+📦 VERSION 1.4.0 RELEASE NOTES
+========================================
+
+• Rebuilt the management page and popup with a compact, consistent interface
+• Added pre-save connection testing with configurable target and timeout
+• Added strict proxy authentication matching and credential-safe exports
+• Made proxy switching, saving, deletion, and imports atomic with rollback protection
+• Added external-control detection and live state synchronization across extension pages
+• Improved performance with cached configuration reads and lightweight popup summaries
+• Added automated regression checks and interrupted-test recovery for Manifest V3 service workers
+
+SINGLE PURPOSE:
+Configure, test, and quickly switch Chrome proxy settings selected by the user.
+
+PRIVACY POLICY:
+https://proxyfox.io/privacy.html
