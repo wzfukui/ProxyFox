@@ -14,7 +14,7 @@ ProxyFox Official Website: [proxyfox.io](https://proxyfox.io)
 - **Proxy-Specific Whitelist**: Each proxy configuration can have its own whitelist rules
 - **Whitelist Merging**: Optionally merge global whitelist with proxy-specific whitelist
 - **One-Click Switching**: Quickly switch between different proxy configurations
-- **Auto Refresh**: Automatically refresh the current page after switching proxies to apply new settings immediately
+- **Optional Auto Refresh**: Reload the active page after switching when enabled; disabled by default to protect unsaved content
 - **Complete Import/Export**: Easily backup and migrate all configurations, including global whitelist
 - **Multi-language Support**:
   - Simplified Chinese
@@ -25,7 +25,8 @@ ProxyFox Official Website: [proxyfox.io](https://proxyfox.io)
 - **Intuitive Language Switching Interface**: Easily switch between different languages
 - **Status Feedback**: Clear display of current proxy status
 - **Update History**: Detailed version update records
-- **Minimal Permissions**: Requires only necessary permissions (proxy, storage, tabs)
+- **Proxy Authentication**: Responds to matching proxy authentication challenges through Chrome's WebRequest Auth Provider
+- **Safe Exports**: Excludes usernames and passwords by default unless explicitly enabled
 - **Manifest V3 Compatible**: Ensures long-term usability
 
 ## Installation Methods
@@ -46,7 +47,7 @@ ProxyFox Official Website: [proxyfox.io](https://proxyfox.io)
 ## Usage Guide
 
 1. **View Proxies**: Click the ProxyFox icon in the browser toolbar
-2. **Switch Proxies**: Click the desired proxy configuration in the popup window (current page will automatically refresh)
+2. **Switch Proxies**: Click the desired proxy configuration in the popup window; optionally enable page reload in settings
 3. **Add Proxy**: Click the "Add Configuration" button and fill in proxy information
 4. **Edit Proxy**: Click the edit button on existing configuration items
 5. **Delete Proxy**: Click the "Delete" button in the edit interface
@@ -74,7 +75,7 @@ One rule per line, traffic matching the whitelist will connect directly without 
 ## FAQ
 
 1. **How to quickly switch proxies?**  
-   Click the extension icon, then click the desired proxy configuration. The current page will automatically refresh to apply the new proxy settings.
+   Click the extension icon, then click the desired proxy configuration. The proxy applies immediately; automatic reload is optional.
 
 2. **What to do if configurations are lost?**  
    Use the export function to regularly backup your configurations, including global whitelist settings.
@@ -95,12 +96,32 @@ One rule per line, traffic matching the whitelist will connect directly without 
    When using HTTPS proxies, if you encounter self-signed certificates or untrusted certificates, Chrome will display certificate warnings. You need to manually add exceptions in Chrome's certificate settings.
 
 8. **Permission Request Explanation**  
-   This extension only requests the following necessary permissions:
+   This extension requests the permissions required for its core features:
    - `proxy`: For managing browser proxy settings (core functionality)
    - `storage`: For storing your proxy configurations
-   - `tabs`: For automatically refreshing the current page after switching proxies
+   - `webRequest`: For receiving proxy authentication challenges
+   - `webRequestAuthProvider`: For providing credentials to the matching proxy
+   - `<all_urls>`: Required by Chrome's authentication event filter; it is not used to read or modify page content
+
+## Development and verification
+
+```bash
+npm run check
+./build.sh
+```
+
+`npm run check` validates JavaScript syntax, proxy configuration rules, strict authentication host matching, manifest permissions, and locale coverage. `build.sh` runs the same checks and verifies that `manifest.json` is at the archive root.
 
 ## Update History
+
+### v1.4.0 (2026-07-10)
+- Fixed proxy authentication and strict host matching
+- Reworked the MV3 service worker lifecycle and proxy state transactions
+- Added safe exports, optional page reload, and background configuration validation
+- Rebuilt proxy management as a single-screen workspace with explicit select, save, activate, and undo flows
+- Added pre-save connection testing with configurable URL and timeout, split apply/network timing, and automatic restoration
+- Rebuilt the popup as a status panel and quick switcher consistent with the management workspace
+- Added automated tests, locale coverage checks, and release package validation
 
 ### v1.2 (2025-04-03)
 - Added tabs permission to support automatic page refresh after proxy switching
@@ -125,4 +146,4 @@ ProxyFox fully complies with Chrome extension Manifest V3 standards and does not
 
 ## License
 
-This project is open source under the MIT License. 
+This project is open source under the MIT License.

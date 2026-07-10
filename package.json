@@ -1,0 +1,9 @@
+{
+  "name": "proxyfox",
+  "version": "1.4.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/run-tests.js",
+    "check": "node --check js/background.js && node --check js/options.js && node --check js/popup.js && node --check js/utils/config.js && node --check js/utils/i18n.js && npm test"
+  }
+}

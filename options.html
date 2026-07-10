@@ -1,391 +1,334 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>__MSG_options_title__</title>
   <link rel="stylesheet" href="css/options.css">
 </head>
 <body>
-  <div class="container">
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <a href="https://proxyfox.io" target="_blank" class="logo-link">
-          <img src="images/proxyfox-logo-128.png" alt="ProxyFox">
-        </a>
-        <div class="app-info">
-          <a href="https://proxyfox.io" target="_blank" class="title-link">
-            <h1>ProxyFox</h1>
-          </a>
-          <div class="version" id="sidebarVersion">v1.3.4</div>
+  <a class="skip-link" href="#mainContent">__MSG_skip_to_content__</a>
+
+  <header class="app-header">
+    <a href="https://proxyfox.io" target="_blank" class="brand" aria-label="ProxyFox">
+      <img src="images/proxyfox-logo-48.png" alt="">
+      <span class="brand-wordmark">ProxyFox</span>
+      <span class="version-pill" id="sidebarVersion">v1.4.0</span>
+    </a>
+
+    <nav class="top-nav" aria-label="__MSG_options_navigation__">
+      <button type="button" class="nav-item active" data-tab="proxy-settings" aria-pressed="true">
+        __MSG_nav_proxySettings__
+      </button>
+      <button type="button" class="nav-item" data-tab="global-whitelist" aria-pressed="false">
+        __MSG_nav_globalWhitelist__
+      </button>
+      <button type="button" class="nav-item" data-tab="language-settings" aria-pressed="false">
+        __MSG_nav_languageSettings__
+      </button>
+      <button type="button" class="nav-item" data-tab="update-history" aria-pressed="false">
+        __MSG_nav_updateHistory__
+      </button>
+      <button type="button" class="nav-item" data-tab="about" aria-pressed="false">
+        __MSG_nav_about__
+      </button>
+    </nav>
+
+  </header>
+
+  <main id="mainContent" class="page-shell">
+    <section class="tab-content active" id="proxy-settings" aria-labelledby="proxySettingsTitle">
+      <div class="page-heading proxy-heading">
+        <div>
+          <p class="eyebrow">PROXY WORKSPACE</p>
+          <h1 id="proxySettingsTitle">__MSG_nav_proxySettings__</h1>
+        </div>
+        <div class="heading-actions">
+          <div class="active-summary" aria-live="polite">
+            <span>__MSG_current_proxy__</span>
+            <strong id="activeProxySummary">—</strong>
+          </div>
+          <button type="button" id="importBtn" class="button secondary">__MSG_btn_import__</button>
+          <button type="button" id="exportBtn" class="button secondary">__MSG_btn_export__</button>
+          <button type="button" id="addProxyBtn" class="button primary">＋ __MSG_btn_addProxy__</button>
         </div>
       </div>
 
-      <ul class="nav-menu">
-        <li class="nav-item active" data-tab="proxy-settings">
-          <span class="icon">🧩</span>
-          <span class="label">__MSG_nav_proxySettings__</span>
-        </li>
-        <li class="nav-item" data-tab="global-whitelist">
-          <span class="icon">📝</span>
-          <span class="label">__MSG_nav_globalWhitelist__</span>
-        </li>
-        <li class="nav-item" data-tab="language-settings">
-          <span class="icon">🌐</span>
-          <span class="label">__MSG_nav_languageSettings__</span>
-        </li>
-        <li class="nav-item" data-tab="update-history">
-          <span class="icon">🕒</span>
-          <span class="label">__MSG_nav_updateHistory__</span>
-        </li>
-        <li class="nav-item" data-tab="about">
-          <span class="icon">ℹ️</span>
-          <span class="label">__MSG_nav_about__</span>
-        </li>
-      </ul>
-    </div>
-    
-    <div class="content">
-      <!-- 代理设置 -->
-      <div class="tab-content active" id="proxy-settings">
-        <div class="section-header">
-          <h2>__MSG_nav_proxySettings__</h2>
-          <div class="actions">
-            <button id="addProxyBtn" class="button primary">__MSG_btn_addProxy__</button>
-            <button id="exportBtn" class="button">__MSG_btn_export__</button>
-            <button id="importBtn" class="button">__MSG_btn_import__</button>
+      <div class="proxy-workspace">
+        <aside class="config-browser" aria-label="__MSG_proxy_list_label__">
+          <div class="browser-heading">
+            <span>__MSG_proxy_list_title__</span>
+            <span id="proxyCount" class="count-badge">0</span>
           </div>
-        </div>
-
-        <div class="proxy-list-container">
           <div class="proxy-list" id="proxyList">
-            <!-- 代理配置列表将通过 JS 动态生成 -->
             <div class="loading">__MSG_loading__</div>
           </div>
-        </div>
 
-        <!-- 内嵌代理配置表单 -->
-        <div class="proxy-form-container" id="proxyFormContainer">
-          <div class="form-header">
-            <h3 id="formTitle">__MSG_form_title_add__</h3>
-            <button id="closeFormBtn" class="icon-button" title="__MSG_btn_close__">✕</button>
+          <div class="quick-settings">
+            <label class="compact-toggle" for="autoRefreshToggle">
+              <input type="checkbox" id="autoRefreshToggle">
+              <span>
+                <strong>__MSG_autoRefresh_label__</strong>
+                <small>__MSG_autoRefresh_desc__</small>
+              </span>
+            </label>
+            <label class="compact-toggle" for="includeCredentialsToggle">
+              <input type="checkbox" id="includeCredentialsToggle">
+              <span>
+                <strong>__MSG_exportCredentials_label__</strong>
+                <small>__MSG_exportCredentials_desc__</small>
+              </span>
+            </label>
           </div>
-          <form id="proxyForm">
-            <div class="form-group">
-              <input type="text" id="proxyName" placeholder="__MSG_form_name__" required>
-            </div>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <select id="proxyType">
-                  <option value="http">HTTP</option>
-                  <option value="https">HTTPS</option>
-                  <option value="socks4">SOCKS4</option>
-                  <option value="socks5">SOCKS5</option>
-                </select>
-              </div>
-              <div class="form-group separator protocol-separator">
-                <span class="separator-text">://</span>
-              </div>
-              <div class="form-group grow">
-                <input type="text" id="proxyHost" placeholder="__MSG_form_host__" required>
-              </div>
-              <div class="form-group separator port-separator">
-                <span class="separator-text">:</span>
-              </div>
-              <div class="form-group">
-                <input type="text" id="proxyPort" placeholder="__MSG_form_port__" required>
-              </div>
-            </div>
-            
-            <!-- HTTPS代理提示 -->
-            <div class="form-group https-warning" id="httpsProxyWarning" style="display:none;">
-              <div class="warning-box">
-                <p>__MSG_https_proxy_warning__</p>
-                <a href="#" id="httpsHelpLink">__MSG_https_help_link__</a>
-              </div>
-            </div>
-            
-            <!-- 认证信息区域 - 简化版 -->
-            <div class="form-group auth-section">
-              <div class="form-row auth-row">
-                <div class="form-label">__MSG_form_username_label__</div>
-                <div class="form-group auth-input">
-                  <input type="text" id="proxyUsername" placeholder="__MSG_form_username__">
-                </div>
-                <div class="form-label">__MSG_form_password_label__</div>
-                <div class="form-group auth-input">
-                  <input type="password" id="proxyPassword" placeholder="__MSG_form_password__">
-                </div>
-              </div>
-              <p class="auth-hint">__MSG_auth_hint__</p>
-            </div>
-            
-            <div class="form-group">
-              <div class="checkbox-container whitelist-options">
-                <input type="checkbox" id="useGlobalWhitelist">
-                <span class="checkbox-label">__MSG_form_useGlobalWhitelist__</span>
-              </div>
-              <textarea id="whitelist" rows="4" placeholder="__MSG_form_whitelist_placeholder__"></textarea>
-              <p class="form-hint">__MSG_form_whitelist_hint__</p>
-              
-              <!-- Whitelist Comment Help Section -->
-              <details class="help-section">
-                <summary class="help-title">__MSG_whitelist_comment_help_title__</summary>
-                <div class="help-content">
-                  <p>__MSG_whitelist_comment_help_desc__</p>
-                  <ul class="help-examples">
-                    <li><code>__MSG_whitelist_comment_help_line__</code></li>
-                    <li><code>__MSG_whitelist_comment_help_inline__</code></li>
-                  </ul>
-                  <p class="help-tip">__MSG_whitelist_comment_help_organize__</p>
-                </div>
-              </details>
-            </div>
-            <input type="hidden" id="proxyId">
-            
-            <div class="form-actions">
+        </aside>
+
+        <section class="editor-panel" id="proxyFormContainer" aria-live="polite">
+          <div class="editor-empty" id="editorEmptyState">
+            <img src="images/proxyfox-light.png" alt="">
+            <h2>__MSG_editor_empty_title__</h2>
+            <p>__MSG_editor_empty_desc__</p>
+            <button type="button" class="button primary" id="emptyAddProxyBtn">＋ __MSG_btn_addProxy__</button>
+          </div>
+
+          <div class="system-editor" id="systemConfigPanel" hidden>
+            <div class="editor-title-row">
               <div>
-                <button type="button" id="deleteProxyBtn" class="button danger">__MSG_btn_delete__</button>
+                <span class="mode-kicker">__MSG_connection_mode__</span>
+                <h2 id="systemConfigTitle">—</h2>
               </div>
-              <div class="right-actions">
-                <button type="button" id="cancelProxyBtn" class="button">__MSG_btn_cancel__</button>
-                <button type="button" id="saveProxyBtn" class="button primary">__MSG_btn_save__</button>
+              <span class="state-badge" id="systemConfigState">__MSG_status_inactive__</span>
+            </div>
+            <div class="mode-illustration" aria-hidden="true">
+              <span class="mode-node">Browser</span>
+              <span class="mode-line"></span>
+              <span class="mode-node accent" id="systemModeNode">Direct</span>
+              <span class="mode-line"></span>
+              <span class="mode-node">Internet</span>
+            </div>
+            <p class="system-description" id="systemConfigDescription"></p>
+            <div class="editor-actions system-actions">
+              <button type="button" id="activateSystemBtn" class="button primary">__MSG_btn_activateProxy__</button>
+            </div>
+          </div>
+
+          <form id="proxyForm" class="proxy-form" hidden>
+            <div class="editor-title-row">
+              <div>
+                <span class="mode-kicker" id="formModeLabel">__MSG_editor_editing__</span>
+                <h2 id="formTitle">__MSG_form_title_add__</h2>
               </div>
+              <span class="state-badge" id="formStateBadge">__MSG_status_draft__</span>
+            </div>
+
+            <div class="form-layout">
+              <div class="primary-form-column">
+                <fieldset class="form-section connection-section">
+                  <legend>__MSG_form_connection__</legend>
+                  <div class="connection-test-control">
+                    <span id="connectionTestResult" aria-live="polite"></span>
+                    <button type="button" id="testSettingsBtn" class="test-settings-button" popovertarget="proxyTestSettingsPopover">__MSG_btn_testSettings__</button>
+                    <button type="button" id="testProxyBtn" class="test-proxy-button">__MSG_btn_testProxy__</button>
+                  </div>
+                  <label class="field name-field" for="proxyName">
+                    <span>__MSG_form_name__</span>
+                    <input type="text" id="proxyName" placeholder="Office proxy" required autocomplete="off">
+                  </label>
+
+                  <div class="endpoint-row">
+                    <label class="field protocol-field" for="proxyType">
+                      <span>__MSG_form_type__</span>
+                      <select id="proxyType">
+                        <option value="http">HTTP</option>
+                        <option value="https">HTTPS</option>
+                        <option value="socks4">SOCKS4</option>
+                        <option value="socks5">SOCKS5</option>
+                      </select>
+                    </label>
+                    <label class="field host-field" for="proxyHost">
+                      <span>__MSG_form_host__</span>
+                      <input type="text" id="proxyHost" placeholder="proxy.example.com" required autocomplete="off" spellcheck="false">
+                    </label>
+                    <label class="field port-field" for="proxyPort">
+                      <span>__MSG_form_port__</span>
+                      <input type="number" id="proxyPort" placeholder="8080" min="1" max="65535" inputmode="numeric" required>
+                    </label>
+                  </div>
+
+                  <p class="test-proxy-notice">
+                    <span>__MSG_test_proxy_notice__</span>
+                    <strong id="testTargetSummary"></strong>
+                  </p>
+                  <div class="https-warning" id="httpsProxyWarning" hidden>
+                    <span aria-hidden="true">!</span>
+                    <p>__MSG_https_proxy_warning__ <a href="#" id="httpsHelpLink">__MSG_https_help_link__</a></p>
+                  </div>
+                </fieldset>
+
+                <fieldset class="form-section auth-section">
+                  <legend>__MSG_form_authentication__ <small>__MSG_optional__</small></legend>
+                  <div class="two-column-fields">
+                    <label class="field" for="proxyUsername">
+                      <span>__MSG_form_username_label__</span>
+                      <input type="text" id="proxyUsername" placeholder="__MSG_form_username__" autocomplete="username">
+                    </label>
+                    <label class="field" for="proxyPassword">
+                      <span>__MSG_form_password_label__</span>
+                      <span class="password-field">
+                        <input type="password" id="proxyPassword" placeholder="__MSG_form_password__" autocomplete="current-password">
+                        <button type="button" id="togglePasswordBtn" class="reveal-button" aria-label="__MSG_toggle_password__">Show</button>
+                      </span>
+                    </label>
+                  </div>
+                </fieldset>
+              </div>
+
+              <fieldset class="form-section routing-section">
+                <legend>__MSG_form_routing__</legend>
+                <label class="inline-check" for="useGlobalWhitelist">
+                  <input type="checkbox" id="useGlobalWhitelist">
+                  <span>__MSG_form_useGlobalWhitelist__</span>
+                </label>
+                <label class="field" for="whitelist">
+                  <span>__MSG_form_whitelist__</span>
+                  <textarea id="whitelist" rows="5" placeholder="*.example.com&#10;10.0.0.0/8"></textarea>
+                  <small>__MSG_form_whitelist_hint__</small>
+                </label>
+              </fieldset>
+            </div>
+
+            <input type="hidden" id="proxyId">
+            <div class="editor-actions" id="editorActions">
+              <button type="button" id="deleteProxyBtn" class="button danger">__MSG_btn_delete__</button>
+              <span class="action-spacer"></span>
+              <button type="button" id="cancelProxyBtn" class="button ghost">__MSG_btn_discardChanges__</button>
+              <button type="button" id="saveProxyBtn" class="button secondary">__MSG_btn_save__</button>
+              <button type="button" id="saveAndActivateBtn" class="button primary">__MSG_btn_saveAndActivate__</button>
             </div>
           </form>
+
+          <div id="proxyTestSettingsPopover" class="test-settings-popover" popover>
+            <div class="test-settings-heading">
+              <div>
+                <span class="mode-kicker">CONNECTION PROBE</span>
+                <h3>__MSG_test_settings_title__</h3>
+              </div>
+              <button type="button" class="popover-close" popovertarget="proxyTestSettingsPopover" popovertargetaction="hide" aria-label="__MSG_btn_close__">×</button>
+            </div>
+            <label class="field" for="proxyTestUrl">
+              <span>__MSG_test_url_label__</span>
+              <input type="url" id="proxyTestUrl" placeholder="https://www.gstatic.com/generate_204" spellcheck="false" autocomplete="url">
+              <small>__MSG_test_url_hint__</small>
+            </label>
+            <label class="field" for="proxyTestTimeout">
+              <span>__MSG_test_timeout_label__</span>
+              <select id="proxyTestTimeout">
+                <option value="5000">5 __MSG_unit_seconds__</option>
+                <option value="10000">10 __MSG_unit_seconds__</option>
+                <option value="15000">15 __MSG_unit_seconds__</option>
+                <option value="30000">30 __MSG_unit_seconds__</option>
+              </select>
+            </label>
+            <div class="test-settings-actions">
+              <button type="button" id="resetProxyTestSettingsBtn" class="button ghost">__MSG_btn_restoreDefault__</button>
+              <button type="button" id="saveProxyTestSettingsBtn" class="button primary">__MSG_btn_saveTestSettings__</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="tab-content utility-page" id="global-whitelist" aria-labelledby="globalWhitelistTitle">
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow">ROUTING RULES</p>
+          <h1 id="globalWhitelistTitle">__MSG_globalWhitelist_title__</h1>
+          <p class="heading-copy">__MSG_globalWhitelist_desc__</p>
+        </div>
+        <button type="button" id="saveGlobalWhitelistBtn" class="button primary">__MSG_btn_saveGlobalWhitelist__</button>
+      </div>
+      <div class="whitelist-workspace">
+        <label class="field whitelist-editor" for="globalWhitelistInput">
+          <span>__MSG_globalWhitelist_title__</span>
+          <textarea id="globalWhitelistInput" rows="18" placeholder="__MSG_globalWhitelist_placeholder__"></textarea>
+        </label>
+        <aside class="rule-reference">
+          <p class="mode-kicker">__MSG_rule_reference__</p>
+          <h2>__MSG_domain_pattern_help_title__</h2>
+          <dl>
+            <div><dt>*.example.com</dt><dd>__MSG_domain_pattern_help_wildcard__</dd></div>
+            <div><dt>example.com</dt><dd>__MSG_domain_pattern_help_exact__</dd></div>
+            <div><dt>10.0.0.0/8</dt><dd>CIDR</dd></div>
+            <div><dt># note</dt><dd>__MSG_whitelist_comment_help_desc__</dd></div>
+          </dl>
+        </aside>
+      </div>
+    </section>
+
+    <section class="tab-content utility-page" id="language-settings" aria-labelledby="languageTitle">
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow">DISPLAY</p>
+          <h1 id="languageTitle">__MSG_languageSettings_title__</h1>
+          <p class="heading-copy">__MSG_languageSettings_desc__</p>
         </div>
       </div>
+      <div class="language-grid">
+        <button class="language-btn" data-lang="zh_CN"><span>简</span><strong>简体中文</strong></button>
+        <button class="language-btn" data-lang="zh_TW"><span>繁</span><strong>繁體中文</strong></button>
+        <button class="language-btn" data-lang="en"><span>EN</span><strong>English</strong></button>
+        <button class="language-btn" data-lang="ja"><span>日</span><strong>日本語</strong></button>
+        <button class="language-btn" data-lang="ko"><span>한</span><strong>한국어</strong></button>
+      </div>
+    </section>
 
-      <!-- 全局白名单 -->
-      <div class="tab-content" id="global-whitelist">
-        <h2>__MSG_globalWhitelist_title__</h2>
-        <p class="section-desc">__MSG_globalWhitelist_desc__</p>
-        
-        <div class="form-section">
-          <div class="form-group">
-            <textarea id="globalWhitelistInput" rows="10" placeholder="__MSG_globalWhitelist_placeholder__"></textarea>
-          </div>
-          <p class="form-hint">__MSG_form_whitelist_hint__</p>
-          
-          <!-- Global Whitelist Comment Help Section -->
-          <details class="help-section">
-            <summary class="help-title">__MSG_whitelist_comment_help_title__</summary>
-            <div class="help-content">
-              <p>__MSG_whitelist_comment_help_desc__</p>
-              <ul class="help-examples">
-                <li><code>__MSG_whitelist_comment_help_line__</code></li>
-                <li><code>__MSG_whitelist_comment_help_inline__</code></li>
-              </ul>
-              <p class="help-tip">__MSG_whitelist_comment_help_organize__</p>
-            </div>
-          </details>
-          
-          <!-- Domain Pattern Matching Help Section -->
-          <details class="help-section">
-            <summary class="help-title">__MSG_domain_pattern_help_title__</summary>
-            <div class="help-content">
-              <p>__MSG_domain_pattern_help_desc__</p>
-              <ul class="help-examples">
-                <li><code>*.qq.com</code> - __MSG_domain_pattern_help_wildcard__</li>
-                <li><code>qq.com</code> - __MSG_domain_pattern_help_exact__</li>
-                <li><code>*.gtimg.com</code> - __MSG_domain_pattern_help_example__</li>
-              </ul>
-              <p class="help-tip">__MSG_domain_pattern_help_smart__</p>
-            </div>
-          </details>
-          
-          <div class="form-actions">
-            <button id="saveGlobalWhitelistBtn" class="button primary">__MSG_btn_saveGlobalWhitelist__</button>
-          </div>
+    <section class="tab-content utility-page" id="update-history" aria-labelledby="historyTitle">
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow">RELEASE NOTES</p>
+          <h1 id="historyTitle">__MSG_updateHistory_title__</h1>
         </div>
       </div>
-      
-      <!-- 语言设置 -->
-      <div class="tab-content" id="language-settings">
-        <h2>__MSG_languageSettings_title__</h2>
-        <p class="section-desc">__MSG_languageSettings_desc__</p>
-        
-        <div class="language-options">
-          <div class="language-grid">
-            <button class="language-btn" data-lang="zh_CN">
-              <span class="language-flag">🇨🇳</span>
-              <span class="language-name">简体中文</span>
-            </button>
-            <button class="language-btn" data-lang="zh_TW">
-              <span class="language-flag">🇹🇼</span>
-              <span class="language-name">繁體中文</span>
-            </button>
-            <button class="language-btn" data-lang="en">
-              <span class="language-flag">🇺🇸</span>
-              <span class="language-name">English</span>
-            </button>
-            <button class="language-btn" data-lang="ja">
-              <span class="language-flag">🇯🇵</span>
-              <span class="language-name">日本語</span>
-            </button>
-            <button class="language-btn" data-lang="ko">
-              <span class="language-flag">🇰🇷</span>
-              <span class="language-name">한국어</span>
-            </button>
-          </div>
-          <p class="language-hint">__MSG_languageSettings_hint__</p>
+      <div class="release-layout">
+        <article class="current-release">
+          <span class="release-version" id="currentVersion">v1.4.0</span>
+          <time>2026-07-10</time>
+          <h2>__MSG_updateHistory_v1_3_4__</h2>
+          <ul>
+            <li>__MSG_feature_codeRefactor__</li>
+            <li>__MSG_feature_perfOptimization__</li>
+            <li>__MSG_feature_modularDesign__</li>
+            <li>__MSG_feature_smartTimer__</li>
+          </ul>
+        </article>
+        <div class="previous-releases">
+          <article><strong>v1.3.3</strong><span>2025-06-29</span><p>__MSG_updateHistory_v1_3_3__</p></article>
+          <article><strong>v1.3.2</strong><span>2025-06-28</span><p>__MSG_updateHistory_v1_3_2__</p></article>
+          <article><strong>v1.3</strong><span>2025-06-21</span><p>__MSG_updateHistory_v1_3__</p></article>
         </div>
       </div>
-      
-      <!-- 更新历史 -->
-      <div class="tab-content" id="update-history">
-        <h2>__MSG_updateHistory_title__</h2>
-        
-        <div class="history-container">
-          <div class="history-item">
-            <div class="history-date">2025-11-02</div>
-            <div class="history-version" id="currentVersion">v1.3.4</div>
-            <div class="history-content">
-              <h3>__MSG_updateHistory_v1_3_4__</h3>
-              <ul>
-                <li>__MSG_feature_codeRefactor__</li>
-                <li>__MSG_feature_perfOptimization__</li>
-                <li>__MSG_feature_modularDesign__</li>
-                <li>__MSG_feature_smartTimer__</li>
-              </ul>
-            </div>
-          </div>
+    </section>
 
-          <div class="history-item">
-            <div class="history-date">2025-06-29</div>
-            <div class="history-version">v1.3.3</div>
-            <div class="history-content">
-              <h3>__MSG_updateHistory_v1_3_3__</h3>
-              <ul>
-                <li>__MSG_feature_smartDomainExpansion__</li>
-                <li>__MSG_feature_improvedPatternMatching__</li>
-                <li>__MSG_feature_enhancedCompatibility__</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="history-item">
-            <div class="history-date">2025-06-28</div>
-            <div class="history-version">v1.3.2</div>
-            <div class="history-content">
-              <h3>__MSG_updateHistory_v1_3_2__</h3>
-              <ul>
-                <li>__MSG_feature_instantWhitelist__</li>
-                <li>__MSG_feature_improvedConfiguration__</li>
-              </ul>
-            </div>
-          </div>
-          
-          <div class="history-item">
-            <div class="history-date">2025-06-21</div>
-            <div class="history-version">v1.3</div>
-            <div class="history-content">
-              <h3>__MSG_updateHistory_v1_3__</h3>
-              <ul>
-                <li>__MSG_feature_commentSupport__</li>
-                <li>__MSG_feature_enhancedWhitelist__</li>
-                <li>__MSG_feature_improvedHelp__</li>
-                <li>__MSG_feature_betterUX__</li>
-              </ul>
-            </div>
-          </div>
-          
-          <div class="history-item">
-            <div class="history-date">2025-04-03</div>
-            <div class="history-version">v1.2</div>
-            <div class="history-content">
-              <h3>__MSG_updateHistory_v1_2__</h3>
-              <ul>
-                <li>__MSG_feature_bugfixes__</li>
-                <li>__MSG_feature_autoRefresh__</li>
-              </ul>
-            </div>
-          </div>
-          
-          <div class="history-item">
-            <div class="history-date">2025-03-27</div>
-            <div class="history-version">v1.1</div>
-            <div class="history-content">
-              <h3>__MSG_updateHistory_v1_1__</h3>
-              <ul>
-                <li>__MSG_feature_i18n__</li>
-                <li>__MSG_feature_i18n_languages__</li>
-                <li>__MSG_feature_i18n_langSelector__</li>
-                <li>__MSG_feature_bugfixes__</li>
-              </ul>
-            </div>
-          </div>
-          
-          <div class="history-item">
-            <div class="history-date">2025-03-26</div>
-            <div class="history-version">v1.0</div>
-            <div class="history-content">
-              <h3>__MSG_updateHistory_firstRelease__</h3>
-              <ul>
-                <li>__MSG_feature_multiProxy__</li>
-                <li>__MSG_feature_proxyTypes__</li>
-                <li>__MSG_feature_globalWhitelist__</li>
-                <li>__MSG_feature_advancedOptions__</li>
-                <li>__MSG_feature_oneClick__</li>
-                <li>__MSG_feature_importExport__</li>
-                <li>__MSG_feature_mv3__</li>
-              </ul>
-            </div>
+    <section class="tab-content utility-page" id="about" aria-labelledby="aboutTitle">
+      <div class="about-layout">
+        <img src="images/proxyfox-logo-128.png" alt="" class="about-logo">
+        <div>
+          <p class="eyebrow">ABOUT</p>
+          <h1 id="aboutTitle">ProxyFox</h1>
+          <p class="about-version" id="aboutVersion">ProxyFox v1.4.0</p>
+          <p class="about-copy">__MSG_about_long_description__</p>
+          <div class="about-links">
+            <a href="https://github.com/wzfukui/ProxyFox" target="_blank">GitHub ↗</a>
+            <a href="https://proxyfox.io" target="_blank">proxyfox.io ↗</a>
           </div>
         </div>
       </div>
+    </section>
+  </main>
 
-      <!-- 关于 -->
-      <div class="tab-content" id="about">
-        <h2>__MSG_about_title__</h2>
-        
-        <div class="about-section">
-          <div class="app-info">
-            <img src="images/proxyfox-logo-128.png" alt="ProxyFox Logo" class="about-logo">
-            <div>
-              <h3 id="aboutVersion">ProxyFox v1.3.2</h3>
-              <p>__MSG_about_description__</p>
-              <p>__MSG_about_copyright__</p>
-            </div>
-          </div>
+  <input type="file" id="importFile" accept=".json" hidden>
 
-          <div class="app-description">
-            <p>__MSG_about_long_description__</p>
-          </div>
-
-          <div class="project-links">
-            <p>
-              <span class="link-label">__MSG_about_project__</span>
-              <a href="https://github.com/wzfukui/ProxyFox" target="_blank">GitHub @wzfukui/ProxyFox</a>
-            </p>
-            <p>
-              <span class="link-label">__MSG_about_website__</span>
-              <a href="https://proxyfox.io" target="_blank">proxyfox.io</a>
-            </p>
-          </div>
-
-          <div class="feature-list">
-            <h3>__MSG_about_features__</h3>
-            <ul>
-              <li>__MSG_feature_multiProxy__</li>
-              <li>__MSG_feature_proxyTypes__</li>
-              <li>__MSG_feature_globalWhitelist__</li>
-              <li>__MSG_feature_advancedOptions__</li>
-              <li>__MSG_feature_oneClick__</li>
-              <li>__MSG_feature_importExport__</li>
-              <li>__MSG_feature_i18n__</li>
-              <li>__MSG_feature_mv3__</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <input type="file" id="importFile" accept=".json" style="display:none;">
-  
+  <script src="js/utils/config.js"></script>
   <script src="js/utils/i18n.js"></script>
-  <script src="js/utils/timer.js"></script>
   <script src="js/options.js"></script>
 </body>
-</html> 
+</html>

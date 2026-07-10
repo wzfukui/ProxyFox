@@ -3,7 +3,7 @@
 # ProxyFox Chrome Extension Build Script
 # This script creates a zip package for Chrome Web Store submission
 
-set -e  # Exit on any error
+set -euo pipefail
 
 # Colors for output
 RED='\033[0;31m'
@@ -13,7 +13,11 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Get version from manifest.json
-VERSION=$(grep '"version"' manifest.json | sed 's/.*"version": "\([^"]*\)".*/\1/')
+VERSION=$(node -p "require('./manifest.json').version")
+FORCE_BUILD=${FORCE_BUILD:-false}
+if [ "${1:-}" = "--force" ]; then
+    FORCE_BUILD=true
+fi
 
 echo -e "${BLUE}🦊 ProxyFox Build Script${NC}"
 echo -e "${BLUE}========================${NC}"
@@ -28,15 +32,16 @@ OUTPUT_FILE="dist/proxyfox-v${VERSION}.zip"
 
 # Check if file already exists
 if [ -f "$OUTPUT_FILE" ]; then
-    echo -e "${YELLOW}⚠️  Warning: ${OUTPUT_FILE} already exists${NC}"
-    read -p "Do you want to overwrite it? (y/N): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    if [ "$FORCE_BUILD" != "true" ]; then
+        echo -e "${YELLOW}⚠️  ${OUTPUT_FILE} already exists. Use --force to overwrite it.${NC}"
         echo -e "${RED}❌ Build cancelled${NC}"
         exit 1
     fi
     rm "$OUTPUT_FILE"
 fi
+
+echo -e "${BLUE}🔎 Running checks...${NC}"
+npm run check
 
 echo -e "${BLUE}📦 Creating Chrome extension package...${NC}"
 
@@ -69,6 +74,7 @@ EXCLUDE_PATTERNS=(
 # Create temporary directory for building
 TEMP_DIR=$(mktemp -d)
 BUILD_DIR="${TEMP_DIR}/proxyfox"
+trap 'rm -rf "$TEMP_DIR"' EXIT
 
 echo -e "${BLUE}📋 Copying files to build directory...${NC}"
 
@@ -101,14 +107,11 @@ find "$BUILD_DIR/images" -name "*.webp" -delete 2>/dev/null || true
 # Create the zip file
 echo -e "${BLUE}🗜️  Creating zip archive...${NC}"
 ORIGINAL_DIR=$(pwd)
-cd "$TEMP_DIR"
-zip -r "${ORIGINAL_DIR}/${OUTPUT_FILE}" proxyfox/ > /dev/null
+cd "$BUILD_DIR"
+zip -r "${ORIGINAL_DIR}/${OUTPUT_FILE}" . > /dev/null
 
 # Get back to original directory
 cd "$ORIGINAL_DIR"
-
-# Clean up temporary directory
-rm -rf "$TEMP_DIR"
 
 # Check if zip was created successfully
 if [ -f "$OUTPUT_FILE" ]; then
@@ -121,7 +124,12 @@ if [ -f "$OUTPUT_FILE" ]; then
     
     # Show package contents
     echo -e "${BLUE}📋 Package contents:${NC}"
-    unzip -l "$OUTPUT_FILE" | head -20
+    unzip -l "$OUTPUT_FILE" | sed -n '1,20p'
+
+    if ! unzip -Z1 "$OUTPUT_FILE" | awk '$0 == "manifest.json" { found = 1 } END { exit !found }'; then
+        echo -e "${RED}❌ Build failed: manifest.json is not at the archive root${NC}"
+        exit 1
+    fi
     
     if [ $(unzip -l "$OUTPUT_FILE" | wc -l) -gt 25 ]; then
         echo "..."

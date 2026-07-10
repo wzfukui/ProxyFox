@@ -5,54 +5,27 @@ class I18nManager {
     this.cachedMessages = {};
     this.supportedLanguages = ['zh_CN', 'zh_TW', 'en', 'ja', 'ko'];
     this.currentLanguage = 'en';
-    this.isLoaded = false;
+    this.loadedLanguages = new Set();
   }
 
-  // 预加载所有语言数据（优化版本）
-  async preloadMessages() {
-    if (this.isLoaded) {
-      return; // 避免重复加载
-    }
-
-    console.log('开始预加载语言数据...');
+  async preloadMessages(language = this.currentLanguage) {
     const basePath = chrome.runtime.getURL('_locales/');
-    
-    // 使用Promise.allSettled并行加载所有语言，提高性能
-    const loadPromises = this.supportedLanguages.map(async (lang) => {
+    const languages = [...new Set([language, 'en'])]
+      .filter(lang => this.supportedLanguages.includes(lang) && !this.loadedLanguages.has(lang));
+    if (languages.length === 0) return;
+
+    const loadPromises = languages.map(async (lang) => {
       try {
         const url = `${basePath}${lang}/messages.json`;
         const response = await fetch(url);
-        
-        if (response.ok) {
-          const text = await response.text();
-          const cleanedText = this.cleanJsonComments(text);
-          const messages = JSON.parse(cleanedText);
-          this.cachedMessages[lang] = messages;
-          console.log(`✓ ${lang}: ${Object.keys(messages).length} 条消息`);
-          return { lang, success: true };
-        } else {
-          console.warn(`⚠ ${lang}: HTTP ${response.status}`);
-          return { lang, success: false, error: response.status };
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        this.cachedMessages[lang] = await response.json();
+        this.loadedLanguages.add(lang);
       } catch (error) {
-        console.error(`✗ ${lang}:`, error.message);
-        return { lang, success: false, error: error.message };
+        console.error(`Failed to load locale ${lang}:`, error.message);
       }
     });
-
-    const results = await Promise.allSettled(loadPromises);
-    const successCount = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
-    
-    console.log(`语言数据加载完成: ${successCount}/${this.supportedLanguages.length} 种语言`);
-    this.isLoaded = true;
-  }
-
-  // 清理JSON注释（提取为独立方法）
-  cleanJsonComments(text) {
-    return text
-      .replace(/\/\/.*?$/gm, '')      // 移除单行注释
-      .replace(/\/\*[\s\S]*?\*\//g, '') // 移除多行注释
-      .trim();
+    await Promise.all(loadPromises);
   }
 
   // 获取消息文本（优化版本）
@@ -92,30 +65,27 @@ class I18nManager {
     return this.currentLanguage;
   }
 
-  // 刷新界面文本（优化版本）
   async refreshInterfaceText(language = null) {
     const lang = language || this.currentLanguage;
-    console.log(`刷新界面文本: ${lang}`);
+    await this.preloadMessages(lang);
+    this.localizeDocument(lang);
+  }
 
-    // 使用DocumentFragment减少DOM重绘
-    const fragment = document.createDocumentFragment();
-    
-    try {
-      // 批量处理文本节点
-      this.updateTextNodes(lang);
-      
-      // 批量处理按钮文本
-      this.updateButtonTexts(lang);
-      
-      // 批量处理占位符
-      this.updatePlaceholders(lang);
-      
-      // 批量处理标题属性
-      this.updateTitles(lang);
-      
-    } catch (error) {
-      console.error('刷新界面文本时出错:', error);
-    }
+  localizeDocument(language = this.currentLanguage) {
+    this.setCurrentLanguage(language);
+    this.processInnerHTMLMessages(language);
+    this.updateTextNodes(language);
+    this.updatePlaceholders(language);
+    this.updateTitles(language);
+    this.updateMessageAttributes(language);
+  }
+
+  updateMessageAttributes(language) {
+    document.querySelectorAll('[aria-label^="__MSG_"]').forEach(element => {
+      const value = element.getAttribute('aria-label');
+      const messageName = value.slice(6, -2);
+      element.setAttribute('aria-label', this.fetchMessage(messageName, language));
+    });
   }
 
   // 更新文本节点（优化版本）

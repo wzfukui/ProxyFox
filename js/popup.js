@@ -1,383 +1,200 @@
-// DOM 元素引用
 const proxyListEl = document.getElementById('proxyList');
+const proxyCountEl = document.getElementById('proxyCount');
 const currentProxyEl = document.getElementById('currentProxy');
+const currentProxyInfoEl = document.getElementById('currentProxyInfo');
+const connectionStateEl = document.getElementById('connectionState');
 const popupTitleEl = document.getElementById('popupTitle');
-const settingsBtn = document.getElementById('settingsBtn');
+const popupVersionEl = document.getElementById('popupVersion');
 const openSettingsBtn = document.getElementById('openSettingsBtn');
+const statusMessageEl = document.getElementById('statusMessage');
 
-// 状态变量
 let proxyConfigs = [];
 let activeConfigId = 'direct';
+let lastProxyConfig = null;
 let userSettings = {};
+let statusShowTimer = null;
+let statusHideTimer = null;
+let switchingConfigId = null;
 
-// 使用共享的i18n模块（已优化性能）
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const currentLang = await preloadMessages();
+    localizeHtml(currentLang);
+    popupVersionEl.textContent = `v${chrome.runtime.getManifest().version}`;
+    await loadUserSettings();
+    bindEvents();
+    await loadProxyConfigs();
+  } catch (error) {
+    console.error('Failed to initialize popup:', error);
+    showStatusMessage(`${fetchMessage('status_error')}: ${error.message}`, 'error');
+  }
+});
+
 async function preloadMessages() {
-  await window.i18nManager.preloadMessages();
-  refreshTranslations();
+  const data = await chrome.storage.local.get('userLanguage');
+  const currentLang = data.userLanguage || 'en';
+  window.i18nManager.setCurrentLanguage(currentLang);
+  await window.i18nManager.preloadMessages(currentLang);
+  return currentLang;
 }
 
-// 刷新翻译（优化版本）
-function refreshTranslations() {
-  chrome.storage.local.get('userLanguage', function(data) {
-    const currentLang = data.userLanguage || 'zh_CN';
-    window.i18nManager.setCurrentLanguage(currentLang);
-    
-    // 使用优化的批量更新
-    localizeHtml();
-    window.i18nManager.refreshInterfaceText(currentLang);
-  });
-}
-
-// 获取国际化消息的函数（使用共享模块）
-function fetchMessage(messageName, language) {
+function fetchMessage(messageName, language = window.currentLang) {
   return window.i18nManager.fetchMessage(messageName, language);
 }
 
-// 初始化
-document.addEventListener('DOMContentLoaded', async () => {
-  // 首先预加载语言数据
-  await preloadMessages();
-  
-  // 然后加载用户设置和国际化文本
-  await loadUserSettings();
-  localizeHtml();
-  
-  await loadProxyConfigs();
-  bindEvents();
-});
-
-// 替换HTML中的国际化文本
-function localizeHtml() {
-  try {
-    // 获取当前用户语言设置
-    chrome.storage.local.get('userLanguage', function(data) {
-      const currentLang = data.userLanguage || 'zh_CN';
-      window.currentLang = currentLang;
-      
-      // 替换页面标题
-      document.title = fetchMessage('extName', currentLang);
-      
-      // 替换popup标题
-      if (!userSettings.popupTitle) {
-        popupTitleEl.textContent = fetchMessage('extName', currentLang);
-      }
-      
-      // 替换设置按钮标题
-      settingsBtn.title = fetchMessage('btn_settings', currentLang);
-      
-      // 替换当前代理标签
-      const currentProxyLabel = document.querySelector('.current-proxy .label');
-      if (currentProxyLabel) {
-        currentProxyLabel.textContent = fetchMessage('current_proxy', currentLang) + ':';
-      }
-      
-      // 替换加载文本
-      const loadingText = document.querySelector('.loading');
-      if (loadingText) {
-        loadingText.textContent = fetchMessage('loading', currentLang) + '...';
-      }
-      
-      // 替换打开设置按钮文本
-      openSettingsBtn.textContent = fetchMessage('btn_manageProxySettings', currentLang);
-      
-      // 查找所有带有i18n占位符的标签元素
-      const allElements = document.querySelectorAll('*');
-      allElements.forEach(el => {
-        // 检查元素本身的文本内容
-        if (el.childNodes && el.childNodes.length > 0) {
-          for (let i = 0; i < el.childNodes.length; i++) {
-            const node = el.childNodes[i];
-            if (node.nodeType === Node.TEXT_NODE && node.nodeValue && node.nodeValue.includes('__MSG_')) {
-              try {
-                const text = node.nodeValue;
-                const matches = text.match(/__MSG_([a-zA-Z0-9_]+)__/g);
-                if (matches) {
-                  let newText = text;
-                  matches.forEach(match => {
-                    const messageName = match.slice(6, -2); // 去掉 __MSG_ 和 __ 部分
-                    const translated = fetchMessage(messageName, currentLang);
-                    if (translated) {
-                      newText = newText.replace(match, translated);
-                    }
-                  });
-                  node.nodeValue = newText;
-                }
-              } catch (nodeError) {
-                console.error('处理节点文本时出错:', nodeError);
-              }
-            }
-          }
-        }
-        
-        // 检查按钮的value属性
-        if (el.tagName === 'BUTTON' || el.tagName === 'INPUT' && el.type === 'button') {
-          const value = el.value || el.textContent;
-          if (value && value.includes('__MSG_')) {
-            try {
-              const matches = value.match(/__MSG_([a-zA-Z0-9_]+)__/g);
-              if (matches) {
-                let newValue = value;
-                matches.forEach(match => {
-                  const messageName = match.slice(6, -2);
-                  const translated = fetchMessage(messageName, currentLang);
-                  if (translated) {
-                    newValue = newValue.replace(match, translated);
-                  }
-                });
-                
-                if (el.hasAttribute('value')) {
-                  el.value = newValue;
-                } else {
-                  el.textContent = newValue;
-                }
-              }
-            } catch (btnError) {
-              console.error('处理按钮文本时出错:', btnError);
-            }
-          }
-        }
-      });
-      
-      // 可能需要更新已经渲染的代理列表
-      if (proxyConfigs.length > 0) {
-        renderProxyList(proxyConfigs, activeConfigId);
-      }
-    });
-  } catch (error) {
-    console.error('处理国际化文本时出错:', error);
-  }
+function localizeHtml(currentLang) {
+  window.currentLang = currentLang;
+  document.documentElement.lang = currentLang.replace('_', '-');
+  document.title = fetchMessage('extName', currentLang);
+  window.i18nManager.localizeDocument(currentLang);
 }
 
-// 加载用户设置
 async function loadUserSettings() {
-  try {
-    // 从存储中获取用户设置
-    const data = await chrome.storage.local.get('userSettings');
-    
-    if (data.userSettings) {
-      userSettings = data.userSettings;
-      
-      // 应用设置到界面
-      if (userSettings.popupTitle) {
-        popupTitleEl.textContent = userSettings.popupTitle;
-      }
-      
-      // 应用主题
-      if (userSettings.theme) {
-        applyTheme(userSettings.theme);
-      }
-    }
-  } catch (error) {
-    console.error('加载用户设置失败:', error);
-  }
+  const data = await chrome.storage.local.get('userSettings');
+  userSettings = data.userSettings || {};
+  if (userSettings.popupTitle) popupTitleEl.textContent = userSettings.popupTitle;
 }
 
-// 应用主题
-function applyTheme(theme) {
-  const themes = {
-    orange: {
-      primary: '#ff6600',
-      hover: '#e55c00'
-    },
-    blue: {
-      primary: '#1890ff',
-      hover: '#096dd9'
-    },
-    green: {
-      primary: '#52c41a',
-      hover: '#389e0d'
-    },
-    purple: {
-      primary: '#722ed1',
-      hover: '#531dab'
-    }
-  };
-  
-  if (themes[theme]) {
-    document.documentElement.style.setProperty('--primary-color', themes[theme].primary);
-    document.documentElement.style.setProperty('--primary-hover', themes[theme].hover);
-  }
-}
-
-// 加载代理配置列表
 async function loadProxyConfigs() {
-  try {
-    // 从后台脚本获取配置
-    const response = await chrome.runtime.sendMessage({
-      action: 'getConfigs'
-    });
-    
-    if (response) {
-      proxyConfigs = response.configs || [];
-      activeConfigId = response.activeConfigId || 'direct';
-      
-      renderProxyList(proxyConfigs, activeConfigId);
-      updateCurrentProxy();
-    }
-  } catch (error) {
-    console.error('加载代理配置失败:', error);
-    showStatusMessage('加载配置失败，请重试', 'error');
+  proxyListEl.setAttribute('aria-busy', 'true');
+  const response = await chrome.runtime.sendMessage({ action: 'getConfigs' });
+  if (!response || response.success === false) {
+    throw new Error(response?.error || 'Failed to load proxy configurations');
   }
+  proxyConfigs = response.configs || [];
+  activeConfigId = response.activeConfigId || 'direct';
+  lastProxyConfig = response.lastProxyConfig || null;
+  renderProxyList();
+  updateCurrentProxy();
+  proxyListEl.setAttribute('aria-busy', 'false');
 }
 
-// 渲染代理列表（优化版本）
-function renderProxyList(configs, activeConfigId) {
-  // 获取当前用户语言
-  chrome.storage.local.get('userLanguage', function(data) {
-    const currentLang = data.userLanguage || 'zh_CN';
-    
-    // 使用DocumentFragment优化DOM操作
-    const fragment = document.createDocumentFragment();
-    
-    // 添加直连模式
-    const directItem = createProxyItem({
-      id: 'direct',
-      name: fetchMessage('proxy_direct', currentLang),
-      type: 'direct'
-    }, activeConfigId === 'direct', currentLang);
-    fragment.appendChild(directItem);
-    
-    // 添加系统代理
-    const systemItem = createProxyItem({
-      id: 'system',
-      name: fetchMessage('proxy_system', currentLang),
-      type: 'system'
-    }, activeConfigId === 'system', currentLang);
-    fragment.appendChild(systemItem);
-    
-    // 添加自定义代理
-    configs.filter(c => !c.isSystem).forEach(config => {
-      const item = createProxyItem(config, activeConfigId === config.id, currentLang);
-      fragment.appendChild(item);
-    });
-    
-    // 一次性更新DOM，减少重绘
-    proxyListEl.textContent = ''; // 比innerHTML更快
-    proxyListEl.appendChild(fragment);
-  });
+function renderProxyList() {
+  const fragment = document.createDocumentFragment();
+  const systemConfigs = proxyConfigs.filter(config => config.isSystem);
+  const customConfigs = proxyConfigs.filter(config => !config.isSystem);
+
+  fragment.appendChild(createGroupLabel(fetchMessage('proxy_builtin_group')));
+  systemConfigs.forEach(config => fragment.appendChild(createProxyItem(config)));
+
+  if (customConfigs.length > 0) {
+    fragment.appendChild(createGroupLabel(fetchMessage('proxy_custom_group')));
+    customConfigs.forEach(config => fragment.appendChild(createProxyItem(config)));
+  }
+
+  proxyListEl.replaceChildren(fragment);
+  proxyCountEl.textContent = String(proxyConfigs.length);
 }
 
-// 创建代理项目
-function createProxyItem(config, isActive, language) {
-  const item = document.createElement('div');
+function createGroupLabel(text) {
+  const label = document.createElement('div');
+  label.className = 'proxy-group-label';
+  label.textContent = text;
+  return label;
+}
+
+function createProxyItem(config) {
+  const isActive = config.id === activeConfigId;
+  const item = document.createElement('button');
+  item.type = 'button';
   item.className = `proxy-item${isActive ? ' active' : ''}`;
   item.dataset.id = config.id;
-  
-  const status = document.createElement('div');
-  status.className = `proxy-status${isActive ? ' active' : ' inactive'}`;
-  
-  const name = document.createElement('div');
+  item.setAttribute('aria-pressed', String(isActive));
+  item.disabled = switchingConfigId !== null;
+
+  const status = document.createElement('span');
+  status.className = `proxy-status${isActive ? ' active' : ''}`;
+  status.setAttribute('aria-hidden', 'true');
+
+  const copy = document.createElement('span');
+  copy.className = 'proxy-item-copy';
+  const name = document.createElement('span');
   name.className = 'proxy-name';
-  name.textContent = config.name;
-  
-  const info = document.createElement('div');
+  name.textContent = getConfigName(config);
+  const info = document.createElement('span');
   info.className = 'proxy-info';
-  
-  if (config.type === 'direct') {
-    info.textContent = fetchMessage('proxy_mode_direct', language);
-  } else if (config.type === 'system') {
-    info.textContent = fetchMessage('proxy_mode_system', language);
-  } else {
-    info.textContent = `${config.type.toUpperCase()} ${config.host}:${config.port}`;
-  }
-  
-  item.appendChild(status);
-  item.appendChild(name);
-  item.appendChild(info);
-  
+  info.textContent = getConfigInfo(config);
+  copy.append(name, info);
+
+  const state = document.createElement('span');
+  state.className = 'proxy-item-state';
+  state.textContent = isActive ? fetchMessage('status_active') : '';
+
+  item.append(status, copy, state);
   return item;
 }
 
-// 更新当前代理显示
-function updateCurrentProxy() {
-  const activeConfig = proxyConfigs.find(c => c.id === activeConfigId);
-  
-  if (activeConfig) {
-    currentProxyEl.textContent = activeConfig.name;
-  } else {
-    currentProxyEl.textContent = '未知';
-  }
+function getConfigName(config) {
+  if (config.id === 'direct') return fetchMessage('proxy_direct');
+  if (config.id === 'system') return fetchMessage('proxy_system');
+  return config.name;
 }
 
-// 绑定事件
+function getConfigInfo(config) {
+  if (config.type === 'direct') return fetchMessage('proxy_mode_direct');
+  if (config.type === 'system') return fetchMessage('proxy_mode_system');
+  return `${String(config.type).toUpperCase()} · ${config.host}:${config.port}`;
+}
+
+function updateCurrentProxy() {
+  const isExternal = activeConfigId === 'external';
+  const activeConfig = isExternal
+    ? lastProxyConfig
+    : proxyConfigs.find(config => config.id === activeConfigId);
+
+  currentProxyEl.textContent = activeConfig
+    ? getConfigName(activeConfig)
+    : fetchMessage('status_externalProxy');
+  currentProxyInfoEl.textContent = activeConfig
+    ? getConfigInfo(activeConfig)
+    : fetchMessage('status_externalProxy');
+  connectionStateEl.textContent = fetchMessage(isExternal ? 'status_externalProxy' : 'status_active');
+  connectionStateEl.classList.toggle('external', isExternal);
+}
+
 function bindEvents() {
-  // 代理项点击事件：激活指定代理配置
   proxyListEl.addEventListener('click', handleProxyItemClick);
-  
-  // 设置按钮
-  settingsBtn.addEventListener('click', openOptionsPage);
   openSettingsBtn.addEventListener('click', openOptionsPage);
 }
 
-// 处理代理项点击（激活配置）
 async function handleProxyItemClick(event) {
-  // 查找最近的代理项元素
-  const proxyItemEl = event.target.closest('.proxy-item');
-  if (!proxyItemEl) return;
-  
-  const configId = proxyItemEl.dataset.id;
-  
+  const item = event.target.closest('.proxy-item');
+  if (!item || switchingConfigId !== null || item.dataset.id === activeConfigId) return;
+
+  switchingConfigId = item.dataset.id;
+  renderProxyList();
   try {
-    // 获取当前语言
-    const data = await chrome.storage.local.get('userLanguage');
-    const currentLang = data.userLanguage || 'zh_CN';
-    
-    // 发送激活配置消息
     const response = await chrome.runtime.sendMessage({
       action: 'activateConfig',
-      configId
+      configId: switchingConfigId,
+      refreshTab: userSettings.autoRefresh === true
     });
-    
-    if (response.success) {
-      activeConfigId = configId;
-      renderProxyList(proxyConfigs, activeConfigId);
-      updateCurrentProxy();
-      showStatusMessage(fetchMessage('status_proxySwitched', currentLang));
-    } else {
-      throw new Error(response.error || fetchMessage('status_activationFailed', currentLang));
+    if (!response?.success) {
+      throw new Error(response?.error || fetchMessage('status_activationFailed'));
     }
+    activeConfigId = switchingConfigId;
+    updateCurrentProxy();
+    showStatusMessage(fetchMessage('status_proxySwitched'));
   } catch (error) {
-    console.error('激活代理配置失败:', error);
-    
-    // 获取当前语言
-    const data = await chrome.storage.local.get('userLanguage');
-    const currentLang = data.userLanguage || 'zh_CN';
-    
-    showStatusMessage(fetchMessage('status_activationFailed', currentLang), 'error');
+    console.error('Failed to activate proxy configuration:', error);
+    showStatusMessage(`${fetchMessage('status_activationFailed')}: ${error.message}`, 'error');
+  } finally {
+    switchingConfigId = null;
+    renderProxyList();
   }
 }
 
-// 打开选项页面
 function openOptionsPage() {
   chrome.runtime.openOptionsPage();
+  window.close();
 }
 
-// 显示状态消息
 function showStatusMessage(message, type = 'success') {
-  // 检查是否已有消息元素
-  let messageEl = document.querySelector('.status-message');
-  
-  if (!messageEl) {
-    // 创建消息元素
-    messageEl = document.createElement('div');
-    messageEl.className = 'status-message';
-    document.body.appendChild(messageEl);
-  }
-  
-  // 设置消息内容和样式
-  messageEl.textContent = message;
-  messageEl.className = `status-message ${type === 'error' ? 'error' : 'success'}`;
-  
-  // 使用优化的定时器（如果可用）
-  const useOptimizedTimer = typeof window.timerManager !== 'undefined';
-  
-  // 显示消息
-  const showTimer = useOptimizedTimer ? 
-    window.timerManager.setTimeout(() => messageEl.classList.add('show'), 10) :
-    setTimeout(() => messageEl.classList.add('show'), 10);
-  
-  // 2秒后隐藏
-  const hideTimer = useOptimizedTimer ?
-    window.timerManager.setTimeout(() => messageEl.classList.remove('show'), 2000) :
-    setTimeout(() => messageEl.classList.remove('show'), 2000);
-} 
+  statusMessageEl.textContent = message;
+  statusMessageEl.className = `status-message ${type === 'error' ? 'error' : 'success'}`;
+  statusMessageEl.setAttribute('role', type === 'error' ? 'alert' : 'status');
+  clearTimeout(statusShowTimer);
+  clearTimeout(statusHideTimer);
+  statusShowTimer = setTimeout(() => statusMessageEl.classList.add('show'), 10);
+  statusHideTimer = setTimeout(() => statusMessageEl.classList.remove('show'), 2200);
+}

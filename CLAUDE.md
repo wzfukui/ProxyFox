@@ -14,7 +14,7 @@ ProxyFox is a Chrome browser extension for proxy management, built with Manifest
   - Proxy configuration management and persistence
   - Chrome proxy API integration and settings synchronization  
   - Internationalization (i18n) message handling
-  - Proxy authentication and health monitoring
+  - Proxy authentication and effective-state synchronization
   - Tab refresh functionality after proxy switches
 
 - **Popup Interface** (`popup.html` + `js/popup.js:1-466`): Quick proxy switching interface with:
@@ -88,7 +88,7 @@ This is a browser extension with no build process. Development workflow:
 
 ### Security Considerations
 
-- Extension requests minimal permissions: `proxy`, `storage`, `tabs`
+- Extension permissions: `proxy`, `storage`, `webRequest`, `webRequestAuthProvider`, plus `<all_urls>` for authentication challenges
 - No external network requests except Chrome proxy API
 - User credentials stored locally only
-- Proxy authentication handled via Chrome's `proxy.onAuthRequired` API
+- Proxy authentication handled via Chrome's `webRequest.onAuthRequired` API with strict host and port matching

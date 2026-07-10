@@ -12,18 +12,18 @@ ProxyFox 是一款功能强大且易于使用的 Chrome 代理管理扩展，专
 • 一键切换 - 在多个代理配置间快速切换，无需复杂设置
 • 智能白名单 - 支持全局和代理专用白名单，*.domain.com 自动匹配根域名
 • 多协议支持 - 完整支持 HTTP、HTTPS、SOCKS4、SOCKS5 代理协议
-• 认证管理 - 安全存储代理用户名和密码，自动处理认证
+• 认证管理 - 在本地保存代理用户名和密码，并仅向严格匹配的代理提供认证信息
 • 配置导入导出 - 轻松备份和分享代理配置，支持批量管理
 • 国际化界面 - 支持简体中文、繁体中文、英文、日文、韩文五种语言
 
 安全与隐私：
 • 本地存储 - 所有配置和凭据仅存储在本地，保护隐私安全
-• 最小权限 - 仅请求必要的扩展权限，符合 Chrome MV3 安全标准
+• 权限透明 - 仅将全站主机权限用于代理认证事件，不读取或修改网页内容
 • 开源透明 - 代码开源，接受社区审查和贡献
 
 智能特性：
 • 自动域名展开 - 输入 *.example.com 自动包含 example.com 根域名
-• 代理健康检测 - 实时监控代理连接状态
+• 保存前连接测试 - 支持自定义测试地址与超时，拆分网络和应用耗时并自动恢复原设置
 • 注释支持 - 白名单支持行内和整行注释，便于管理大型规则集
 • 状态同步 - 自动验证和同步代理状态，确保配置正确生效
 
@@ -46,18 +46,18 @@ Core Features:
 • One-Click Switching - Quickly switch between multiple proxy configurations without complex setup
 • Smart Whitelist - Supports global and proxy-specific whitelists, *.domain.com automatically matches root domains
 • Multi-Protocol Support - Full support for HTTP, HTTPS, SOCKS4, SOCKS5 proxy protocols
-• Authentication Management - Securely store proxy credentials and handle authentication automatically
+• Authentication Management - Store proxy credentials locally and provide them only to the exact matching proxy
 • Import/Export - Easy backup and sharing of proxy configurations with batch management support
 • Internationalization - Supports 5 languages: Simplified Chinese, Traditional Chinese, English, Japanese, Korean
 
 Security & Privacy:
 • Local Storage - All configurations and credentials stored locally only, protecting privacy
-• Minimal Permissions - Requests only necessary extension permissions, compliant with Chrome MV3 security standards
+• Transparent Permissions - Uses all-host access only for proxy authentication events and never to read or modify page content
 • Open Source - Transparent code open for community review and contribution
 
 Smart Features:
 • Auto Domain Expansion - Input *.example.com automatically includes example.com root domain
-• Proxy Health Detection - Real-time monitoring of proxy connection status
+• Pre-Save Connection Test - Configure the target and timeout, separate network/apply timing, and automatically restore the previous setting
 • Comment Support - Whitelist supports inline and full-line comments for managing large rule sets
 • State Synchronization - Automatic validation and synchronization of proxy states
 

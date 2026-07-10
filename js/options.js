@@ -1,947 +1,864 @@
-// DOM 元素引用
 const navItems = document.querySelectorAll('.nav-item');
 const tabContents = document.querySelectorAll('.tab-content');
-
-// 代理设置元素
 const proxyListEl = document.getElementById('proxyList');
+const proxyCountEl = document.getElementById('proxyCount');
+const activeProxySummaryEl = document.getElementById('activeProxySummary');
 const addProxyBtn = document.getElementById('addProxyBtn');
+const emptyAddProxyBtn = document.getElementById('emptyAddProxyBtn');
 const exportBtn = document.getElementById('exportBtn');
 const importBtn = document.getElementById('importBtn');
 const importFileEl = document.getElementById('importFile');
+const autoRefreshToggleEl = document.getElementById('autoRefreshToggle');
+const includeCredentialsToggleEl = document.getElementById('includeCredentialsToggle');
+const DEFAULT_PROXY_TEST_URL = 'https://www.gstatic.com/generate_204';
+const DEFAULT_PROXY_TEST_TIMEOUT_MS = 10000;
 
-// 表单元素
-const proxyFormContainer = document.getElementById('proxyFormContainer');
-const formTitle = document.getElementById('formTitle');
+const editorEmptyState = document.getElementById('editorEmptyState');
+const systemConfigPanel = document.getElementById('systemConfigPanel');
+const systemConfigTitle = document.getElementById('systemConfigTitle');
+const systemConfigState = document.getElementById('systemConfigState');
+const systemConfigDescription = document.getElementById('systemConfigDescription');
+const systemModeNode = document.getElementById('systemModeNode');
+const activateSystemBtn = document.getElementById('activateSystemBtn');
+
 const proxyForm = document.getElementById('proxyForm');
+const formTitle = document.getElementById('formTitle');
+const formModeLabel = document.getElementById('formModeLabel');
+const formStateBadge = document.getElementById('formStateBadge');
+const editorActions = document.getElementById('editorActions');
 const proxyNameEl = document.getElementById('proxyName');
 const proxyTypeEl = document.getElementById('proxyType');
 const proxyHostEl = document.getElementById('proxyHost');
 const proxyPortEl = document.getElementById('proxyPort');
 const proxyUsernameEl = document.getElementById('proxyUsername');
 const proxyPasswordEl = document.getElementById('proxyPassword');
+const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+const testProxyBtn = document.getElementById('testProxyBtn');
+const connectionTestResult = document.getElementById('connectionTestResult');
+const testTargetSummary = document.getElementById('testTargetSummary');
+const proxyTestSettingsPopover = document.getElementById('proxyTestSettingsPopover');
+const proxyTestUrlEl = document.getElementById('proxyTestUrl');
+const proxyTestTimeoutEl = document.getElementById('proxyTestTimeout');
+const resetProxyTestSettingsBtn = document.getElementById('resetProxyTestSettingsBtn');
+const saveProxyTestSettingsBtn = document.getElementById('saveProxyTestSettingsBtn');
 const useGlobalWhitelistEl = document.getElementById('useGlobalWhitelist');
 const whitelistEl = document.getElementById('whitelist');
 const proxyIdEl = document.getElementById('proxyId');
 const saveProxyBtn = document.getElementById('saveProxyBtn');
+const saveAndActivateBtn = document.getElementById('saveAndActivateBtn');
 const deleteProxyBtn = document.getElementById('deleteProxyBtn');
 const cancelProxyBtn = document.getElementById('cancelProxyBtn');
-const closeFormBtn = document.getElementById('closeFormBtn');
 const httpsProxyWarningEl = document.getElementById('httpsProxyWarning');
 const httpsHelpLinkEl = document.getElementById('httpsHelpLink');
 
-// 全局白名单元素
 const globalWhitelistInputEl = document.getElementById('globalWhitelistInput');
 const saveGlobalWhitelistBtn = document.getElementById('saveGlobalWhitelistBtn');
-
-// 语言设置元素
 const languageButtons = document.querySelectorAll('.language-btn');
 
-// 状态变量
 let proxyConfigs = [];
 let activeConfigId = 'direct';
-let editMode = false;
+let lastProxyConfig = null;
+let selectedConfigId = null;
+let isNewDraft = false;
+let originalFormSnapshot = '';
+let pendingSelectionId = null;
 let globalWhitelist = [];
+let statusShowTimer = null;
+let statusHideTimer = null;
 
-// 获取并更新版本号
-async function updateVersionNumbers() {
-  try {
-    // 获取manifest文件中的版本号
-    const manifestUrl = chrome.runtime.getURL('manifest.json');
-    const response = await fetch(manifestUrl);
-    const manifest = await response.json();
-    const version = manifest.version;
-    
-    // 更新所有版本号显示位置
-    const sidebarVersionEl = document.getElementById('sidebarVersion');
-    const aboutVersionEl = document.getElementById('aboutVersion');
-    const currentVersionEl = document.getElementById('currentVersion');
-    
-    if (sidebarVersionEl) {
-      sidebarVersionEl.textContent = `v${version}`;
-    }
-    if (aboutVersionEl) {
-      aboutVersionEl.textContent = `ProxyFox v${version}`;
-    }
-    if (currentVersionEl) {
-      currentVersionEl.textContent = `v${version}`;
-    }
-    
-    console.log(`版本号已更新为: ${version}`);
-  } catch (error) {
-    console.error('获取版本号失败:', error);
-  }
-}
-
-// 初始化
 document.addEventListener('DOMContentLoaded', async () => {
-  // 首先加载国际化文本和语言数据
-  await preloadMessages();
-  localizeHtml();
-  
-  // 更新版本号
-  await updateVersionNumbers();
-  
-  await loadProxyConfigs();
-  await loadGlobalWhitelist();
-  await initLanguageSettings();
-  bindEvents();
+  try {
+    const currentLang = await preloadMessages();
+    localizeHtml(currentLang);
+    bindEvents();
+    await Promise.all([
+      updateVersionNumbers(),
+      loadGlobalWhitelist(),
+      loadBehaviorSettings(),
+      initLanguageSettings()
+    ]);
+    await loadProxyConfigs();
+    restoreLastActiveTab();
+    selectConfig(proxyConfigs.some(config => config.id === activeConfigId) ? activeConfigId : 'direct');
+  } catch (error) {
+    console.error('Failed to initialize options page:', error);
+    showStatusMessage(`${fetchMessage('status_error', window.currentLang)}: ${error.message}`, 'error');
+  }
 });
 
-// 加载代理配置列表
-async function loadProxyConfigs() {
-  try {
-    // 从后台脚本获取配置
-    const response = await chrome.runtime.sendMessage({
-      action: 'getConfigs'
-    });
-    
-    if (response) {
-      proxyConfigs = response.configs || [];
-      activeConfigId = response.activeConfigId || 'direct';
-      renderProxyList();
-    }
-  } catch (error) {
-    console.error('加载代理配置失败:', error);
-    showStatusMessage('加载配置失败，请重试', 'error');
-  }
-}
+window.addEventListener('beforeunload', event => {
+  if (!isFormDirty()) return;
+  event.preventDefault();
+  event.returnValue = '';
+});
 
-// 渲染代理配置列表（优化版本）
-function renderProxyList() {
-  // 获取当前语言
-  chrome.storage.local.get('userLanguage', function(data) {
-    const currentLang = data.userLanguage || 'zh_CN';
-    
-    // 使用DocumentFragment优化DOM操作
-    const fragment = document.createDocumentFragment();
-    
-    // 批量创建代理项
-    proxyConfigs.forEach(config => {
-      const proxyItemEl = createProxyItemElement(config, currentLang);
-      fragment.appendChild(proxyItemEl);
-    });
-    
-    // 一次性更新DOM，减少重绘
-    proxyListEl.textContent = ''; // 比innerHTML更快
-    proxyListEl.appendChild(fragment);
-  });
-}
-
-// 创建代理项元素（提取为独立函数以提高可读性）
-function createProxyItemElement(config, currentLang) {
-  const proxyItemEl = document.createElement('div');
-  proxyItemEl.className = `proxy-item ${config.id === activeConfigId ? 'active' : ''}`;
-  proxyItemEl.dataset.id = config.id;
-  
-  const statusEl = document.createElement('div');
-  statusEl.className = `proxy-status ${config.id === activeConfigId ? 'active' : 'inactive'}`;
-  
-  const nameEl = document.createElement('div');
-  nameEl.className = 'proxy-name';
-  nameEl.textContent = config.name;
-  
-  const infoEl = document.createElement('div');
-  infoEl.className = 'proxy-info';
-  infoEl.textContent = getProxyInfoText(config, currentLang);
-  
-  const actionsEl = createProxyActions(config, currentLang);
-  
-  proxyItemEl.appendChild(statusEl);
-  proxyItemEl.appendChild(nameEl);
-  proxyItemEl.appendChild(infoEl);
-  proxyItemEl.appendChild(actionsEl);
-  
-  return proxyItemEl;
-}
-
-// 获取代理信息文本
-function getProxyInfoText(config, currentLang) {
-  if (config.type === 'direct') {
-    return fetchMessage('proxy_mode_direct', currentLang);
-  } else if (config.type === 'system') {
-    return fetchMessage('proxy_mode_system', currentLang);
-  } else {
-    return `${config.type.toUpperCase()} ${config.host}:${config.port}`;
-  }
-}
-
-// 创建代理操作按钮
-function createProxyActions(config, currentLang) {
-  const actionsEl = document.createElement('div');
-  actionsEl.className = 'proxy-actions';
-  
-  if (!config.isSystem) {
-    const editBtn = document.createElement('button');
-    editBtn.className = 'proxy-action-btn edit-btn';
-    editBtn.title = fetchMessage('btn_edit', currentLang) || '编辑';
-    editBtn.textContent = '✏️'; // 使用textContent代替innerHTML
-    editBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openEditForm(config);
-    });
-    
-    actionsEl.appendChild(editBtn);
-  }
-  
-  return actionsEl;
-}
-
-// 加载全局白名单
-async function loadGlobalWhitelist() {
-  try {
-    const data = await chrome.storage.local.get(['globalWhitelist', 'globalWhitelistRaw']);
-    globalWhitelist = data.globalWhitelist || [];
-    
-    // 优先显示原始输入（包含注释），否则显示处理后的规则
-    const displayValue = data.globalWhitelistRaw || globalWhitelist.join('\n');
-    globalWhitelistInputEl.value = displayValue;
-  } catch (error) {
-    console.error('加载全局白名单失败:', error);
-    showStatusMessage('加载全局白名单失败', 'error');
-  }
-}
-
-// 解析带注释的白名单输入
-function parseWhitelistWithComments(input) {
-  if (!input || typeof input !== 'string') return [];
-  
-  return input.split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0 && !line.startsWith('#')) // 过滤空行和注释行
-    .map(line => {
-      // 移除行内注释 (例如: *.example.com # CDN servers)
-      const commentIndex = line.indexOf('#');
-      return commentIndex !== -1 ? line.substring(0, commentIndex).trim() : line;
-    })
-    .filter(rule => rule.length > 0); // 移除处理后的空行
-}
-
-// 保存全局白名单
-async function saveGlobalWhitelist() {
-  try {
-    // 从输入框获取原始输入（保留注释）
-    const rawInput = globalWhitelistInputEl.value;
-    
-    // 解析有效规则（去除注释）
-    const rules = parseWhitelistWithComments(rawInput);
-    
-    // 保存原始输入和处理后的规则
-    await chrome.storage.local.set({ 
-      globalWhitelist: rules,
-      globalWhitelistRaw: rawInput // 保存原始输入以便编辑时显示
-    });
-    globalWhitelist = rules;
-    
-    // 重新应用当前激活的代理配置，使新的全局白名单立即生效
-    try {
-      const response = await chrome.runtime.sendMessage({
-        action: 'activateConfig',
-        configId: activeConfigId
-      });
-      
-      if (response && response.success) {
-        showStatusMessage('全局白名单已保存并应用');
-      } else {
-        showStatusMessage('全局白名单已保存，但应用配置时出错', 'warning');
-      }
-    } catch (activateError) {
-      console.error('重新应用代理配置失败:', activateError);
-      showStatusMessage('全局白名单已保存，但应用配置时出错', 'warning');
-    }
-  } catch (error) {
-    console.error('保存全局白名单失败:', error);
-    showStatusMessage('保存全局白名单失败', 'error');
-  }
-}
-
-// 绑定事件
-function bindEvents() {
-  // 导航菜单切换
-  navItems.forEach(item => {
-    item.addEventListener('click', () => {
-      const tabId = item.dataset.tab;
-      
-      // 切换导航项激活状态
-      navItems.forEach(navItem => navItem.classList.remove('active'));
-      item.classList.add('active');
-      
-      // 切换内容区域显示
-      tabContents.forEach(content => content.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      
-      // 保存当前选定的选项卡到存储
-      chrome.storage.local.set({ lastActiveTab: tabId });
-    });
-  });
-  
-  // 代理项点击事件：激活指定代理配置
-  proxyListEl.addEventListener('click', handleProxyItemClick);
-  
-  // 添加代理按钮
-  addProxyBtn.addEventListener('click', handleAddProxy);
-  
-  // 导入导出按钮
-  exportBtn.addEventListener('click', handleExportConfig);
-  importBtn.addEventListener('click', () => importFileEl.click());
-  importFileEl.addEventListener('change', handleImportConfig);
-  
-  // 表单按钮事件
-  saveProxyBtn.addEventListener('click', handleSaveProxy);
-  deleteProxyBtn.addEventListener('click', handleDeleteProxy);
-  cancelProxyBtn.addEventListener('click', closeForm);
-  closeFormBtn.addEventListener('click', closeForm);
-  
-  // 监听表单快捷键
-  proxyForm.addEventListener('keydown', (e) => {
-    // Esc键关闭表单
-    if (e.key === 'Escape') {
-      if (hasFormChanges()) {
-        if (confirm('关闭表单将丢失当前所有输入，确定要关闭吗？')) {
-          closeForm();
-        }
-      } else {
-        closeForm();
-      }
-    }
-    
-    // Enter键提交表单（如果不在文本域内）
-    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-      e.preventDefault();
-      handleSaveProxy();
-    }
-  });
-
-  // 代理类型变更事件
-  proxyTypeEl.addEventListener('change', () => {
-    // 如果选择了HTTPS代理类型，显示提示
-    if (proxyTypeEl.value === 'https') {
-      httpsProxyWarningEl.style.display = 'block';
-    } else {
-      httpsProxyWarningEl.style.display = 'none';
-    }
-  });
-  
-  // HTTPS帮助链接点击事件
-  httpsHelpLinkEl.addEventListener('click', (e) => {
-    e.preventDefault();
-    // 打开Chrome证书设置页面
-    chrome.tabs.create({ url: 'chrome://settings/certificates' });
-  });
-  
-  // 全局白名单保存按钮
-  saveGlobalWhitelistBtn.addEventListener('click', saveGlobalWhitelist);
-  
-  // 语言按钮点击事件
-  languageButtons.forEach(button => {
-    button.addEventListener('click', handleLanguageButtonClick);
-  });
-  
-  // 初始化时恢复上次选择的选项卡
-  restoreLastActiveTab();
-}
-
-// 恢复上次选择的选项卡
-async function restoreLastActiveTab() {
-  try {
-    const data = await chrome.storage.local.get('lastActiveTab');
-    const lastActiveTab = data.lastActiveTab || 'proxy-settings';
-    
-    // 激活上次选择的选项卡
-    const tabToActivate = document.querySelector(`.nav-item[data-tab="${lastActiveTab}"]`);
-    if (tabToActivate) {
-      tabToActivate.click();
-    }
-  } catch (error) {
-    console.error('恢复上次选择的选项卡失败:', error);
-  }
-}
-
-// 检查表单是否有输入内容
-function hasFormChanges() {
-  if (proxyNameEl.value.trim() || 
-      proxyHostEl.value.trim() || 
-      proxyPortEl.value.trim() || 
-      whitelistEl.value.trim()) {
-    return true;
-  }
-  return false;
-}
-
-// 处理代理项点击（激活配置）
-async function handleProxyItemClick(event) {
-  // 忽略编辑按钮的点击
-  if (event.target.closest('.proxy-action-btn')) {
-    return;
-  }
-  
-  // 查找最近的代理项元素
-  const proxyItemEl = event.target.closest('.proxy-item');
-  if (!proxyItemEl) return;
-  
-  const configId = proxyItemEl.dataset.id;
-  
-  try {
-    // 获取当前语言
-    const data = await chrome.storage.local.get('userLanguage');
-    const currentLang = data.userLanguage || 'zh_CN';
-    
-    // 发送激活配置消息
-    const response = await chrome.runtime.sendMessage({
-      action: 'activateConfig',
-      configId
-    });
-    
-    if (response.success) {
-      activeConfigId = configId;
-      renderProxyList();
-      showStatusMessage(fetchMessage('status_proxySwitched', currentLang));
-    } else {
-      throw new Error(response.error || fetchMessage('status_activationFailed', currentLang));
-    }
-  } catch (error) {
-    console.error('激活代理配置失败:', error);
-    showStatusMessage(fetchMessage('status_activationFailed', currentLang), 'error');
-  }
-}
-
-// 处理添加代理
-function handleAddProxy() {
-  openAddForm();
-}
-
-// 打开添加代理表单
-function openAddForm() {
-  // 获取当前语言
-  chrome.storage.local.get('userLanguage', function(data) {
-    const currentLang = data.userLanguage || 'zh_CN';
-    
-    formTitle.textContent = fetchMessage('form_title_add', currentLang);
-    proxyForm.reset();
-    proxyIdEl.value = '';
-    deleteProxyBtn.style.display = 'none';
-    editMode = false;
-    proxyFormContainer.classList.add('active');
-    // 设置默认值
-    proxyTypeEl.value = 'http';
-    proxyPortEl.value = '8080';
-    useGlobalWhitelistEl.checked = true; // 默认选中使用全局白名单
-    
-    // 隐藏HTTPS提示（因为默认是HTTP）
-    httpsProxyWarningEl.style.display = 'none';
-    
-    // 聚焦到第一个输入框（使用优化定时器）
-    const useOptimizedTimer = typeof window.timerManager !== 'undefined';
-    if (useOptimizedTimer) {
-      window.timerManager.setTimeout(() => proxyNameEl.focus(), 0);
-    } else {
-      setTimeout(() => proxyNameEl.focus(), 0);
-    }
-  });
-}
-
-// 打开编辑代理表单
-function openEditForm(config) {
-  // 获取当前语言
-  chrome.storage.local.get('userLanguage', function(data) {
-    const currentLang = data.userLanguage || 'zh_CN';
-    
-    formTitle.textContent = fetchMessage('form_title_edit', currentLang);
-    proxyNameEl.value = config.name;
-    proxyTypeEl.value = config.type;
-    proxyHostEl.value = config.host || '';
-    proxyPortEl.value = config.port || '';
-    proxyUsernameEl.value = config.username || '';
-    proxyPasswordEl.value = config.password || '';
-    // 设置使用全局白名单状态，如果没有该属性则默认选中
-    useGlobalWhitelistEl.checked = config.useGlobalWhitelist !== false;
-    whitelistEl.value = (config.whitelist || []).join('\n');
-    proxyIdEl.value = config.id;
-    deleteProxyBtn.style.display = 'block';
-    editMode = true;
-    proxyFormContainer.classList.add('active');
-    
-    // 根据代理类型显示或隐藏HTTPS提示
-    httpsProxyWarningEl.style.display = config.type === 'https' ? 'block' : 'none';
-    
-    // 聚焦到第一个输入框（使用优化定时器）
-    const useOptimizedTimer = typeof window.timerManager !== 'undefined';
-    if (useOptimizedTimer) {
-      window.timerManager.setTimeout(() => proxyNameEl.focus(), 0);
-    } else {
-      setTimeout(() => proxyNameEl.focus(), 0);
-    }
-  });
-}
-
-// 关闭表单
-function closeForm() {
-  proxyFormContainer.classList.remove('active');
-  proxyForm.reset();
-}
-
-// 处理保存代理配置
-async function handleSaveProxy() {
-  // 表单验证
-  if (!proxyForm.checkValidity()) {
-    proxyForm.reportValidity();
-    return;
-  }
-  
-  // 收集表单数据
-  const configData = {
-    name: proxyNameEl.value.trim(),
-    type: proxyTypeEl.value,
-    host: proxyHostEl.value.trim(),
-    port: parseInt(proxyPortEl.value, 10) || 0,
-    username: proxyUsernameEl.value.trim(),
-    password: proxyPasswordEl.value.trim(),
-    useGlobalWhitelist: useGlobalWhitelistEl.checked,
-    whitelist: parseWhitelistWithComments(whitelistEl.value)
-  };
-  
-  // 检查是否为编辑模式
-  if (editMode) {
-    configData.id = proxyIdEl.value;
-  }
-  
-  try {
-    // 发送保存配置消息
-    const response = await chrome.runtime.sendMessage({
-      action: 'saveConfig',
-      config: configData
-    });
-    
-    if (response.success) {
-      closeForm();
-      await loadProxyConfigs();
-      showStatusMessage(editMode ? '配置已更新' : '配置已添加');
-    } else {
-      throw new Error(response.error || '保存配置失败');
-    }
-  } catch (error) {
-    console.error('保存代理配置失败:', error);
-    showStatusMessage('保存配置失败: ' + error.message, 'error');
-  }
-}
-
-// 处理删除代理配置
-async function handleDeleteProxy() {
-  const configId = proxyIdEl.value;
-  
-  // 确认删除
-  if (!confirm('确定要删除此代理配置吗？')) {
-    return;
-  }
-  
-  try {
-    // 发送删除配置消息
-    const response = await chrome.runtime.sendMessage({
-      action: 'deleteConfig',
-      configId
-    });
-    
-    if (response.success) {
-      closeForm();
-      await loadProxyConfigs();
-      showStatusMessage('配置已删除');
-    } else {
-      throw new Error(response.error || '删除配置失败');
-    }
-  } catch (error) {
-    console.error('删除代理配置失败:', error);
-    showStatusMessage('删除配置失败: ' + error.message, 'error');
-  }
-}
-
-// 处理导出配置
-async function handleExportConfig() {
-  try {
-    // 获取全局设置
-    const data = await chrome.storage.local.get(['globalWhitelist', 'globalWhitelistRaw', 'activeConfigId']);
-    
-    // 创建完整导出数据，包括代理配置、全局白名单和当前激活的配置ID
-    const exportData = JSON.stringify({
-      proxyConfigs: proxyConfigs,
-      globalWhitelist: data.globalWhitelist || [],
-      globalWhitelistRaw: data.globalWhitelistRaw || '', // 导出原始输入（包含注释）
-      activeConfigId: data.activeConfigId || 'direct'
-    }, null, 2);
-    
-    // 创建下载链接
-    const blob = new Blob([exportData], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'proxyfox-config.json';
-    a.click();
-    
-    // 清理 URL 对象（使用优化定时器）
-    const useOptimizedTimer = typeof window.timerManager !== 'undefined';
-    if (useOptimizedTimer) {
-      window.timerManager.setTimeout(() => URL.revokeObjectURL(url), 0);
-    } else {
-      setTimeout(() => URL.revokeObjectURL(url), 0);
-    }
-    
-    showStatusMessage('配置已导出');
-  } catch (error) {
-    console.error('导出配置失败:', error);
-    showStatusMessage('导出配置失败', 'error');
-  }
-}
-
-// 处理导入配置
-async function handleImportConfig(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  
-  try {
-    // 读取文件内容
-    const fileContent = await readFileAsText(file);
-    const importedData = JSON.parse(fileContent);
-    
-    // 检查导入的数据格式
-    let importedConfigs;
-    let importedWhitelist;
-    let importedWhitelistRaw;
-    let importedActiveId;
-    
-    if (Array.isArray(importedData)) {
-      // 兼容旧版格式，只有代理配置数组
-      importedConfigs = importedData;
-      importedWhitelist = null;
-      importedWhitelistRaw = null;
-      importedActiveId = null;
-    } else if (importedData && typeof importedData === 'object') {
-      // 新版格式，包含代理配置、全局白名单和激活ID
-      importedConfigs = importedData.proxyConfigs || [];
-      importedWhitelist = importedData.globalWhitelist || null;
-      importedWhitelistRaw = importedData.globalWhitelistRaw || null;
-      importedActiveId = importedData.activeConfigId || null;
-    } else {
-      throw new Error('导入的数据格式无效');
-    }
-    
-    // 询问导入模式
-    const importMode = confirm('是否替换现有配置？\n点击"确定"替换，点击"取消"合并。') 
-      ? 'replace' 
-      : 'merge';
-    
-    // 发送导入代理配置消息
-    const response = await chrome.runtime.sendMessage({
-      action: 'importConfigs',
-      configs: importedConfigs,
-      mode: importMode
-    });
-    
-    if (!response.success) {
-      throw new Error(response.error || '导入代理配置失败');
-    }
-    
-    // 如果有全局白名单数据，则导入
-    if (importedWhitelist) {
-      // 如果是替换模式或者用户确认，则导入全局白名单
-      const importWhitelist = importMode === 'replace' || 
-        confirm('是否替换全局白名单？\n点击"确定"替换，点击"取消"保留当前设置。');
-      
-      if (importWhitelist) {
-        await chrome.storage.local.set({ 
-          globalWhitelist: importedWhitelist,
-          globalWhitelistRaw: importedWhitelistRaw || importedWhitelist.join('\n')
-        });
-        globalWhitelist = importedWhitelist;
-        // 优先显示原始输入（包含注释），否则显示处理后的规则
-        globalWhitelistInputEl.value = importedWhitelistRaw || importedWhitelist.join('\n');
-      }
-    }
-    
-    // 如果有激活ID且在导入的配置中存在，则设置为当前激活配置
-    if (importedActiveId && importMode === 'replace') {
-      // 获取导入后的配置
-      const currentConfigs = await getProxyConfigs();
-      // 检查激活ID是否在导入的配置中
-      if (currentConfigs.some(c => c.id === importedActiveId)) {
-        await chrome.runtime.sendMessage({
-          action: 'activateConfig',
-          configId: importedActiveId
-        });
-      }
-    }
-    
-    // 重新加载配置
-    await loadProxyConfigs();
-    await loadGlobalWhitelist();
-    
-    showStatusMessage('配置已导入');
-  } catch (error) {
-    console.error('导入配置失败:', error);
-    showStatusMessage('导入配置失败: ' + error.message, 'error');
-  }
-  
-  // 重置文件输入，允许重新选择同一文件
-  event.target.value = '';
-}
-
-// 辅助函数：获取代理配置
-async function getProxyConfigs() {
-  try {
-    const response = await chrome.runtime.sendMessage({
-      action: 'getConfigs'
-    });
-    
-    if (response) {
-      return response.configs || [];
-    }
-    return [];
-  } catch (error) {
-    console.error('获取代理配置失败:', error);
-    return [];
-  }
-}
-
-// 辅助函数：读取文件内容
-function readFileAsText(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = event => resolve(event.target.result);
-    reader.onerror = error => reject(error);
-    reader.readAsText(file);
-  });
-}
-
-// 显示状态消息
-function showStatusMessage(message, type = 'success') {
-  // 检查是否已有消息元素
-  let messageEl = document.querySelector('.status-message');
-  
-  if (!messageEl) {
-    // 创建消息元素
-    messageEl = document.createElement('div');
-    messageEl.className = 'status-message';
-    document.body.appendChild(messageEl);
-  }
-  
-  // 设置消息内容和样式
-  messageEl.textContent = message;
-  messageEl.className = `status-message ${type === 'error' ? 'error' : 'success'}`;
-  
-  // 使用优化的定时器（如果可用）
-  const useOptimizedTimer = typeof window.timerManager !== 'undefined';
-  
-  // 显示消息
-  const showTimer = useOptimizedTimer ? 
-    window.timerManager.setTimeout(() => messageEl.classList.add('show'), 10) :
-    setTimeout(() => messageEl.classList.add('show'), 10);
-  
-  // 2秒后隐藏
-  const hideTimer = useOptimizedTimer ?
-    window.timerManager.setTimeout(() => messageEl.classList.remove('show'), 2000) :
-    setTimeout(() => messageEl.classList.remove('show'), 2000);
-}
-
-// 初始化语言设置
-async function initLanguageSettings() {
-  try {
-    // 获取用户当前选择的语言
-    const data = await chrome.storage.local.get('userLanguage');
-    const currentLang = data.userLanguage || 'zh_CN';
-    
-    // 设置活动语言按钮
-    setActiveLanguageButton(currentLang);
-  } catch (error) {
-    console.error('初始化语言设置失败:', error);
-  }
-}
-
-// 设置活动语言按钮
-function setActiveLanguageButton(langCode) {
-  // 移除所有按钮的active类
-  languageButtons.forEach(button => {
-    button.classList.remove('active');
-    // 如果这个按钮是当前语言，添加active类
-    if (button.dataset.lang === langCode) {
-      button.classList.add('active');
-    }
-  });
-}
-
-// 处理语言按钮点击
-async function handleLanguageButtonClick(event) {
-  const selectedLanguage = event.currentTarget.dataset.lang;
-  
-  // 如果点击的就是当前语言，不做任何处理
+async function preloadMessages() {
   const data = await chrome.storage.local.get('userLanguage');
-  if (data.userLanguage === selectedLanguage) {
-    return;
-  }
-  
-  try {
-    // 更新活动按钮状态
-    setActiveLanguageButton(selectedLanguage);
-    
-    // 保存用户语言设置
-    await chrome.storage.local.set({ userLanguage: selectedLanguage });
-    
-    // 更新存储中系统配置的名称
-    const configs = await getProxyConfigs();
-    let needsUpdate = false;
-    
-    configs.forEach(config => {
-      if (config.id === 'direct') {
-        config.name = fetchMessage('proxy_direct', selectedLanguage);
-        needsUpdate = true;
-      } else if (config.id === 'system') {
-        config.name = fetchMessage('proxy_system', selectedLanguage);
-        needsUpdate = true;
-      }
-    });
-    
-    if (needsUpdate) {
-      await chrome.storage.local.set({ proxyConfigs: configs });
-    }
-    
-    // 立即重新加载国际化文本
-    localizeHtml();
-    
-    // 显示成功消息
-    showStatusMessage(fetchMessage('status_languageChanged', selectedLanguage) || '语言已更改，刷新页面以完全应用新语言');
-    
-    // 延迟1秒后刷新页面，以确保消息能被看到
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
-  } catch (error) {
-    console.error('切换语言失败:', error);
-    showStatusMessage(fetchMessage('status_languageChangeFailed', selectedLanguage) || '切换语言失败', 'error');
-  }
+  const currentLang = data.userLanguage || 'en';
+  window.i18nManager.setCurrentLanguage(currentLang);
+  await window.i18nManager.preloadMessages(currentLang);
+  return currentLang;
 }
 
-// 处理页面上的国际化文本
-function localizeHtml() {
-  try {
-    // 获取当前语言
-    chrome.storage.local.get('userLanguage', function(data) {
-      const currentLang = data.userLanguage || 'zh_CN';
-      // 将当前语言保存到window对象，方便其他函数使用
-      window.currentLang = currentLang;
-      
-      const elements = document.querySelectorAll('*');
-      
-      // 处理页面元素
-      elements.forEach(el => {
-        // 处理元素的内部文本和属性
-        if (el.childNodes && el.childNodes.length > 0) {
-          for (let i = 0; i < el.childNodes.length; i++) {
-            const node = el.childNodes[i];
-            if (node.nodeType === Node.TEXT_NODE && node.nodeValue && node.nodeValue.includes('__MSG_')) {
-              try {
-                const text = node.nodeValue;
-                const matches = text.match(/__MSG_([a-zA-Z0-9_]+)__/g);
-                if (matches) {
-                  let newText = text;
-                  matches.forEach(match => {
-                    const messageName = match.slice(6, -2); // 去掉 __MSG_ 和 __ 部分
-                    const translated = fetchMessage(messageName, currentLang);
-                    if (translated) {
-                      newText = newText.replace(match, translated);
-                    }
-                  });
-                  node.nodeValue = newText;
-                }
-              } catch (nodeError) {
-                console.error('处理节点文本时出错:', nodeError);
-              }
-            }
-          }
-        }
-        
-        // 检查元素的title属性
-        if (el.hasAttribute('title')) {
-          const title = el.getAttribute('title');
-          if (title && title.includes('__MSG_')) {
-            try {
-              const matches = title.match(/__MSG_([a-zA-Z0-9_]+)__/g);
-              if (matches) {
-                let newTitle = title;
-                matches.forEach(match => {
-                  const messageName = match.slice(6, -2);
-                  const translated = fetchMessage(messageName, currentLang);
-                  if (translated) {
-                    newTitle = newTitle.replace(match, translated);
-                  }
-                });
-                el.setAttribute('title', newTitle);
-              }
-            } catch (titleError) {
-              console.error('处理title属性时出错:', titleError);
-            }
-          }
-        }
-        
-        // 检查按钮的value属性
-        if (el.tagName === 'BUTTON' || el.tagName === 'INPUT' && el.type === 'button') {
-          const value = el.value || el.textContent;
-          if (value && value.includes('__MSG_')) {
-            try {
-              const matches = value.match(/__MSG_([a-zA-Z0-9_]+)__/g);
-              if (matches) {
-                let newValue = value;
-                matches.forEach(match => {
-                  const messageName = match.slice(6, -2);
-                  const translated = fetchMessage(messageName, currentLang);
-                  if (translated) {
-                    newValue = newValue.replace(match, translated);
-                  }
-                });
-                
-                if (el.hasAttribute('value')) {
-                  el.value = newValue;
-                } else {
-                  el.textContent = newValue;
-                }
-              }
-            } catch (btnError) {
-              console.error('处理按钮文本时出错:', btnError);
-            }
-          }
-        }
-        
-        // 检查输入框的placeholder属性
-        if ((el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') && el.hasAttribute('placeholder')) {
-          const placeholder = el.getAttribute('placeholder');
-          if (placeholder && placeholder.includes('__MSG_')) {
-            try {
-              const matches = placeholder.match(/__MSG_([a-zA-Z0-9_]+)__/g);
-              if (matches) {
-                let newPlaceholder = placeholder;
-                matches.forEach(match => {
-                  const messageName = match.slice(6, -2);
-                  const translated = fetchMessage(messageName, currentLang);
-                  if (translated) {
-                    newPlaceholder = newPlaceholder.replace(match, translated);
-                  }
-                });
-                el.setAttribute('placeholder', newPlaceholder);
-              }
-            } catch (placeholderError) {
-              console.error('处理placeholder属性时出错:', placeholderError);
-            }
-          }
-        }
-      });
-    });
-  } catch (error) {
-    console.error('处理国际化文本时出错:', error);
-  }
-}
-
-// 获取国际化消息的函数（使用共享模块）
-function fetchMessage(messageName, language) {
+function fetchMessage(messageName, language = window.currentLang) {
   return window.i18nManager.fetchMessage(messageName, language);
 }
 
-// 使用共享的i18n模块（已优化性能）
-async function preloadMessages() {
-  await window.i18nManager.preloadMessages();
-} 
+function localizeHtml(currentLang) {
+  window.currentLang = currentLang;
+  document.documentElement.lang = currentLang.replace('_', '-');
+  document.title = fetchMessage('options_title', currentLang);
+  window.i18nManager.localizeDocument(currentLang);
+}
+
+async function updateVersionNumbers() {
+  const manifest = chrome.runtime.getManifest();
+  const version = manifest.version;
+  document.getElementById('sidebarVersion').textContent = `v${version}`;
+  document.getElementById('aboutVersion').textContent = `ProxyFox v${version}`;
+  document.getElementById('currentVersion').textContent = `v${version}`;
+}
+
+async function loadProxyConfigs() {
+  const response = await chrome.runtime.sendMessage({ action: 'getConfigs' });
+  if (!response || response.success === false) {
+    throw new Error(response?.error || 'Failed to load proxy configurations');
+  }
+  proxyConfigs = response.configs || [];
+  activeConfigId = response.activeConfigId || 'direct';
+  lastProxyConfig = response.lastProxyConfig || null;
+  renderProxyList();
+  updateActiveSummary();
+}
+
+function renderProxyList() {
+  const fragment = document.createDocumentFragment();
+  const systemConfigs = proxyConfigs.filter(config => config.isSystem);
+  const customConfigs = proxyConfigs.filter(config => !config.isSystem);
+
+  fragment.appendChild(createGroupLabel(fetchMessage('proxy_builtin_group')));
+  systemConfigs.forEach(config => fragment.appendChild(createProxyItemElement(config)));
+
+  fragment.appendChild(createGroupLabel(fetchMessage('proxy_custom_group')));
+  if (isNewDraft) {
+    fragment.appendChild(createProxyItemElement({
+      id: '__draft__',
+      name: proxyNameEl.value.trim() || fetchMessage('status_draft'),
+      type: proxyTypeEl.value || 'http',
+      host: proxyHostEl.value.trim(),
+      port: proxyPortEl.value,
+      isDraft: true
+    }));
+  }
+  customConfigs.forEach(config => fragment.appendChild(createProxyItemElement(config)));
+
+  if (customConfigs.length === 0 && !isNewDraft) {
+    const empty = document.createElement('div');
+    empty.className = 'list-empty';
+    empty.textContent = fetchMessage('proxy_empty_list');
+    fragment.appendChild(empty);
+  }
+
+  proxyListEl.replaceChildren(fragment);
+  proxyCountEl.textContent = String(proxyConfigs.length + (isNewDraft ? 1 : 0));
+}
+
+function createGroupLabel(text) {
+  const label = document.createElement('div');
+  label.className = 'proxy-group-label';
+  label.textContent = text;
+  return label;
+}
+
+function createProxyItemElement(config) {
+  const isSelected = selectedConfigId === config.id;
+  const isActive = activeConfigId === config.id;
+  const item = document.createElement('button');
+  item.type = 'button';
+  item.className = `proxy-item${isSelected ? ' selected' : ''}${isActive ? ' active-config' : ''}`;
+  item.dataset.id = config.id;
+  item.setAttribute('aria-pressed', String(isSelected));
+
+  const status = document.createElement('span');
+  status.className = `proxy-status${isActive ? ' active' : ''}`;
+  status.setAttribute('aria-hidden', 'true');
+
+  const copy = document.createElement('span');
+  copy.className = 'proxy-item-copy';
+  const name = document.createElement('span');
+  name.className = 'proxy-name';
+  name.textContent = getConfigDisplayName(config);
+  const info = document.createElement('span');
+  info.className = 'proxy-info';
+  info.textContent = getProxyInfoText(config);
+  copy.append(name, info);
+
+  const state = document.createElement('span');
+  state.className = 'item-state';
+  state.textContent = isActive ? fetchMessage('status_active') : '';
+
+  item.append(status, copy, state);
+  return item;
+}
+
+function getConfigDisplayName(config) {
+  if (config.id === 'direct') return fetchMessage('proxy_direct');
+  if (config.id === 'system') return fetchMessage('proxy_system');
+  return config.name;
+}
+
+function getProxyInfoText(config) {
+  if (config.isDraft) return fetchMessage('status_draft');
+  if (config.type === 'direct') return fetchMessage('proxy_mode_direct');
+  if (config.type === 'system') return fetchMessage('proxy_mode_system');
+  return `${String(config.type).toUpperCase()} · ${config.host}:${config.port}`;
+}
+
+function updateActiveSummary() {
+  if (activeConfigId === 'external') {
+    activeProxySummaryEl.textContent = lastProxyConfig?.name || fetchMessage('status_externalProxy');
+    return;
+  }
+  const activeConfig = proxyConfigs.find(config => config.id === activeConfigId);
+  activeProxySummaryEl.textContent = activeConfig ? getConfigDisplayName(activeConfig) : '—';
+}
+
+function requestSelectConfig(configId) {
+  if (configId === selectedConfigId) return;
+  if (isFormDirty()) {
+    pendingSelectionId = configId;
+    editorActions.classList.add('needs-attention');
+    showStatusMessage(fetchMessage('status_unsavedSelection'), 'error');
+    cancelProxyBtn.focus();
+    return;
+  }
+  selectConfig(configId);
+}
+
+function selectConfig(configId) {
+  const config = proxyConfigs.find(item => item.id === configId);
+  if (!config) {
+    showEmptyEditor();
+    return;
+  }
+
+  selectedConfigId = config.id;
+  isNewDraft = false;
+  pendingSelectionId = null;
+  editorActions.classList.remove('needs-attention');
+  renderProxyList();
+
+  if (config.isSystem) {
+    showSystemEditor(config);
+  } else {
+    showCustomEditor(config);
+  }
+}
+
+function showEmptyEditor() {
+  selectedConfigId = null;
+  isNewDraft = false;
+  editorEmptyState.hidden = false;
+  systemConfigPanel.hidden = true;
+  proxyForm.hidden = true;
+  renderProxyList();
+}
+
+function showSystemEditor(config) {
+  editorEmptyState.hidden = true;
+  proxyForm.hidden = true;
+  systemConfigPanel.hidden = false;
+  systemConfigPanel.dataset.configId = config.id;
+  systemConfigTitle.textContent = getConfigDisplayName(config);
+  systemModeNode.textContent = getConfigDisplayName(config);
+  systemConfigDescription.textContent = fetchMessage(
+    config.id === 'direct' ? 'system_direct_desc' : 'system_proxy_desc'
+  );
+  const isActive = config.id === activeConfigId;
+  systemConfigState.textContent = fetchMessage(isActive ? 'status_active' : 'status_inactive');
+  systemConfigState.classList.toggle('active', isActive);
+  activateSystemBtn.disabled = isActive;
+  activateSystemBtn.textContent = fetchMessage(isActive ? 'status_active' : 'btn_activateProxy');
+}
+
+function showCustomEditor(config) {
+  editorEmptyState.hidden = true;
+  systemConfigPanel.hidden = true;
+  proxyForm.hidden = false;
+  fillForm(config);
+  formModeLabel.textContent = fetchMessage('editor_editing');
+  formTitle.textContent = config.name;
+  deleteProxyBtn.hidden = false;
+  originalFormSnapshot = captureFormSnapshot();
+  updateDirtyState();
+}
+
+function startNewDraft() {
+  if (isFormDirty()) {
+    pendingSelectionId = '__new__';
+    showStatusMessage(fetchMessage('status_unsavedSelection'), 'error');
+    cancelProxyBtn.focus();
+    return;
+  }
+
+  isNewDraft = true;
+  clearConnectionTestResult();
+  selectedConfigId = '__draft__';
+  pendingSelectionId = null;
+  editorEmptyState.hidden = true;
+  systemConfigPanel.hidden = true;
+  proxyForm.hidden = false;
+  proxyForm.reset();
+  proxyIdEl.value = '';
+  proxyTypeEl.value = 'http';
+  proxyPortEl.value = '8080';
+  useGlobalWhitelistEl.checked = true;
+  proxyPasswordEl.type = 'password';
+  togglePasswordBtn.textContent = fetchMessage('show_password');
+  httpsProxyWarningEl.hidden = true;
+  formModeLabel.textContent = fetchMessage('editor_creating');
+  formTitle.textContent = fetchMessage('form_title_add');
+  deleteProxyBtn.hidden = true;
+  originalFormSnapshot = captureFormSnapshot();
+  updateDirtyState();
+  renderProxyList();
+  proxyNameEl.focus();
+}
+
+function fillForm(config) {
+  clearConnectionTestResult();
+  proxyNameEl.value = config.name || '';
+  proxyTypeEl.value = config.type || 'http';
+  proxyHostEl.value = config.host || '';
+  proxyPortEl.value = config.port || '';
+  proxyUsernameEl.value = config.username || '';
+  proxyPasswordEl.value = config.password || '';
+  useGlobalWhitelistEl.checked = config.useGlobalWhitelist !== false;
+  whitelistEl.value = (config.whitelist || []).join('\n');
+  proxyIdEl.value = config.id || '';
+  httpsProxyWarningEl.hidden = config.type !== 'https';
+  proxyPasswordEl.type = 'password';
+  togglePasswordBtn.textContent = fetchMessage('show_password');
+}
+
+function captureFormSnapshot() {
+  return JSON.stringify({
+    name: proxyNameEl.value,
+    type: proxyTypeEl.value,
+    host: proxyHostEl.value,
+    port: proxyPortEl.value,
+    username: proxyUsernameEl.value,
+    password: proxyPasswordEl.value,
+    useGlobalWhitelist: useGlobalWhitelistEl.checked,
+    whitelist: whitelistEl.value,
+    id: proxyIdEl.value
+  });
+}
+
+function isFormDirty() {
+  return !proxyForm.hidden && captureFormSnapshot() !== originalFormSnapshot;
+}
+
+function updateDirtyState() {
+  const dirty = isFormDirty();
+  const isActive = !isNewDraft && selectedConfigId === activeConfigId;
+  formTitle.textContent = proxyNameEl.value.trim()
+    || fetchMessage(isNewDraft ? 'form_title_add' : 'form_title_edit');
+  formStateBadge.textContent = fetchMessage(
+    dirty ? 'status_unsaved' : isNewDraft ? 'status_draft' : isActive ? 'status_active' : 'status_saved'
+  );
+  formStateBadge.classList.toggle('dirty', dirty || isNewDraft);
+  formStateBadge.classList.toggle('active', isActive && !dirty);
+  saveProxyBtn.hidden = isActive;
+  saveProxyBtn.disabled = !dirty;
+  saveAndActivateBtn.disabled = !dirty && isActive;
+  const primaryActionKey = isActive
+    ? 'btn_saveAndKeepActive'
+    : (dirty || isNewDraft) ? 'btn_saveAndActivate' : 'btn_activateProxy';
+  saveAndActivateBtn.textContent = fetchMessage(primaryActionKey);
+  if (isNewDraft) renderProxyList();
+}
+
+function collectValidatedFormConfig() {
+  if (!proxyForm.checkValidity()) {
+    proxyForm.reportValidity();
+    return null;
+  }
+
+  const configData = {
+    id: proxyIdEl.value || 'pending',
+    name: proxyNameEl.value.trim(),
+    type: proxyTypeEl.value,
+    host: proxyHostEl.value.trim(),
+    port: Number(proxyPortEl.value),
+    username: proxyUsernameEl.value.trim(),
+    password: proxyPasswordEl.value,
+    useGlobalWhitelist: useGlobalWhitelistEl.checked,
+    whitelist: window.ProxyFoxConfig.parseWhitelistText(whitelistEl.value)
+  };
+
+  try {
+    const normalized = window.ProxyFoxConfig.normalizeConfig(configData);
+    if (isNewDraft) delete normalized.id;
+    return normalized;
+  } catch (error) {
+    showStatusMessage(error.message, 'error');
+    return null;
+  }
+}
+
+async function saveCurrentConfig(activateAfterSave) {
+  const config = collectValidatedFormConfig();
+  if (!config) return;
+  setFormBusy(true);
+
+  try {
+    const saveResponse = await chrome.runtime.sendMessage({ action: 'saveConfig', config });
+    if (!saveResponse?.success) throw new Error(saveResponse?.error || 'Failed to save proxy configuration');
+    const savedConfig = saveResponse.config;
+
+    if (activateAfterSave && activeConfigId !== savedConfig.id) {
+      const activateResponse = await chrome.runtime.sendMessage({
+        action: 'activateConfig',
+        configId: savedConfig.id
+      });
+      if (!activateResponse?.success) throw new Error(activateResponse?.error || 'Failed to activate proxy configuration');
+    }
+
+    isNewDraft = false;
+    selectedConfigId = savedConfig.id;
+    const nextId = pendingSelectionId;
+    pendingSelectionId = null;
+    await loadProxyConfigs();
+    selectConfig(savedConfig.id);
+    showStatusMessage(fetchMessage(activateAfterSave ? 'status_savedAndActivated' : 'status_configSaved'));
+
+    if (nextId) {
+      if (nextId === '__new__') startNewDraft();
+      else selectConfig(nextId);
+    }
+  } catch (error) {
+    console.error('Failed to save proxy configuration:', error);
+    showStatusMessage(`${fetchMessage('status_error')}: ${error.message}`, 'error');
+  } finally {
+    setFormBusy(false);
+  }
+}
+
+async function testCurrentProxy() {
+  const config = collectValidatedFormConfig();
+  if (!config) return;
+  testProxyBtn.disabled = true;
+  testProxyBtn.textContent = fetchMessage('status_testingProxy');
+  connectionTestResult.textContent = fetchMessage('status_testingProxy');
+  connectionTestResult.className = '';
+
+  try {
+    const response = await chrome.runtime.sendMessage({ action: 'testConfig', config });
+    if (!response?.success) throw new Error(response?.error || 'Proxy connection test failed');
+    const totalLatencyMs = getFiniteLatency(response.latencyMs);
+    const networkLatencyMs = getFiniteLatency(response.requestLatencyMs);
+    const applyLatencyMs = getFiniteLatency(response.applyLatencyMs);
+    const timingParts = [];
+    if (networkLatencyMs !== null) {
+      timingParts.push(`${fetchMessage('test_latency_network')} ${networkLatencyMs} ms`);
+    } else if (totalLatencyMs !== null) {
+      timingParts.push(`${fetchMessage('test_latency_total')} ${totalLatencyMs} ms`);
+    }
+    if (applyLatencyMs !== null) {
+      timingParts.push(`${fetchMessage('test_latency_apply')} ${applyLatencyMs} ms`);
+    }
+    connectionTestResult.textContent = timingParts[0] || fetchMessage('status_proxyTestSuccess');
+    connectionTestResult.className = 'success';
+    showStatusMessage([fetchMessage('status_proxyTestSuccess'), ...timingParts].join(' · '));
+  } catch (error) {
+    console.error('Proxy connection test failed:', error);
+    connectionTestResult.textContent = fetchMessage('status_proxyTestFailed');
+    connectionTestResult.className = 'error';
+    showStatusMessage(`${fetchMessage('status_proxyTestFailed')}: ${error.message}`, 'error');
+  } finally {
+    testProxyBtn.disabled = false;
+    testProxyBtn.textContent = fetchMessage('btn_testProxy');
+  }
+}
+
+function getFiniteLatency(value) {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? Math.max(0, Math.round(value))
+    : null;
+}
+
+function setFormBusy(busy) {
+  proxyForm.setAttribute('aria-busy', String(busy));
+  for (const control of proxyForm.querySelectorAll('button, input, select, textarea')) {
+    control.disabled = busy;
+  }
+  if (!busy) updateDirtyState();
+}
+
+function discardChanges() {
+  const nextId = pendingSelectionId;
+  pendingSelectionId = null;
+  editorActions.classList.remove('needs-attention');
+
+  if (nextId === '__new__') {
+    isNewDraft = false;
+    originalFormSnapshot = captureFormSnapshot();
+    startNewDraft();
+    return;
+  }
+  if (nextId) {
+    originalFormSnapshot = captureFormSnapshot();
+    selectConfig(nextId);
+    return;
+  }
+  if (isNewDraft) {
+    isNewDraft = false;
+    selectConfig(proxyConfigs.some(config => config.id === activeConfigId) ? activeConfigId : 'direct');
+    return;
+  }
+  const config = proxyConfigs.find(item => item.id === selectedConfigId);
+  if (config) showCustomEditor(config);
+}
+
+async function deleteCurrentConfig() {
+  const config = proxyConfigs.find(item => item.id === selectedConfigId);
+  if (!config || config.isSystem) return;
+  const wasActive = config.id === activeConfigId;
+  setFormBusy(true);
+
+  try {
+    const response = await chrome.runtime.sendMessage({ action: 'deleteConfig', configId: config.id });
+    if (!response?.success) throw new Error(response?.error || 'Failed to delete proxy configuration');
+    await loadProxyConfigs();
+    selectConfig(proxyConfigs.some(item => item.id === activeConfigId) ? activeConfigId : 'direct');
+    showUndoMessage(fetchMessage('status_configDeleted'), async () => {
+      const restoreResponse = await chrome.runtime.sendMessage({ action: 'saveConfig', config });
+      if (!restoreResponse?.success) throw new Error(restoreResponse?.error || 'Failed to restore proxy configuration');
+      if (wasActive) {
+        const activateResponse = await chrome.runtime.sendMessage({ action: 'activateConfig', configId: config.id });
+        if (!activateResponse?.success) throw new Error(activateResponse?.error || 'Failed to reactivate proxy configuration');
+      }
+      await loadProxyConfigs();
+      selectConfig(config.id);
+      showStatusMessage(fetchMessage('status_configRestored'));
+    });
+  } catch (error) {
+    console.error('Failed to delete proxy configuration:', error);
+    showStatusMessage(`${fetchMessage('status_error')}: ${error.message}`, 'error');
+  } finally {
+    setFormBusy(false);
+  }
+}
+
+async function activateSelectedSystemConfig() {
+  const configId = systemConfigPanel.dataset.configId;
+  const response = await chrome.runtime.sendMessage({ action: 'activateConfig', configId });
+  if (!response?.success) {
+    showStatusMessage(`${fetchMessage('status_error')}: ${response?.error || ''}`, 'error');
+    return;
+  }
+  await loadProxyConfigs();
+  selectConfig(configId);
+  showStatusMessage(fetchMessage('status_proxySwitched'));
+}
+
+async function loadGlobalWhitelist() {
+  const data = await chrome.storage.local.get(['globalWhitelist', 'globalWhitelistRaw']);
+  globalWhitelist = data.globalWhitelist || [];
+  globalWhitelistInputEl.value = data.globalWhitelistRaw || globalWhitelist.join('\n');
+}
+
+async function saveGlobalWhitelist() {
+  const rawInput = globalWhitelistInputEl.value;
+  const response = await chrome.runtime.sendMessage({ action: 'saveGlobalWhitelist', rawInput });
+  if (!response?.success) {
+    showStatusMessage(`${fetchMessage('status_error')}: ${response?.error || ''}`, 'error');
+    return;
+  }
+  globalWhitelist = response.rules || [];
+  showStatusMessage(fetchMessage('status_globalWhitelistSaved'));
+}
+
+async function loadBehaviorSettings() {
+  const data = await chrome.storage.local.get('userSettings');
+  const settings = data.userSettings || {};
+  autoRefreshToggleEl.checked = settings.autoRefresh === true;
+  includeCredentialsToggleEl.checked = false;
+  proxyTestUrlEl.value = settings.proxyTestUrl || DEFAULT_PROXY_TEST_URL;
+  proxyTestTimeoutEl.value = String(settings.proxyTestTimeoutMs || DEFAULT_PROXY_TEST_TIMEOUT_MS);
+  updateProxyTestSummary();
+}
+
+async function saveAutoRefreshSetting() {
+  const data = await chrome.storage.local.get('userSettings');
+  await chrome.storage.local.set({
+    userSettings: { ...(data.userSettings || {}), autoRefresh: autoRefreshToggleEl.checked }
+  });
+  showStatusMessage(fetchMessage('status_behaviorSaved'));
+}
+
+function getValidatedProxyTestSettings() {
+  proxyTestUrlEl.setCustomValidity('');
+  let url;
+  try {
+    url = new URL(proxyTestUrlEl.value.trim());
+  } catch {
+    proxyTestUrlEl.setCustomValidity(fetchMessage('test_url_error'));
+    proxyTestUrlEl.reportValidity();
+    return null;
+  }
+  if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) {
+    proxyTestUrlEl.setCustomValidity(fetchMessage('test_url_error'));
+    proxyTestUrlEl.reportValidity();
+    return null;
+  }
+  return {
+    proxyTestUrl: url.toString(),
+    proxyTestTimeoutMs: Number(proxyTestTimeoutEl.value)
+  };
+}
+
+function updateProxyTestSummary() {
+  try {
+    const url = new URL(proxyTestUrlEl.value || DEFAULT_PROXY_TEST_URL);
+    const seconds = Number(proxyTestTimeoutEl.value || DEFAULT_PROXY_TEST_TIMEOUT_MS) / 1000;
+    testTargetSummary.textContent = `${url.host} · ${seconds} ${fetchMessage('unit_seconds')}`;
+  } catch {
+    testTargetSummary.textContent = fetchMessage('test_target_custom');
+  }
+}
+
+async function saveProxyTestSettings() {
+  const settings = getValidatedProxyTestSettings();
+  if (!settings) return;
+  const data = await chrome.storage.local.get('userSettings');
+  await chrome.storage.local.set({
+    userSettings: { ...(data.userSettings || {}), ...settings }
+  });
+  updateProxyTestSummary();
+  proxyTestSettingsPopover.hidePopover?.();
+  showStatusMessage(fetchMessage('status_testSettingsSaved'));
+}
+
+async function resetProxyTestSettings() {
+  proxyTestUrlEl.value = DEFAULT_PROXY_TEST_URL;
+  proxyTestTimeoutEl.value = String(DEFAULT_PROXY_TEST_TIMEOUT_MS);
+  await saveProxyTestSettings();
+}
+
+async function exportConfigurations() {
+  const data = await chrome.storage.local.get(['globalWhitelist', 'globalWhitelistRaw', 'activeConfigId']);
+  const exportedConfigs = proxyConfigs.map(config => {
+    if (includeCredentialsToggleEl.checked || config.isSystem) return { ...config };
+    const { username: _username, password: _password, ...safeConfig } = config;
+    return safeConfig;
+  });
+  const exportData = JSON.stringify({
+    formatVersion: 2,
+    includesCredentials: includeCredentialsToggleEl.checked,
+    proxyConfigs: exportedConfigs,
+    globalWhitelist: data.globalWhitelist || [],
+    globalWhitelistRaw: data.globalWhitelistRaw || '',
+    activeConfigId: data.activeConfigId || 'direct'
+  }, null, 2);
+  const url = URL.createObjectURL(new Blob([exportData], { type: 'application/json' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'proxyfox-config.json';
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+  showStatusMessage(fetchMessage('status_exportSuccess'));
+}
+
+async function importConfigurations(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (isFormDirty()) {
+    showStatusMessage(fetchMessage('status_unsavedSelection'), 'error');
+    event.target.value = '';
+    return;
+  }
+  try {
+    const importedData = JSON.parse(await file.text());
+    const importedConfigs = Array.isArray(importedData) ? importedData : importedData?.proxyConfigs;
+    if (!Array.isArray(importedConfigs)) throw new Error('Imported file does not contain proxy configurations');
+    const mode = confirm(fetchMessage('confirm_importMode')) ? 'replace' : 'merge';
+    const response = await chrome.runtime.sendMessage({ action: 'importConfigs', configs: importedConfigs, mode });
+    if (!response?.success) throw new Error(response?.error || 'Failed to import proxy configurations');
+
+    if (!Array.isArray(importedData) && importedData.globalWhitelist != null) {
+      const shouldImportWhitelist = mode === 'replace' || confirm(fetchMessage('confirm_importWhitelist'));
+      if (shouldImportWhitelist) {
+        const rawInput = importedData.globalWhitelistRaw || importedData.globalWhitelist.join('\n');
+        const whitelistResponse = await chrome.runtime.sendMessage({ action: 'saveGlobalWhitelist', rawInput });
+        if (!whitelistResponse?.success) throw new Error(whitelistResponse?.error || 'Failed to import global whitelist');
+      }
+    }
+
+    await Promise.all([loadProxyConfigs(), loadGlobalWhitelist()]);
+    selectConfig(proxyConfigs.some(config => config.id === activeConfigId) ? activeConfigId : 'direct');
+    showStatusMessage(fetchMessage('status_importSuccess'));
+  } catch (error) {
+    console.error('Failed to import configurations:', error);
+    showStatusMessage(`${fetchMessage('status_error')}: ${error.message}`, 'error');
+  } finally {
+    event.target.value = '';
+  }
+}
+
+function bindEvents() {
+  navItems.forEach(item => item.addEventListener('click', () => activateTab(item.dataset.tab)));
+  proxyListEl.addEventListener('click', event => {
+    const item = event.target.closest('.proxy-item');
+    if (item) requestSelectConfig(item.dataset.id);
+  });
+  addProxyBtn.addEventListener('click', startNewDraft);
+  emptyAddProxyBtn.addEventListener('click', startNewDraft);
+  importBtn.addEventListener('click', () => importFileEl.click());
+  exportBtn.addEventListener('click', () => exportConfigurations().catch(handleActionError));
+  importFileEl.addEventListener('change', importConfigurations);
+  autoRefreshToggleEl.addEventListener('change', () => saveAutoRefreshSetting().catch(handleActionError));
+  saveGlobalWhitelistBtn.addEventListener('click', () => saveGlobalWhitelist().catch(handleActionError));
+  saveProxyBtn.addEventListener('click', () => saveCurrentConfig(false));
+  saveAndActivateBtn.addEventListener('click', () => saveCurrentConfig(true));
+  testProxyBtn.addEventListener('click', testCurrentProxy);
+  saveProxyTestSettingsBtn.addEventListener('click', () => saveProxyTestSettings().catch(handleActionError));
+  resetProxyTestSettingsBtn.addEventListener('click', () => resetProxyTestSettings().catch(handleActionError));
+  proxyTestUrlEl.addEventListener('input', () => {
+    proxyTestUrlEl.setCustomValidity('');
+  });
+  cancelProxyBtn.addEventListener('click', discardChanges);
+  deleteProxyBtn.addEventListener('click', deleteCurrentConfig);
+  activateSystemBtn.addEventListener('click', () => activateSelectedSystemConfig().catch(handleActionError));
+  httpsHelpLinkEl.addEventListener('click', event => {
+    event.preventDefault();
+    chrome.tabs.create({ url: 'chrome://settings/certificates' });
+  });
+  proxyTypeEl.addEventListener('change', () => {
+    httpsProxyWarningEl.hidden = proxyTypeEl.value !== 'https';
+  });
+  togglePasswordBtn.addEventListener('click', togglePasswordVisibility);
+  proxyForm.addEventListener('input', () => {
+    clearConnectionTestResult();
+    updateDirtyState();
+  });
+  proxyForm.addEventListener('change', () => {
+    clearConnectionTestResult();
+    updateDirtyState();
+  });
+  proxyForm.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      discardChanges();
+    }
+  });
+  languageButtons.forEach(button => button.addEventListener('click', handleLanguageButtonClick));
+}
+
+function activateTab(tabId) {
+  navItems.forEach(item => {
+    const active = item.dataset.tab === tabId;
+    item.classList.toggle('active', active);
+    item.setAttribute('aria-pressed', String(active));
+  });
+  tabContents.forEach(content => content.classList.toggle('active', content.id === tabId));
+  chrome.storage.local.set({ lastActiveTab: tabId });
+}
+
+async function restoreLastActiveTab() {
+  const data = await chrome.storage.local.get('lastActiveTab');
+  activateTab(document.getElementById(data.lastActiveTab || '') ? data.lastActiveTab : 'proxy-settings');
+}
+
+function togglePasswordVisibility() {
+  const reveal = proxyPasswordEl.type === 'password';
+  proxyPasswordEl.type = reveal ? 'text' : 'password';
+  togglePasswordBtn.textContent = fetchMessage(reveal ? 'hide_password' : 'show_password');
+  togglePasswordBtn.setAttribute('aria-label', fetchMessage(reveal ? 'hide_password' : 'show_password'));
+}
+
+function clearConnectionTestResult() {
+  connectionTestResult.textContent = '';
+  connectionTestResult.className = '';
+}
+
+async function initLanguageSettings() {
+  const data = await chrome.storage.local.get('userLanguage');
+  setActiveLanguageButton(data.userLanguage || 'en');
+}
+
+function setActiveLanguageButton(language) {
+  languageButtons.forEach(button => {
+    const active = button.dataset.lang === language;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
+}
+
+async function handleLanguageButtonClick(event) {
+  const selectedLanguage = event.currentTarget.dataset.lang;
+  if (isFormDirty()) {
+    showStatusMessage(fetchMessage('status_unsavedSelection'), 'error');
+    return;
+  }
+  const data = await chrome.storage.local.get('userLanguage');
+  if (data.userLanguage === selectedLanguage) return;
+  await window.i18nManager.preloadMessages(selectedLanguage);
+  window.i18nManager.setCurrentLanguage(selectedLanguage);
+  await chrome.storage.local.set({ userLanguage: selectedLanguage });
+  showStatusMessage(fetchMessage('status_languageChanged', selectedLanguage));
+  setTimeout(() => window.location.reload(), 700);
+}
+
+function handleActionError(error) {
+  console.error('Options action failed:', error);
+  showStatusMessage(`${fetchMessage('status_error')}: ${error.message}`, 'error');
+}
+
+function getStatusMessageElement() {
+  let messageEl = document.querySelector('.status-message');
+  if (!messageEl) {
+    messageEl = document.createElement('div');
+    messageEl.className = 'status-message';
+    messageEl.setAttribute('aria-live', 'polite');
+    document.body.appendChild(messageEl);
+  }
+  return messageEl;
+}
+
+function showStatusMessage(message, type = 'success') {
+  const messageEl = getStatusMessageElement();
+  messageEl.replaceChildren(document.createTextNode(message));
+  messageEl.className = `status-message ${type === 'error' ? 'error' : 'success'}`;
+  messageEl.setAttribute('role', type === 'error' ? 'alert' : 'status');
+  clearTimeout(statusShowTimer);
+  clearTimeout(statusHideTimer);
+  statusShowTimer = setTimeout(() => messageEl.classList.add('show'), 10);
+  statusHideTimer = setTimeout(() => messageEl.classList.remove('show'), 2600);
+}
+
+function showUndoMessage(message, undoAction) {
+  const messageEl = getStatusMessageElement();
+  const text = document.createElement('span');
+  text.textContent = message;
+  const undoButton = document.createElement('button');
+  undoButton.type = 'button';
+  undoButton.className = 'undo-button';
+  undoButton.textContent = fetchMessage('btn_undo');
+  undoButton.addEventListener('click', async () => {
+    undoButton.disabled = true;
+    try {
+      await undoAction();
+    } catch (error) {
+      handleActionError(error);
+    }
+  }, { once: true });
+  messageEl.replaceChildren(text, undoButton);
+  messageEl.className = 'status-message undo-message';
+  messageEl.setAttribute('role', 'status');
+  clearTimeout(statusShowTimer);
+  clearTimeout(statusHideTimer);
+  statusShowTimer = setTimeout(() => messageEl.classList.add('show'), 10);
+  statusHideTimer = setTimeout(() => messageEl.classList.remove('show'), 6000);
+}

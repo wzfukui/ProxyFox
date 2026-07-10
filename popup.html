@@ -1,34 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>__MSG_extName__</title>
   <link rel="stylesheet" href="css/popup.css">
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1 id="popupTitle" data-i18n="extName">__MSG_extName__</h1>
-      <button id="settingsBtn" class="icon-button" title="__MSG_btn_settings__">⚙️</button>
+  <main class="popup-shell">
+    <header class="popup-header">
+      <div class="popup-brand">
+        <img src="images/proxyfox-logo-48.png" alt="">
+        <span class="brand-copy">
+          <strong id="popupTitle">ProxyFox</strong>
+          <small id="popupVersion">v1.4.0</small>
+        </span>
+      </div>
     </header>
-    
-    <div class="current-proxy">
-      <div class="label" data-i18n="current_proxy">__MSG_current_proxy__:</div>
-      <div id="currentProxy" class="value">__MSG_loading__...</div>
-    </div>
-    
-    <div class="proxy-list" id="proxyList">
-      <!-- 代理配置列表将通过 JS 动态生成 -->
-      <div class="loading" data-i18n="loading">__MSG_loading__...</div>
-    </div>
-    
-    <div class="actions">
-      <button id="openSettingsBtn" class="button" data-i18n="btn_manageProxySettings">__MSG_btn_manageProxySettings__</button>
-    </div>
-  </div>
+
+    <section class="active-connection" aria-live="polite">
+      <div class="active-heading">
+        <span>__MSG_current_proxy__</span>
+        <strong id="connectionState">__MSG_status_active__</strong>
+      </div>
+      <div class="active-body">
+        <span class="live-indicator" aria-hidden="true"></span>
+        <div>
+          <h1 id="currentProxy">__MSG_loading__</h1>
+          <p id="currentProxyInfo">—</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="quick-switch" aria-labelledby="quickSwitchTitle">
+      <div class="section-heading">
+        <div>
+          <p>QUICK SWITCH</p>
+          <h2 id="quickSwitchTitle">__MSG_proxy_list_title__</h2>
+        </div>
+        <span id="proxyCount" class="count-badge">0</span>
+      </div>
+      <div class="proxy-list" id="proxyList" aria-busy="true">
+        <div class="loading">__MSG_loading__</div>
+      </div>
+    </section>
+
+    <footer class="popup-footer">
+      <button type="button" id="openSettingsBtn" class="manage-button">
+        <span>__MSG_btn_manageProxySettings__</span>
+        <span aria-hidden="true">↗</span>
+      </button>
+    </footer>
+  </main>
+
+  <div id="statusMessage" class="status-message" aria-live="polite"></div>
 
   <script src="js/utils/i18n.js"></script>
-  <script src="js/utils/timer.js"></script>
   <script src="js/popup.js"></script>
 </body>
-</html> 
+</html>
