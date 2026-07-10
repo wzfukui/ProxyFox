@@ -116,6 +116,10 @@ npm run check
 
 ## Update History
 
+### v1.4.1 (2026-07-10)
+- Reduced popup dimensions, spacing, and list height with single-row proxy details
+- Removed redundant status copy while preserving the current visual language and scanability
+
 ### v1.4.0 (2026-07-10)
 - Fixed proxy authentication and strict host matching
 - Reworked the MV3 service worker lifecycle and proxy state transactions with serialized switching and rollback protection

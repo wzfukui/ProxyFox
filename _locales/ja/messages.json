@@ -435,6 +435,14 @@
     "message": "セキュリティと信頼性の更新",
     "description": "v1.3.4バージョンアップデートタイトル"
   },
+  "updateHistory_v1_4_1": {
+    "message": "コンパクトポップアップ更新",
+    "description": "v1.4.1 version update title"
+  },
+  "feature_compactPopup": {
+    "message": "ポップアップを縮小し、プロキシ情報をコンパクトな1行リストに整理",
+    "description": "v1.4.1 compact popup feature"
+  },
   "feature_codeRefactor": {
     "message": "プロキシ認証を修正し、ホストとポートを厳密に照合",
     "description": "v1.3.4機能 - コードリファクタリング"

@@ -463,6 +463,14 @@
     "message": "安全与可靠性更新",
     "description": "v1.3.4版本更新标题"
   },
+  "updateHistory_v1_4_1": {
+    "message": "紧凑弹窗更新",
+    "description": "v1.4.1 version update title"
+  },
+  "feature_compactPopup": {
+    "message": "缩小弹窗尺寸，并将代理信息整理为紧凑的单行列表",
+    "description": "v1.4.1 compact popup feature"
+  },
   "feature_codeRefactor": {
     "message": "修复代理认证，并严格匹配主机和端口",
     "description": "v1.3.4功能 - 代码重构"

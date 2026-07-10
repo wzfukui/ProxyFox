@@ -129,11 +129,7 @@ function createProxyItem(config) {
   info.textContent = getConfigInfo(config);
   copy.append(name, info);
 
-  const state = document.createElement('span');
-  state.className = 'proxy-item-state';
-  state.textContent = isActive ? fetchMessage('status_active') : '';
-
-  item.append(status, copy, state);
+  item.append(status, copy);
   return item;
 }
 

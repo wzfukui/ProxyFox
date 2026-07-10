@@ -179,10 +179,11 @@ KEY SELLING POINTS TO EMPHASIZE:
 • Open source transparency
 
 ========================================
-📦 VERSION 1.4.0 RELEASE NOTES
+📦 VERSION 1.4.1 RELEASE NOTES
 ========================================
 
 • Rebuilt the management page and popup with a compact, consistent interface
+• Tightened popup dimensions and converted proxy entries to compact single-row items
 • Added pre-save connection testing with configurable target and timeout
 • Added strict proxy authentication matching and credential-safe exports
 • Made proxy switching, saving, deletion, and imports atomic with rollback protection

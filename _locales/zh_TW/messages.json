@@ -395,6 +395,14 @@
     "message": "安全與可靠性更新",
     "description": "v1.3.4版本更新標題"
   },
+  "updateHistory_v1_4_1": {
+    "message": "緊湊彈出視窗更新",
+    "description": "v1.4.1 version update title"
+  },
+  "feature_compactPopup": {
+    "message": "縮小彈出視窗尺寸，並將代理資訊整理為緊湊的單行列表",
+    "description": "v1.4.1 compact popup feature"
+  },
   "feature_codeRefactor": {
     "message": "修正代理認證，並嚴格比對主機與連接埠",
     "description": "v1.3.4功能 - 代碼重構"

@@ -435,6 +435,14 @@
     "message": "보안 및 안정성 업데이트",
     "description": "v1.3.4 버전 업데이트 제목"
   },
+  "updateHistory_v1_4_1": {
+    "message": "컴팩트 팝업 업데이트",
+    "description": "v1.4.1 version update title"
+  },
+  "feature_compactPopup": {
+    "message": "팝업 크기를 줄이고 프록시 정보를 간결한 한 줄 목록으로 정리",
+    "description": "v1.4.1 compact popup feature"
+  },
   "feature_codeRefactor": {
     "message": "프록시 인증 수정 및 호스트와 포트의 엄격한 일치 적용",
     "description": "v1.3.4 기능 - 코드 리팩토링"

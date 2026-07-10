@@ -435,6 +435,14 @@
     "message": "Security and Reliability Update",
     "description": "v1.3.4 version update title"
   },
+  "updateHistory_v1_4_1": {
+    "message": "Compact Popup Update",
+    "description": "v1.4.1 version update title"
+  },
+  "feature_compactPopup": {
+    "message": "Reduced popup dimensions and aligned proxy details into compact single-row items",
+    "description": "v1.4.1 compact popup feature"
+  },
   "feature_codeRefactor": {
     "message": "Fixed proxy authentication with strict host and port matching",
     "description": "v1.3.4 feature - code refactoring"
