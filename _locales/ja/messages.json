@@ -435,6 +435,15 @@
     "message": "セキュリティと信頼性の更新",
     "description": "v1.3.4バージョンアップデートタイトル"
   },
+  "updateHistory_v1_4_2": {
+    "message": "より高速で安全なプロキシ切り替え",
+    "description": "v1.4.2 version update title"
+  },
+  "feature_popupColdStart": { "message": "Popup の起動を並列化し、Service Worker のコールドスタート時のストレージ読み取りを削減" },
+  "feature_matchingPerformance": { "message": "大きなバイパスリストを展開する前にプロキシエンドポイントを照合" },
+  "feature_atomicImport": { "message": "プロキシ設定とグローバルホワイトリストをロールバック可能な単一トランザクションでインポート" },
+  "feature_authReliability": { "message": "プロキシ切り替え中も新しい認証情報を確実に提供" },
+  "feature_storageMigration": { "message": "旧形式の設定を移行し、無効な項目が Popup を妨げないように分離" },
   "updateHistory_v1_4_1": {
     "message": "コンパクトポップアップ更新",
     "description": "v1.4.1 version update title"

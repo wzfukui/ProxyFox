@@ -735,17 +735,27 @@ async function importConfigurations(event) {
     const importedConfigs = Array.isArray(importedData) ? importedData : importedData?.proxyConfigs;
     if (!Array.isArray(importedConfigs)) throw new Error('Imported file does not contain proxy configurations');
     const mode = confirm(fetchMessage('confirm_importMode')) ? 'replace' : 'merge';
-    const response = await chrome.runtime.sendMessage({ action: 'importConfigs', configs: importedConfigs, mode });
-    if (!response?.success) throw new Error(response?.error || 'Failed to import proxy configurations');
-
-    if (!Array.isArray(importedData) && importedData.globalWhitelist != null) {
-      const shouldImportWhitelist = mode === 'replace' || confirm(fetchMessage('confirm_importWhitelist'));
-      if (shouldImportWhitelist) {
-        const rawInput = importedData.globalWhitelistRaw || importedData.globalWhitelist.join('\n');
-        const whitelistResponse = await chrome.runtime.sendMessage({ action: 'saveGlobalWhitelist', rawInput });
-        if (!whitelistResponse?.success) throw new Error(whitelistResponse?.error || 'Failed to import global whitelist');
+    const includesWhitelist = !Array.isArray(importedData) && importedData.globalWhitelist != null;
+    const importGlobalWhitelist = includesWhitelist
+      && (mode === 'replace' || confirm(fetchMessage('confirm_importWhitelist')));
+    let globalWhitelistRaw = '';
+    if (importGlobalWhitelist) {
+      if (typeof importedData.globalWhitelistRaw === 'string') {
+        globalWhitelistRaw = importedData.globalWhitelistRaw;
+      } else if (Array.isArray(importedData.globalWhitelist)) {
+        globalWhitelistRaw = importedData.globalWhitelist.join('\n');
+      } else {
+        throw new Error('Imported global whitelist must be an array or raw text');
       }
     }
+    const response = await chrome.runtime.sendMessage({
+      action: 'importBundle',
+      configs: importedConfigs,
+      mode,
+      importGlobalWhitelist,
+      globalWhitelistRaw
+    });
+    if (!response?.success) throw new Error(response?.error || 'Failed to import proxy configurations');
 
     await Promise.all([loadProxyConfigs(), loadGlobalWhitelist()]);
     selectConfig(proxyConfigs.some(config => config.id === activeConfigId) ? activeConfigId : 'direct');

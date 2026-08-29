@@ -2,6 +2,8 @@ importScripts('utils/config.js');
 
 const {
   SYSTEM_CONFIG_IDS,
+  normalizeHost,
+  normalizePort,
   normalizeConfig,
   parseWhitelistText,
   expandWhitelist,
@@ -46,6 +48,9 @@ const MAX_SERIALIZED_CONFIG_BYTES = 6 * 1024 * 1024;
 const MAX_GLOBAL_WHITELIST_BYTES = 1024 * 1024;
 const PROXY_TEST_RECOVERY_KEY = 'proxyTestRecovery';
 let temporaryAuthConfig = null;
+let pendingAuthConfig = null;
+let lastInitializationMetrics = null;
+let lastSyncMetrics = null;
 
 function getMessage(messageName) {
   return chrome.i18n.getMessage(messageName) || messageName;
@@ -140,8 +145,37 @@ async function waitForProxyMutations() {
   await mutationQueue;
 }
 
+function prepareStoredConfigs(configs) {
+  const prepared = [];
+  const issues = [];
+  const seenIds = new Set();
+
+  for (const config of ensureSystemConfigs(configs)) {
+    try {
+      const normalized = SYSTEM_CONFIG_IDS.has(config.id)
+        ? normalizeConfig(config, { allowSystem: true })
+        : normalizeConfig(config);
+      if (seenIds.has(normalized.id)) throw new Error('Duplicate proxy configuration ID');
+      seenIds.add(normalized.id);
+      prepared.push(normalized);
+    } catch (error) {
+      issues.push({ id: config?.id || '', error: error.message });
+      if (config && typeof config === 'object') {
+        prepared.push({ ...config, isInvalid: true, validationError: error.message });
+      }
+    }
+  }
+
+  return { configs: prepared, issues };
+}
+
 function setCachedProxyConfigs(configs) {
-  cachedProxyConfigs = ensureSystemConfigs(configs).map(config => ({ ...config }));
+  const prepared = prepareStoredConfigs(configs);
+  cachedProxyConfigs = prepared.configs.map(config => ({ ...config }));
+  if (prepared.issues.length > 0) {
+    console.warn('Some stored proxy configurations are invalid:', prepared.issues);
+  }
+  return prepared;
 }
 
 function assertConfigCollectionSize(configs) {
@@ -240,17 +274,27 @@ async function getProxyConfigs() {
 }
 
 async function initializeState() {
-  const data = await chrome.storage.local.get([
-    'proxyConfigs',
-    'activeConfigId',
-    'lastProxyConfig',
-    'proxyControlLevel',
-    'userLanguage'
+  const startedAt = performance.now();
+  const [data, initialProxyDetails] = await Promise.all([
+    chrome.storage.local.get([
+      'proxyConfigs',
+      'activeConfigId',
+      'lastProxyConfig',
+      'proxyControlLevel',
+      'userLanguage',
+      'globalWhitelist',
+      PROXY_TEST_RECOVERY_KEY
+    ]),
+    getChromeProxySettings()
   ]);
-  const configs = ensureSystemConfigs(data.proxyConfigs);
+  const prepared = prepareStoredConfigs(data.proxyConfigs);
+  const configs = prepared.configs;
   const updates = {};
 
   if (!Array.isArray(data.proxyConfigs)) {
+    updates.proxyConfigs = configs;
+  } else if (prepared.issues.length === 0
+      && JSON.stringify(configs) !== JSON.stringify(ensureSystemConfigs(data.proxyConfigs))) {
     updates.proxyConfigs = configs;
   }
 
@@ -261,14 +305,25 @@ async function initializeState() {
   activeConfigId = data.activeConfigId || 'direct';
   lastProxyConfig = data.lastProxyConfig || summarizeConfig(configs[0]);
   proxyControlLevel = data.proxyControlLevel || 'controllable_by_this_extension';
-  setCachedProxyConfigs(configs);
+  cachedProxyConfigs = configs.map(config => ({ ...config }));
 
-  if (Object.keys(updates).length > 0) {
-    await chrome.storage.local.set(updates);
-  }
-
-  await recoverInterruptedProxyTest();
-  await syncWithChromeProxySettings();
+  const recovered = await recoverInterruptedProxyTest({
+    recovery: data[PROXY_TEST_RECOVERY_KEY],
+    proxyDetails: initialProxyDetails
+  });
+  const proxyDetails = recovered ? await getChromeProxySettings() : initialProxyDetails;
+  await syncWithChromeProxySettings({
+    proxyDetails,
+    configs,
+    globalWhitelist: data.globalWhitelist || [],
+    storageUpdates: updates
+  });
+  lastInitializationMetrics = {
+    durationMs: Math.max(0, Math.round(performance.now() - startedAt)),
+    recoveredInterruptedTest: recovered,
+    storageReads: 1,
+    proxyReads: recovered ? 2 : 1
+  };
 }
 
 function ensureInitialized() {
@@ -290,25 +345,64 @@ function detectInitialLanguage() {
   return 'en';
 }
 
-async function syncWithChromeProxySettings() {
-  const [proxyDetails, configs, whitelistData] = await Promise.all([
-    getChromeProxySettings(),
-    getProxyConfigs(),
-    chrome.storage.local.get('globalWhitelist')
+function proxyEndpointMatches(value, config) {
+  if (value?.mode !== 'fixed_servers' || !value.rules?.singleProxy || !config || config.isInvalid) return false;
+  const actualProxy = value.rules.singleProxy;
+  try {
+    return String(actualProxy.scheme || 'http').toLowerCase() === String(config.type || 'http').toLowerCase()
+      && normalizeHost(actualProxy.host) === normalizeHost(config.host)
+      && normalizePort(actualProxy.port) === normalizePort(config.port);
+  } catch (_error) {
+    return false;
+  }
+}
+
+async function findMatchingConfig(proxyValue, configs, globalWhitelist) {
+  if (proxyValue?.mode === 'direct' || proxyValue?.mode === 'system') {
+    return {
+      config: configs.find(config => config.id === proxyValue.mode) || null,
+      endpointCandidates: 1
+    };
+  }
+  if (proxyValue?.mode !== 'fixed_servers') return { config: null, endpointCandidates: 0 };
+
+  const activeConfig = configs.find(config => config.id === activeConfigId);
+  const orderedConfigs = activeConfig
+    ? [activeConfig, ...configs.filter(config => config.id !== activeConfig.id)]
+    : configs;
+  const candidates = orderedConfigs.filter(config => proxyEndpointMatches(proxyValue, config));
+  for (const config of candidates) {
+    try {
+      const expectedValue = await buildProxySettings(config, globalWhitelist);
+      if (proxyValuesMatch(proxyValue, expectedValue)) {
+        return { config, endpointCandidates: candidates.length };
+      }
+    } catch (error) {
+      console.warn(`Skipping invalid proxy configuration ${config.id || '(unknown)'}:`, error.message);
+    }
+  }
+  return { config: null, endpointCandidates: candidates.length };
+}
+
+async function syncWithChromeProxySettings(options = {}) {
+  const startedAt = performance.now();
+  const previousState = { activeConfigId, lastProxyConfig, proxyControlLevel };
+  const [proxyDetails, configs, globalWhitelist] = await Promise.all([
+    options.proxyDetails ? Promise.resolve(options.proxyDetails) : getChromeProxySettings(),
+    options.configs ? Promise.resolve(options.configs) : getProxyConfigs(),
+    options.globalWhitelist !== undefined
+      ? Promise.resolve(options.globalWhitelist)
+      : chrome.storage.local.get('globalWhitelist').then(data => data.globalWhitelist || [])
   ]);
   const externallyControlled = proxyDetails.levelOfControl === 'not_controllable'
     || proxyDetails.levelOfControl === 'controlled_by_other_extensions';
-  const globalWhitelist = whitelistData.globalWhitelist || [];
   let matchedConfig = null;
+  let endpointCandidates = 0;
 
   if (!externallyControlled) {
-    for (const config of configs) {
-      const expectedValue = await buildProxySettings(config, globalWhitelist);
-      if (proxyValuesMatch(proxyDetails.value, expectedValue)) {
-        matchedConfig = config;
-        break;
-      }
-    }
+    const match = await findMatchingConfig(proxyDetails.value, configs, globalWhitelist);
+    matchedConfig = match.config;
+    endpointCandidates = match.endpointCandidates;
   }
 
   if (matchedConfig) {
@@ -321,12 +415,20 @@ async function syncWithChromeProxySettings() {
 
   proxyControlLevel = proxyDetails.levelOfControl;
 
-  await chrome.storage.local.set({
-    activeConfigId,
-    lastProxyConfig,
-    proxyControlLevel
-  });
+  const storageUpdates = { ...(options.storageUpdates || {}) };
+  if (previousState.activeConfigId !== activeConfigId) storageUpdates.activeConfigId = activeConfigId;
+  if (JSON.stringify(previousState.lastProxyConfig) !== JSON.stringify(lastProxyConfig)) {
+    storageUpdates.lastProxyConfig = lastProxyConfig;
+  }
+  if (previousState.proxyControlLevel !== proxyControlLevel) storageUpdates.proxyControlLevel = proxyControlLevel;
+  if (Object.keys(storageUpdates).length > 0) await chrome.storage.local.set(storageUpdates);
   updateExtensionIcon(proxyDetails.value && proxyDetails.value.mode !== 'direct');
+  lastSyncMetrics = {
+    durationMs: Math.max(0, Math.round(performance.now() - startedAt)),
+    configCount: configs.length,
+    endpointCandidates,
+    storageWrite: Object.keys(storageUpdates).length > 0
+  };
   return { activeConfigId, lastProxyConfig, proxyControlLevel };
 }
 
@@ -367,12 +469,12 @@ async function buildProxySettings(config, globalWhitelistOverride) {
   };
 }
 
-async function applyProxySettings(config, globalWhitelistOverride) {
+async function applyProxySettings(config, globalWhitelistOverride, currentSettingsOverride) {
   const normalizedConfig = SYSTEM_CONFIG_IDS.has(config.id)
     ? normalizeConfig(config, { allowSystem: true })
     : normalizeConfig(config);
   const value = await buildProxySettings(normalizedConfig, globalWhitelistOverride);
-  const currentSettings = await getChromeProxySettings();
+  const currentSettings = currentSettingsOverride || await getChromeProxySettings();
   assertProxyControllable(currentSettings);
   await setChromeProxySettings(value);
   const effectiveSettings = await getChromeProxySettings();
@@ -381,6 +483,16 @@ async function applyProxySettings(config, globalWhitelistOverride) {
   }
 
   return normalizedConfig;
+}
+
+async function withPendingAuthConfig(config, task) {
+  const previousPendingConfig = pendingAuthConfig;
+  pendingAuthConfig = config;
+  try {
+    return await task();
+  } finally {
+    pendingAuthConfig = previousPendingConfig;
+  }
 }
 
 async function persistActiveConfig(config, extraStorage = {}) {
@@ -403,14 +515,17 @@ async function activateConfig(configId, options = {}) {
   const config = configs.find(item => item.id === configId);
   if (!config) throw new Error(`Proxy configuration not found: ${configId}`);
 
-  const normalizedConfig = await runProxyTransaction(
+  const authConfig = SYSTEM_CONFIG_IDS.has(config.id)
+    ? normalizeConfig(config, { allowSystem: true })
+    : normalizeConfig(config);
+  const normalizedConfig = await withPendingAuthConfig(authConfig, () => runProxyTransaction(
     ['activeConfigId', 'lastProxyConfig', 'proxyControlLevel'],
-    async () => {
-      const normalized = await applyProxySettings(config);
+    async proxySnapshot => {
+      const normalized = await applyProxySettings(authConfig, undefined, proxySnapshot);
       await persistActiveConfig(normalized);
       return normalized;
     }
-  );
+  ));
 
   if (options.refreshTab) {
     await refreshCurrentTab();
@@ -442,14 +557,14 @@ async function saveProxyConfig(config, options = {}) {
 
   const shouldActivate = options.activate === true || normalizedConfig.id === activeConfigId;
   if (shouldActivate) {
-    return runProxyTransaction(
+    return withPendingAuthConfig(normalizedConfig, () => runProxyTransaction(
       ['proxyConfigs', 'activeConfigId', 'lastProxyConfig', 'proxyControlLevel'],
-      async () => {
-        const normalized = await applyProxySettings(normalizedConfig);
+      async proxySnapshot => {
+        const normalized = await applyProxySettings(normalizedConfig, undefined, proxySnapshot);
         await persistActiveConfig(normalized, { proxyConfigs: nextConfigs });
         return normalized;
       }
-    );
+    ));
   } else {
     await chrome.storage.local.set({ proxyConfigs: nextConfigs });
     setCachedProxyConfigs(nextConfigs);
@@ -467,9 +582,9 @@ async function deleteProxyConfig(configId) {
   if (configId === activeConfigId) {
     await runProxyTransaction(
       ['proxyConfigs', 'activeConfigId', 'lastProxyConfig', 'proxyControlLevel'],
-      async () => {
+      async proxySnapshot => {
         const directConfig = nextConfigs.find(config => config.id === 'direct');
-        const normalizedDirect = await applyProxySettings(directConfig);
+        const normalizedDirect = await applyProxySettings(directConfig, undefined, proxySnapshot);
         await persistActiveConfig(normalizedDirect, { proxyConfigs: nextConfigs });
       }
     );
@@ -499,8 +614,23 @@ function normalizeImportedConfigs(newConfigs) {
 }
 
 async function importProxyConfigs(newConfigs, mode = 'merge') {
+  return importProxyBundle({ configs: newConfigs }, mode);
+}
+
+function validateGlobalWhitelistInput(rawInput) {
+  const rawValue = String(rawInput || '');
+  if (new TextEncoder().encode(rawValue).byteLength > MAX_GLOBAL_WHITELIST_BYTES) {
+    throw new Error('Global whitelist is too large to store safely');
+  }
+  return { rawValue, rules: parseWhitelistText(rawValue) };
+}
+
+async function importProxyBundle(bundle, mode = 'merge') {
   if (mode !== 'merge' && mode !== 'replace') throw new Error('Invalid import mode');
-  const imported = normalizeImportedConfigs(newConfigs);
+  const imported = normalizeImportedConfigs(bundle.configs);
+  const whitelistImport = bundle.importGlobalWhitelist
+    ? validateGlobalWhitelistInput(bundle.globalWhitelistRaw)
+    : null;
   const currentConfigs = await getProxyConfigs();
   let nextConfigs;
 
@@ -523,30 +653,38 @@ async function importProxyConfigs(newConfigs, mode = 'merge') {
   assertConfigCollectionSize(nextConfigs);
   let nextActiveConfig = nextConfigs.find(config => config.id === activeConfigId);
   if (!nextActiveConfig) nextActiveConfig = nextConfigs.find(config => config.id === 'direct');
-  await runProxyTransaction(
-    ['proxyConfigs', 'activeConfigId', 'lastProxyConfig', 'proxyControlLevel'],
-    async () => {
-      const normalizedActive = await applyProxySettings(nextActiveConfig);
-      await persistActiveConfig(normalizedActive, { proxyConfigs: nextConfigs });
+  const storageKeys = ['proxyConfigs', 'activeConfigId', 'lastProxyConfig', 'proxyControlLevel'];
+  if (whitelistImport) storageKeys.push('globalWhitelist', 'globalWhitelistRaw');
+  await withPendingAuthConfig(nextActiveConfig, () => runProxyTransaction(
+    storageKeys,
+    async proxySnapshot => {
+      const normalizedActive = await applyProxySettings(
+        nextActiveConfig,
+        whitelistImport ? whitelistImport.rules : undefined,
+        proxySnapshot
+      );
+      await persistActiveConfig(normalizedActive, {
+        proxyConfigs: nextConfigs,
+        ...(whitelistImport ? {
+          globalWhitelist: whitelistImport.rules,
+          globalWhitelistRaw: whitelistImport.rawValue
+        } : {})
+      });
     }
-  );
+  ));
   return true;
 }
 
 async function saveGlobalWhitelist(rawInput) {
-  const rawValue = String(rawInput || '');
-  if (new TextEncoder().encode(rawValue).byteLength > MAX_GLOBAL_WHITELIST_BYTES) {
-    throw new Error('Global whitelist is too large to store safely');
-  }
-  const rules = parseWhitelistText(rawValue);
+  const { rawValue, rules } = validateGlobalWhitelistInput(rawInput);
   const configs = await getProxyConfigs();
   const activeConfig = configs.find(config => config.id === activeConfigId);
 
   await runProxyTransaction(
     ['globalWhitelist', 'globalWhitelistRaw', 'activeConfigId', 'lastProxyConfig', 'proxyControlLevel'],
-    async () => {
+    async proxySnapshot => {
       if (activeConfig && !SYSTEM_CONFIG_IDS.has(activeConfig.id) && activeConfig.useGlobalWhitelist !== false) {
-        await applyProxySettings(activeConfig, rules);
+        await applyProxySettings(activeConfig, rules, proxySnapshot);
       }
       await chrome.storage.local.set({
         globalWhitelist: rules,
@@ -609,12 +747,13 @@ async function clearProxyTestRecovery() {
   await chrome.storage.local.remove(PROXY_TEST_RECOVERY_KEY);
 }
 
-async function recoverInterruptedProxyTest() {
-  const data = await chrome.storage.local.get(PROXY_TEST_RECOVERY_KEY);
-  const recovery = data[PROXY_TEST_RECOVERY_KEY];
+async function recoverInterruptedProxyTest(options = {}) {
+  const hasRecoveryOverride = Object.prototype.hasOwnProperty.call(options, 'recovery');
+  const data = hasRecoveryOverride ? null : await chrome.storage.local.get(PROXY_TEST_RECOVERY_KEY);
+  const recovery = hasRecoveryOverride ? options.recovery : data[PROXY_TEST_RECOVERY_KEY];
   if (!recovery?.snapshot || !recovery?.testValue) return false;
 
-  const currentSettings = await getChromeProxySettings();
+  const currentSettings = options.proxyDetails || await getChromeProxySettings();
   const candidateStillApplied = currentSettings.levelOfControl === 'controlled_by_this_extension'
     && proxyValuesMatch(currentSettings.value, recovery.testValue);
   if (candidateStillApplied) {
@@ -729,7 +868,11 @@ async function handleMessage(message) {
         })),
         activeConfigId,
         lastProxyConfig,
-        proxyControlLevel
+        proxyControlLevel,
+        diagnostics: {
+          initialization: lastInitializationMetrics,
+          sync: lastSyncMetrics
+        }
       };
     }
     case 'activateConfig':
@@ -755,6 +898,15 @@ async function handleMessage(message) {
     case 'importConfigs':
       return enqueueProxyMutation(async () => {
         await importProxyConfigs(message.configs, message.mode);
+        return { success: true };
+      });
+    case 'importBundle':
+      return enqueueProxyMutation(async () => {
+        await importProxyBundle({
+          configs: message.configs,
+          importGlobalWhitelist: message.importGlobalWhitelist === true,
+          globalWhitelistRaw: message.globalWhitelistRaw
+        }, message.mode);
         return { success: true };
       });
     case 'saveGlobalWhitelist':
@@ -783,7 +935,9 @@ function proxyAuthHandler(details, callback) {
   ensureInitialized()
     .then(getProxyConfigs)
     .then(configs => {
-      const activeConfig = temporaryAuthConfig || configs.find(config => config.id === activeConfigId);
+      const activeConfig = temporaryAuthConfig
+        || pendingAuthConfig
+        || configs.find(config => config.id === activeConfigId);
       if (!activeConfig || !activeConfig.username || !authChallengeMatches(details, activeConfig)) {
         callback();
         return;

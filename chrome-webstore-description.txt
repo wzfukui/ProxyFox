@@ -179,17 +179,15 @@ KEY SELLING POINTS TO EMPHASIZE:
 • Open source transparency
 
 ========================================
-📦 VERSION 1.4.1 RELEASE NOTES
+📦 VERSION 1.4.2 RELEASE NOTES
 ========================================
 
-• Rebuilt the management page and popup with a compact, consistent interface
-• Tightened popup dimensions and converted proxy entries to compact single-row items
-• Added pre-save connection testing with configurable target and timeout
-• Added strict proxy authentication matching and credential-safe exports
-• Made proxy switching, saving, deletion, and imports atomic with rollback protection
-• Added external-control detection and live state synchronization across extension pages
-• Improved performance with cached configuration reads and lightweight popup summaries
-• Added automated regression checks and interrupted-test recovery for Manifest V3 service workers
+• Parallelized popup initialization and reduced Manifest V3 service-worker cold-start work
+• Matched proxy endpoints before processing large bypass lists for substantially faster startup at scale
+• Made configuration and global-whitelist imports one rollback-safe transaction
+• Fixed credential selection during the proxy activation window
+• Migrated legacy configurations and isolated invalid stored entries without blocking the popup
+• Added cold-start, scale, import-rollback, authentication-race, and migration regression tests
 
 SINGLE PURPOSE:
 Configure, test, and quickly switch Chrome proxy settings selected by the user.

@@ -8,6 +8,7 @@ const popupTitleEl = document.getElementById('popupTitle');
 const popupVersionEl = document.getElementById('popupVersion');
 const openSettingsBtn = document.getElementById('openSettingsBtn');
 const statusMessageEl = document.getElementById('statusMessage');
+performance.mark('proxyfox-popup-script-start');
 
 let proxyConfigs = [];
 let activeConfigId = 'direct';
@@ -17,15 +18,34 @@ let statusShowTimer = null;
 let statusHideTimer = null;
 let switchingConfigId = null;
 let proxyRefreshTimer = null;
+let lastProxyDiagnostics = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
+  bindEvents();
+  popupVersionEl.textContent = `v${chrome.runtime.getManifest().version}`;
+  const settingsPromise = chrome.storage.local.get(['userLanguage', 'userSettings']);
+  const configsPromise = requestProxyConfigs()
+    .then(response => ({ response }), error => ({ error }));
   try {
-    const currentLang = await preloadMessages();
+    const settingsData = await settingsPromise;
+    const currentLang = settingsData.userLanguage || 'en';
+    applyUserSettings(settingsData.userSettings);
+    await preloadMessages(currentLang);
     localizeHtml(currentLang);
-    popupVersionEl.textContent = `v${chrome.runtime.getManifest().version}`;
-    await loadUserSettings();
-    bindEvents();
-    await loadProxyConfigs();
+    performance.mark('proxyfox-popup-localized');
+    const configResult = await configsPromise;
+    if (configResult.error) throw configResult.error;
+    applyProxyConfigResponse(configResult.response);
+    performance.mark('proxyfox-popup-ready');
+    performance.measure(
+      'proxyfox-popup-time-to-ready',
+      'proxyfox-popup-script-start',
+      'proxyfox-popup-ready'
+    );
+    console.debug('ProxyFox popup ready', {
+      durationMs: Math.round(performance.getEntriesByName('proxyfox-popup-time-to-ready').at(-1)?.duration || 0),
+      background: lastProxyDiagnostics
+    });
   } catch (error) {
     console.error('Failed to initialize popup:', error);
     showStatusMessage(`${fetchMessage('status_error')}: ${error.message}`, 'error');
@@ -43,12 +63,9 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   }, 40);
 });
 
-async function preloadMessages() {
-  const data = await chrome.storage.local.get('userLanguage');
-  const currentLang = data.userLanguage || 'en';
+async function preloadMessages(currentLang) {
   window.i18nManager.setCurrentLanguage(currentLang);
   await window.i18nManager.preloadMessages(currentLang);
-  return currentLang;
 }
 
 function fetchMessage(messageName, language = window.currentLang) {
@@ -62,24 +79,32 @@ function localizeHtml(currentLang) {
   window.i18nManager.localizeDocument(currentLang);
 }
 
-async function loadUserSettings() {
-  const data = await chrome.storage.local.get('userSettings');
-  userSettings = data.userSettings || {};
+function applyUserSettings(settings) {
+  userSettings = settings || {};
   if (userSettings.popupTitle) popupTitleEl.textContent = userSettings.popupTitle;
 }
 
-async function loadProxyConfigs() {
-  proxyListEl.setAttribute('aria-busy', 'true');
+async function requestProxyConfigs() {
   const response = await chrome.runtime.sendMessage({ action: 'getConfigSummaries' });
   if (!response || response.success === false) {
     throw new Error(response?.error || 'Failed to load proxy configurations');
   }
+  return response;
+}
+
+function applyProxyConfigResponse(response) {
   proxyConfigs = response.configs || [];
   activeConfigId = response.activeConfigId || 'direct';
   lastProxyConfig = response.lastProxyConfig || null;
+  lastProxyDiagnostics = response.diagnostics || null;
   renderProxyList();
   updateCurrentProxy();
   proxyListEl.setAttribute('aria-busy', 'false');
+}
+
+async function loadProxyConfigs() {
+  proxyListEl.setAttribute('aria-busy', 'true');
+  applyProxyConfigResponse(await requestProxyConfigs());
 }
 
 function renderProxyList() {

@@ -463,6 +463,15 @@
     "message": "安全与可靠性更新",
     "description": "v1.3.4版本更新标题"
   },
+  "updateHistory_v1_4_2": {
+    "message": "更快、更可靠的代理切换",
+    "description": "v1.4.2 版本更新标题"
+  },
+  "feature_popupColdStart": { "message": "并行加载 Popup，减少后台冷启动时的存储读取" },
+  "feature_matchingPerformance": { "message": "先匹配代理端点，再处理大型白名单" },
+  "feature_atomicImport": { "message": "代理配置与全局白名单改为可回滚的一体化导入" },
+  "feature_authReliability": { "message": "在代理切换生效窗口中及时提供新认证信息" },
+  "feature_storageMigration": { "message": "自动迁移旧配置，并隔离异常条目避免 Popup 无法打开" },
   "updateHistory_v1_4_1": {
     "message": "紧凑弹窗更新",
     "description": "v1.4.1 version update title"

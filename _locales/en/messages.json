@@ -435,6 +435,15 @@
     "message": "Security and Reliability Update",
     "description": "v1.3.4 version update title"
   },
+  "updateHistory_v1_4_2": {
+    "message": "Faster and Safer Switching",
+    "description": "v1.4.2 version update title"
+  },
+  "feature_popupColdStart": { "message": "Parallelized popup startup and reduced cold service-worker storage reads" },
+  "feature_matchingPerformance": { "message": "Matched proxy endpoints before expanding large bypass lists" },
+  "feature_atomicImport": { "message": "Made proxy and global-whitelist imports one rollback-safe transaction" },
+  "feature_authReliability": { "message": "Provided the new credentials during the proxy activation window" },
+  "feature_storageMigration": { "message": "Migrated legacy configurations and isolated invalid entries without blocking the popup" },
   "updateHistory_v1_4_1": {
     "message": "Compact Popup Update",
     "description": "v1.4.1 version update title"

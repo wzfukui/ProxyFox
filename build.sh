@@ -69,6 +69,8 @@ EXCLUDE_PATTERNS=(
     "dist"
     "images/*.webp"
     "images/*.jpg"
+    "proxyfox-logo.png"
+    "proxyfox-working-logo.png"
 )
 
 # Create temporary directory for building

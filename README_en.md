@@ -116,6 +116,14 @@ npm run check
 
 ## Update History
 
+### v1.4.2 (2026-08-29)
+- Parallelized popup language, settings, and background requests while combining cold-start storage and proxy reads
+- Matched proxy endpoints before expanding bypass lists, reducing the large-collection worst-case benchmark from about 1105 ms to about 21 ms
+- Imported configurations and the global whitelist in one rollback-safe transaction
+- Fixed the credential race while a newly selected proxy becomes active
+- Migrated legacy configurations and isolated invalid entries so one bad record cannot block the popup
+- Added regression coverage for cold starts, scale performance, atomic imports, authentication races, and invalid stored data
+
 ### v1.4.1 (2026-07-10)
 - Reduced popup dimensions, spacing, and list height with single-row proxy details
 - Removed redundant status copy while preserving the current visual language and scanability

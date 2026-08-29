@@ -10,7 +10,7 @@ class I18nManager {
 
   async preloadMessages(language = this.currentLanguage) {
     const basePath = chrome.runtime.getURL('_locales/');
-    const languages = [...new Set([language, 'en'])]
+    const languages = [language]
       .filter(lang => this.supportedLanguages.includes(lang) && !this.loadedLanguages.has(lang));
     if (languages.length === 0) return;
 

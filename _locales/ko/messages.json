@@ -435,6 +435,15 @@
     "message": "보안 및 안정성 업데이트",
     "description": "v1.3.4 버전 업데이트 제목"
   },
+  "updateHistory_v1_4_2": {
+    "message": "더 빠르고 안전한 프록시 전환",
+    "description": "v1.4.2 version update title"
+  },
+  "feature_popupColdStart": { "message": "Popup 시작을 병렬화하고 Service Worker 콜드 스타트의 저장소 읽기를 줄였습니다" },
+  "feature_matchingPerformance": { "message": "대규모 우회 목록을 확장하기 전에 프록시 엔드포인트를 먼저 비교합니다" },
+  "feature_atomicImport": { "message": "프록시 설정과 전역 화이트리스트를 롤백 가능한 단일 트랜잭션으로 가져옵니다" },
+  "feature_authReliability": { "message": "프록시 전환 중에도 새 인증 정보를 즉시 제공합니다" },
+  "feature_storageMigration": { "message": "이전 설정을 마이그레이션하고 잘못된 항목이 Popup을 막지 않도록 격리합니다" },
   "updateHistory_v1_4_1": {
     "message": "컴팩트 팝업 업데이트",
     "description": "v1.4.1 version update title"

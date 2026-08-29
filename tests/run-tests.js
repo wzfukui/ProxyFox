@@ -44,7 +44,11 @@ function createBackgroundHarness(options = {}) {
   const timeline = [];
   const backgroundErrors = [];
   const appliedValues = [];
+  const authResponses = [];
   let clearCount = 0;
+  let proxyGetCount = 0;
+  let storageGetCount = 0;
+  let storageSetCount = 0;
 
   const chrome = {
     action: { setIcon(_details, callback) { callback(); } },
@@ -60,6 +64,7 @@ function createBackgroundHarness(options = {}) {
       onProxyError: event('proxy.onProxyError'),
       settings: {
         get(_details, callback) {
+          proxyGetCount += 1;
           callback({ value: structuredClone(currentProxyValue), levelOfControl });
         },
         set({ value }, callback) {
@@ -68,6 +73,12 @@ function createBackgroundHarness(options = {}) {
             levelOfControl = 'controlled_by_this_extension';
             appliedValues.push(structuredClone(value));
             timeline.push(`proxy:${value.rules?.singleProxy?.host || value.mode}`);
+            const authDetails = options.authChallengeDuringSet?.(value);
+            if (authDetails) {
+              listeners['webRequest.onAuthRequired'].callback(authDetails, response => {
+                authResponses.push(response);
+              });
+            }
             callback();
           };
           const delay = options.proxySetDelay?.(value) || 0;
@@ -86,6 +97,7 @@ function createBackgroundHarness(options = {}) {
     storage: {
       local: {
         async get(keys) {
+          storageGetCount += 1;
           const requested = Array.isArray(keys)
             ? keys
             : typeof keys === 'string' ? [keys] : Object.keys(keys || {});
@@ -94,6 +106,7 @@ function createBackgroundHarness(options = {}) {
           );
         },
         async set(values) {
+          storageSetCount += 1;
           if (failNextStoragePredicate?.(values)) {
             failNextStoragePredicate = null;
             throw new Error('Simulated storage failure');
@@ -135,13 +148,17 @@ function createBackgroundHarness(options = {}) {
     timeline,
     backgroundErrors,
     appliedValues,
+    authResponses,
     send(message) {
       return new Promise(resolve => listeners['runtime.onMessage'].callback(message, {}, resolve));
     },
     failNextStorageSet(predicate = () => true) { failNextStoragePredicate = predicate; },
     getCurrentProxyValue() { return structuredClone(currentProxyValue); },
     getLevelOfControl() { return levelOfControl; },
-    getClearCount() { return clearCount; }
+    getClearCount() { return clearCount; },
+    getProxyGetCount() { return proxyGetCount; },
+    getStorageGetCount() { return storageGetCount; },
+    getStorageSetCount() { return storageSetCount; }
   };
 }
 
@@ -269,6 +286,21 @@ test('manifest declares the authentication API permissions and omits tabs', () =
   assert.ok(manifest.permissions.includes('webRequest'));
   assert.ok(manifest.permissions.includes('webRequestAuthProvider'));
   assert.equal(manifest.permissions.includes('tabs'), false);
+});
+
+test('release version is consistent across extension metadata and visible pages', () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(projectRoot, 'manifest.json'), 'utf8'));
+  const packageJson = JSON.parse(fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8'));
+  const popupHtml = fs.readFileSync(path.join(projectRoot, 'popup.html'), 'utf8');
+  const optionsHtml = fs.readFileSync(path.join(projectRoot, 'options.html'), 'utf8');
+  const readme = fs.readFileSync(path.join(projectRoot, 'README.md'), 'utf8');
+  const readmeEn = fs.readFileSync(path.join(projectRoot, 'README_en.md'), 'utf8');
+
+  assert.equal(packageJson.version, manifest.version);
+  assert.match(popupHtml, new RegExp(`v${manifest.version.replaceAll('.', '\\.')}`));
+  assert.match(optionsHtml, new RegExp(`v${manifest.version.replaceAll('.', '\\.')}`));
+  assert.match(readme, new RegExp(`v${manifest.version.replaceAll('.', '\\.')}`));
+  assert.match(readmeEn, new RegExp(`v${manifest.version.replaceAll('.', '\\.')}`));
 });
 
 test('background registers MV3 wake-up listeners synchronously at top level', () => {
@@ -634,4 +666,142 @@ test('rejects an oversized global whitelist before applying it', async () => {
   assert.equal('globalWhitelistRaw' in harness.storageData, false);
   assert.deepEqual(harness.storageData.globalWhitelist, []);
   assert.equal(harness.getCurrentProxyValue().mode, 'direct');
+});
+
+test('cold popup summaries initialize with one bulk storage read and one proxy read', async () => {
+  const harness = createBackgroundHarness();
+
+  const response = await harness.send({ action: 'getConfigSummaries' });
+
+  assert.equal(response.diagnostics.initialization.storageReads, 1);
+  assert.equal(response.diagnostics.initialization.proxyReads, 1);
+  assert.equal(harness.getProxyGetCount(), 1);
+  assert.ok(harness.getStorageGetCount() <= 2);
+});
+
+test('large unmatched configuration collections avoid expanding every whitelist', async () => {
+  const customConfigs = Array.from({ length: 1000 }, (_value, index) => ({
+    id: `proxy_${index}`,
+    name: `Proxy ${index}`,
+    type: 'http',
+    host: `proxy-${index}.example.com`,
+    port: 8080,
+    whitelist: [],
+    useGlobalWhitelist: true
+  }));
+  const globalWhitelist = Array.from({ length: 10000 }, (_value, index) => `host-${index}.example.com`);
+  const harness = createBackgroundHarness({
+    configs: [
+      { id: 'direct', name: 'Direct', type: 'direct', isSystem: true, whitelist: [] },
+      { id: 'system', name: 'System', type: 'system', isSystem: true, whitelist: [] },
+      ...customConfigs
+    ],
+    currentProxyValue: {
+      mode: 'fixed_servers',
+      rules: {
+        singleProxy: { scheme: 'http', host: 'unmatched.example.com', port: 8080 },
+        bypassList: globalWhitelist
+      }
+    },
+    storageData: { globalWhitelist }
+  });
+
+  const startedAt = performance.now();
+  const response = await harness.send({ action: 'getConfigSummaries' });
+  const durationMs = performance.now() - startedAt;
+
+  assert.equal(response.diagnostics.sync.endpointCandidates, 0);
+  assert.ok(durationMs < 500, `large cold sync took ${durationMs.toFixed(1)}ms`);
+});
+
+test('bundle import rolls proxy, configurations, and whitelist back together', async () => {
+  const currentProxyValue = {
+    mode: 'fixed_servers',
+    rules: {
+      singleProxy: { scheme: 'http', host: 'a.example.com', port: 8001 },
+      bypassList: []
+    }
+  };
+  const harness = createBackgroundHarness({ activeConfigId: 'a', currentProxyValue });
+  await harness.send({ action: 'getConfigs' });
+  harness.failNextStorageSet(values => Object.prototype.hasOwnProperty.call(values, 'globalWhitelistRaw'));
+
+  const response = await harness.send({
+    action: 'importBundle',
+    mode: 'replace',
+    configs: [{ id: 'c', name: 'C', type: 'http', host: 'c.example.com', port: 9000 }],
+    importGlobalWhitelist: true,
+    globalWhitelistRaw: 'internal.example.com'
+  });
+
+  assert.equal(response.success, false);
+  assert.equal(harness.storageData.activeConfigId, 'a');
+  assert.ok(harness.storageData.proxyConfigs.some(config => config.id === 'a'));
+  assert.deepEqual(harness.storageData.globalWhitelist, []);
+  assert.equal(harness.getCurrentProxyValue().rules.singleProxy.host, 'a.example.com');
+});
+
+test('uses pending credentials during the proxy activation window', async () => {
+  const configs = [
+    { id: 'direct', name: 'Direct', type: 'direct', isSystem: true, whitelist: [] },
+    { id: 'system', name: 'System', type: 'system', isSystem: true, whitelist: [] },
+    {
+      id: 'old', name: 'Old', type: 'http', host: 'old.example.com', port: 8000,
+      username: 'old-user', password: 'old-secret', whitelist: []
+    },
+    {
+      id: 'next', name: 'Next', type: 'http', host: 'next.example.com', port: 9000,
+      username: 'next-user', password: 'next-secret', whitelist: []
+    }
+  ];
+  const harness = createBackgroundHarness({
+    configs,
+    activeConfigId: 'old',
+    currentProxyValue: {
+      mode: 'fixed_servers',
+      rules: { singleProxy: { scheme: 'http', host: 'old.example.com', port: 8000 }, bypassList: [] }
+    },
+    authChallengeDuringSet(value) {
+      if (value.rules?.singleProxy?.host !== 'next.example.com') return null;
+      return {
+        isProxy: true,
+        requestId: 'activation-request',
+        challenger: { host: 'next.example.com', port: 9000 }
+      };
+    }
+  });
+
+  const response = await harness.send({ action: 'activateConfig', configId: 'next' });
+  await new Promise(resolve => setImmediate(resolve));
+
+  assert.equal(response.success, true);
+  assert.equal(harness.authResponses[0].authCredentials.username, 'next-user');
+  assert.equal(harness.authResponses[0].authCredentials.password, 'next-secret');
+});
+
+test('proxy activation reuses the transaction snapshot for control validation', async () => {
+  const harness = createBackgroundHarness();
+  await harness.send({ action: 'getConfigs' });
+  const readsBeforeActivation = harness.getProxyGetCount();
+
+  const response = await harness.send({ action: 'activateConfig', configId: 'a' });
+
+  assert.equal(response.success, true);
+  assert.equal(harness.getProxyGetCount() - readsBeforeActivation, 2);
+});
+
+test('keeps the popup usable when one stored configuration is invalid', async () => {
+  const harness = createBackgroundHarness({
+    configs: [
+      { id: 'direct', name: 'Direct', type: 'direct', isSystem: true, whitelist: [] },
+      { id: 'system', name: 'System', type: 'system', isSystem: true, whitelist: [] },
+      { id: 'broken', name: 'Broken', type: 'http', port: 8080, whitelist: [] }
+    ]
+  });
+
+  const response = await harness.send({ action: 'getConfigSummaries' });
+
+  assert.notEqual(response.success, false);
+  assert.ok(response.configs.some(config => config.id === 'broken'));
+  assert.equal(response.activeConfigId, 'direct');
 });
