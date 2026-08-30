@@ -4,7 +4,7 @@
     "description": "扩展名称"
   },
   "extDesc": {
-    "message": "一款轻量级的代理管理扩展，支持多种代理配置，一键切换。",
+    "message": "开源 Chrome 代理切换器：多配置、严格认证匹配、直连白名单、连接测试与安全导出，数据仅保存在本地。",
     "description": "扩展描述"
   },
   "options_title": {

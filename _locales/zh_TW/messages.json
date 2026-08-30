@@ -4,7 +4,7 @@
     "description": "擴展名稱"
   },
   "extDesc": {
-    "message": "一款簡單高效的代理配置切換工具",
+    "message": "開源 Chrome 代理切換器：多設定、嚴格認證比對、直接連線規則、連線測試與安全匯出，資料僅儲存在本機。",
     "description": "擴展描述"
   },
   "options_title": {

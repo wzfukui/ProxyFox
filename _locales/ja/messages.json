@@ -4,7 +4,7 @@
     "description": "拡張機能名"
   },
   "extDesc": {
-    "message": "シンプルで効率的なプロキシ切り替えツール",
+    "message": "ローカル保存のオープンソース Chrome プロキシ切替。複数設定、厳密な認証照合、除外ルール、接続テスト、安全な書き出しに対応。",
     "description": "拡張機能の説明"
   },
   "options_title": {

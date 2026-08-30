@@ -4,7 +4,7 @@
     "description": "확장 프로그램 이름"
   },
   "extDesc": {
-    "message": "간단하고 효율적인 프록시 전환 도구",
+    "message": "로컬 저장 기반 오픈소스 Chrome 프록시 전환 도구. 여러 프로필, 엄격한 인증 일치, 우회 규칙, 연결 테스트, 안전한 내보내기 지원.",
     "description": "확장 프로그램 설명"
   },
   "options_title": {

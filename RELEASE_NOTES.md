@@ -17,7 +17,7 @@ The v1.4.2 candidate improves startup and large-configuration performance while 
 ### Verified artifact
 
 - File: `proxyfox-v1.4.2.zip`
-- Size: `269338` bytes
-- SHA-256: `c5a50300f77a61e521f81f22c2e995caaf78f50e13dd3e7dfcf56d3ef7fd71d3`
+- Size: `268003` bytes
+- SHA-256: `457d02710d5e3af93d6c1d86590462424067c6594ebaefbf722273b7f55790bd`
 
 The candidate has not yet been submitted as a Chrome Web Store update. The store currently carries stable v1.4.1.
