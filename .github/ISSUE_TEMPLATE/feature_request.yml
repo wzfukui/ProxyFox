@@ -1,0 +1,32 @@
+name: Feature request
+description: Propose a focused improvement to ProxyFox
+title: "[Feature] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: Describe the repeated workflow or limitation, not only a preferred implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: privacy
+    attributes:
+      label: Privacy and permission impact
+      description: Note any new Chrome permission, network request, stored data, or external service.
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundary
+    attributes:
+      label: Product boundary
+      options:
+        - label: This request manages user-provided proxies and does not turn ProxyFox into a proxy or VPN service.
+          required: true

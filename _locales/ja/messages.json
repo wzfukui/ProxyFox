@@ -328,7 +328,7 @@
     "description": "バグ修正機能項目"
   },
   "https_proxy_warning": {
-    "message": "HTTPSプロキシを使用する場合、自己署名証明書や信頼されていない証明書に遭遇すると、Chromeは証明書の警告を表示します。Chromeの証明書設定で例外を追加する必要があります。",
+    "message": "ProxyFox は Chrome の証明書検証を回避しません。企業プロキシが TLS 検査を行う場合は、管理者に信頼済みルート証明書の配布と目的の説明を依頼してください。警告を無視したり、ブラウザの安全性を下げたりしないでください。",
     "description": "HTTPSプロキシ警告のヒント"
   },
   "https_help_link": {

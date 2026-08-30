@@ -1,12 +1,12 @@
-# ProxyFox - 简单高效的代理切换工具
+# ProxyFox
 
-<img src="images/proxyfox-logo.png" alt="ProxyFox Screenshot" width="50%">
+**开源、本地优先的 Chrome 代理切换器。** 面向开发、测试和企业网络场景，支持认证代理、直连白名单、连接测试、失败回滚与安全导出。
 
-ProxyFox 是一款基于 Chrome 浏览器的代理管理扩展，旨在为用户提供简单、高效的代理配置切换功能，类似经典的 SwitchyOmega 工具。项目适配最新的 Manifest V3 标准，支持多代理配置、全局白名单与代理特定白名单管理、一键切换，并提供完整的导入/导出功能和清晰的状态标识。
+[Chrome 应用商店](https://chromewebstore.google.com/detail/proxyfox/ejgcljmgjglpeacggbhccbhhojjmkjci) · [官方网站](https://proxyfox.io) · [English](README_en.md) · [隐私政策](https://proxyfox.io/privacy.html)
 
-ProxyFox官方网站：[proxyfox.io](https://proxyfox.io)
+> 当前源码与候选包版本为 v1.4.2；Chrome 商店当前稳定版为 v1.4.1。ProxyFox 不提供代理服务器，不是 VPN，也不支持按网站自动选择不同代理。
 
-
+<img src="images/proxyfox-logo.png" alt="ProxyFox 狐狸标志" width="240">
 
 ## 功能特点
 
@@ -35,7 +35,7 @@ ProxyFox官方网站：[proxyfox.io](https://proxyfox.io)
 
 ### 从 Chrome 应用商店安装
 
-1. 访问 Chrome 应用商店（链接待发布）
+1. 打开 [ProxyFox Chrome 应用商店页面](https://chromewebstore.google.com/detail/proxyfox/ejgcljmgjglpeacggbhccbhhojjmkjci)
 2. 点击「添加到 Chrome」按钮
 
 ### 手动安装（开发版）
@@ -96,8 +96,8 @@ ProxyFox官方网站：[proxyfox.io](https://proxyfox.io)
 6. **在哪里可以查看更新历史？**  
    在设置页面中，点击左侧导航栏的"更新历史"选项即可查看详细的版本更新记录。
 
-7. **HTTPS代理的证书问题如何处理？**  
-   使用HTTPS代理时，如果遇到自签名证书或不受信任的证书，Chrome会显示证书警告。您需要在Chrome的证书设置中手动添加例外。
+7. **HTTPS代理的证书问题如何处理？**
+   ProxyFox 不会绕过 Chrome 证书校验。如果企业代理执行 TLS 解密，请由网络管理员部署受信任的根证书并确认代理用途；不要忽略证书警告或降低浏览器安全设置。
 
 8. **权限请求说明**  
    本扩展仅请求核心功能所需权限：

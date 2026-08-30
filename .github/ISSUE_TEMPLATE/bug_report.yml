@@ -1,0 +1,49 @@
+name: Bug report
+description: Report reproducible ProxyFox behavior that is incorrect
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Do not include real proxy credentials, private hosts, or browser profile data. Use safe test values."
+  - type: input
+    id: version
+    attributes:
+      label: ProxyFox version
+      placeholder: "1.4.2"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Chrome and operating system
+      placeholder: "Chrome 140, macOS 15"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options: [Popup switching, Profile editor, Authentication, Bypass rules, Connection test, Import or export, Localization, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Use example.com and documentation-only IP ranges where possible.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Sensitive data check
+      options:
+        - label: I removed passwords, private proxy addresses, and personal data.
+          required: true

@@ -332,7 +332,7 @@
     "description": "Bug fixes feature item"
   },
   "https_proxy_warning": {
-    "message": "When using HTTPS proxy, if you encounter self-signed or untrusted certificates, Chrome will display certificate warnings. You need to add exceptions in Chrome's certificate settings.",
+    "message": "ProxyFox does not bypass Chrome certificate validation. If an enterprise proxy performs TLS inspection, ask your administrator to deploy and explain a trusted root certificate; do not ignore warnings or weaken browser security.",
     "description": "HTTPS proxy warning tip"
   },
   "https_help_link": {

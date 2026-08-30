@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: mailto:support@proxyfox.io
+    about: Report credential, routing, or package vulnerabilities privately.

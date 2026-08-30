@@ -328,7 +328,7 @@
     "description": "錯誤修復功能項"
   },
   "https_proxy_warning": {
-    "message": "使用HTTPS代理時，如果遇到自簽名證書或不受信任的證書，Chrome會顯示證書警告。您需要在Chrome的證書設置中添加例外。",
+    "message": "ProxyFox 不會繞過 Chrome 的憑證驗證。如果企業代理執行 TLS 檢查，請由網路管理員部署並說明受信任的根憑證；不要忽略警告或降低瀏覽器安全設定。",
     "description": "HTTPS代理警告提示"
   },
   "https_help_link": {

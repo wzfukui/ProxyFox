@@ -1,10 +1,12 @@
-# ProxyFox - Simple and Efficient Proxy Switching Tool
+# ProxyFox
 
-<img src="images/proxyfox-logo.png" alt="ProxyFox Screenshot" width="50%">
+**An open-source, local-first proxy switcher for Chrome.** Built for development, testing, and enterprise networks, with authenticated proxies, bypass rules, connection tests, rollback, and safe exports.
 
-ProxyFox is a Chrome browser extension for proxy management, designed to provide users with simple and efficient proxy configuration switching functionality, similar to the classic SwitchyOmega tool. The project is compatible with the latest Manifest V3 standard, supporting multiple proxy configurations, global whitelist and proxy-specific whitelist management, one-click switching, and providing complete import/export functionality with clear status indicators.
+[Chrome Web Store](https://chromewebstore.google.com/detail/proxyfox/ejgcljmgjglpeacggbhccbhhojjmkjci) · [Website](https://proxyfox.io/en/) · [中文](README.md) · [Privacy](https://proxyfox.io/en/privacy.html)
 
-ProxyFox Official Website: [proxyfox.io](https://proxyfox.io)
+> The source and candidate package are v1.4.2; the Chrome Web Store currently carries stable v1.4.1. ProxyFox does not provide proxy servers, is not a VPN, and does not automatically choose different proxies by website.
+
+<img src="images/proxyfox-logo.png" alt="ProxyFox fox mark" width="240">
 
 ## Features
 
@@ -33,7 +35,7 @@ ProxyFox Official Website: [proxyfox.io](https://proxyfox.io)
 
 ### Install from Chrome Web Store
 
-1. Visit the Chrome Web Store (link pending)
+1. Open the [ProxyFox Chrome Web Store listing](https://chromewebstore.google.com/detail/proxyfox/ejgcljmgjglpeacggbhccbhhojjmkjci)
 2. Click the "Add to Chrome" button
 
 ### Manual Installation (Development Version)
@@ -94,8 +96,8 @@ One rule per line, traffic matching the whitelist will connect directly without 
 6. **Where can I view update history?**  
    Click the "Update History" option in the left navigation bar of the settings page to view detailed version update records.
 
-7. **How to handle HTTPS proxy certificate issues?**  
-   When using HTTPS proxies, if you encounter self-signed certificates or untrusted certificates, Chrome will display certificate warnings. You need to manually add exceptions in Chrome's certificate settings.
+7. **How should HTTPS proxy certificate issues be handled?**
+   ProxyFox does not bypass Chrome certificate validation. If an enterprise proxy performs TLS inspection, have the network administrator deploy a trusted root certificate and verify its purpose; do not ignore warnings or weaken browser security.
 
 8. **Permission Request Explanation**  
    This extension requests the permissions required for its core features:

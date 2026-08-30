@@ -88,7 +88,7 @@
     "description": "保存全局白名单按钮"
   },
   "https_proxy_warning": {
-    "message": "使用HTTPS代理时，如果遇到自签名证书或不受信任的证书，Chrome会显示证书警告。您需要在Chrome证书设置中添加例外。",
+    "message": "ProxyFox 不会绕过 Chrome 的证书校验。如果企业代理执行 TLS 检查，请让网络管理员部署并说明受信任的根证书；不要忽略警告或降低浏览器安全设置。",
     "description": "HTTPS代理警告提示"
   },
   "https_help_link": {
