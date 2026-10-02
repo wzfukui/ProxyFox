@@ -67,6 +67,11 @@ let statusShowTimer = null;
 let statusHideTimer = null;
 let proxyStateRefreshTimer = null;
 let userSettingsWriteQueue = Promise.resolve();
+let formBusy = false;
+let proxyStateRefreshPending = false;
+let configLoadSequence = 0;
+let editorRevision = 0;
+let globalWhitelistSnapshot = '';
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -80,7 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       initLanguageSettings()
     ]);
     await loadProxyConfigs();
-    restoreLastActiveTab();
+    await restoreLastActiveTab();
     selectConfig(proxyConfigs.some(config => config.id === activeConfigId) ? activeConfigId : 'direct');
   } catch (error) {
     console.error('Failed to initialize options page:', error);
@@ -99,7 +104,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 });
 
 window.addEventListener('beforeunload', event => {
-  if (!isFormDirty()) return;
+  if (!hasUnsavedChanges()) return;
   event.preventDefault();
   event.returnValue = '';
 });
@@ -132,7 +137,9 @@ async function updateVersionNumbers() {
 }
 
 async function loadProxyConfigs() {
+  const sequence = ++configLoadSequence;
   const response = await chrome.runtime.sendMessage({ action: 'getConfigs' });
+  if (sequence !== configLoadSequence) return false;
   if (!response || response.success === false) {
     throw new Error(response?.error || 'Failed to load proxy configurations');
   }
@@ -141,14 +148,27 @@ async function loadProxyConfigs() {
   lastProxyConfig = response.lastProxyConfig || null;
   renderProxyList();
   updateActiveSummary();
+  return true;
 }
 
 async function refreshProxyState() {
-  const preserveEditor = isFormDirty();
+  if (formBusy) {
+    proxyStateRefreshPending = true;
+    return;
+  }
+  const revision = editorRevision;
   const previousSelection = selectedConfigId;
-  await loadProxyConfigs();
-  if (preserveEditor) {
+  const previousConfig = proxyConfigs.find(config => config.id === previousSelection);
+  if (!await loadProxyConfigs()) return;
+  // Check after the await: the user may have typed, selected or started an operation.
+  if (formBusy || isFormDirty() || isNewDraft || revision !== editorRevision) {
     updateDirtyState();
+    return;
+  }
+  const currentConfig = proxyConfigs.find(config => config.id === previousSelection);
+  if (currentConfig && JSON.stringify(currentConfig) === JSON.stringify(previousConfig)) {
+    if (currentConfig.isSystem) showSystemEditor(currentConfig);
+    else updateDirtyState();
     return;
   }
   const nextSelection = proxyConfigs.some(config => config.id === previousSelection)
@@ -158,6 +178,7 @@ async function refreshProxyState() {
 }
 
 function renderProxyList() {
+  const focusedId = proxyListEl.contains(document.activeElement) ? document.activeElement.dataset.id : null;
   const fragment = document.createDocumentFragment();
   const systemConfigs = proxyConfigs.filter(config => config.isSystem);
   const customConfigs = proxyConfigs.filter(config => !config.isSystem);
@@ -186,6 +207,9 @@ function renderProxyList() {
   }
 
   proxyListEl.replaceChildren(fragment);
+  if (focusedId) {
+    [...proxyListEl.querySelectorAll('.proxy-item')].find(item => item.dataset.id === focusedId)?.focus();
+  }
   proxyCountEl.textContent = String(proxyConfigs.length + (isNewDraft ? 1 : 0));
 }
 
@@ -203,6 +227,7 @@ function createProxyItemElement(config) {
   item.type = 'button';
   item.className = `proxy-item${isSelected ? ' selected' : ''}${isActive ? ' active-config' : ''}`;
   item.dataset.id = config.id;
+  item.disabled = formBusy;
   item.setAttribute('aria-pressed', String(isSelected));
 
   const status = document.createElement('span');
@@ -250,6 +275,7 @@ function updateActiveSummary() {
 }
 
 function requestSelectConfig(configId) {
+  if (formBusy) return;
   if (configId === selectedConfigId) return;
   if (isFormDirty()) {
     pendingSelectionId = configId;
@@ -262,6 +288,7 @@ function requestSelectConfig(configId) {
 }
 
 function selectConfig(configId) {
+  editorRevision++;
   const config = proxyConfigs.find(item => item.id === configId);
   if (!config) {
     showEmptyEditor();
@@ -303,7 +330,7 @@ function showSystemEditor(config) {
   const isActive = config.id === activeConfigId;
   systemConfigState.textContent = fetchMessage(isActive ? 'status_active' : 'status_inactive');
   systemConfigState.classList.toggle('active', isActive);
-  activateSystemBtn.disabled = isActive;
+  activateSystemBtn.disabled = formBusy || isActive;
   activateSystemBtn.textContent = fetchMessage(isActive ? 'status_active' : 'btn_activateProxy');
 }
 
@@ -320,6 +347,7 @@ function showCustomEditor(config) {
 }
 
 function startNewDraft() {
+  if (formBusy) return;
   if (isFormDirty()) {
     pendingSelectionId = '__new__';
     showStatusMessage(fetchMessage('status_unsavedSelection'), 'error');
@@ -327,6 +355,7 @@ function startNewDraft() {
     return;
   }
 
+  editorRevision++;
   isNewDraft = true;
   clearConnectionTestResult();
   selectedConfigId = '__draft__';
@@ -360,7 +389,7 @@ function fillForm(config) {
   proxyUsernameEl.value = config.username || '';
   proxyPasswordEl.value = config.password || '';
   useGlobalWhitelistEl.checked = config.useGlobalWhitelist !== false;
-  whitelistEl.value = (config.whitelist || []).join('\n');
+  whitelistEl.value = Array.isArray(config.whitelist) ? config.whitelist.join('\n') : '';
   proxyIdEl.value = config.id || '';
   httpsProxyWarningEl.hidden = config.type !== 'https';
   proxyPasswordEl.type = 'password';
@@ -385,6 +414,10 @@ function isFormDirty() {
   return !proxyForm.hidden && captureFormSnapshot() !== originalFormSnapshot;
 }
 
+function hasUnsavedChanges() {
+  return isFormDirty() || globalWhitelistInputEl.value !== globalWhitelistSnapshot;
+}
+
 function updateDirtyState() {
   const dirty = isFormDirty();
   const isActive = !isNewDraft && selectedConfigId === activeConfigId;
@@ -396,8 +429,8 @@ function updateDirtyState() {
   formStateBadge.classList.toggle('dirty', dirty || isNewDraft);
   formStateBadge.classList.toggle('active', isActive && !dirty);
   saveProxyBtn.hidden = isActive;
-  saveProxyBtn.disabled = !dirty;
-  saveAndActivateBtn.disabled = !dirty && isActive;
+  saveProxyBtn.disabled = formBusy || !dirty;
+  saveAndActivateBtn.disabled = formBusy || (!dirty && isActive);
   const primaryActionKey = isActive
     ? 'btn_saveAndKeepActive'
     : (dirty || isNewDraft) ? 'btn_saveAndActivate' : 'btn_activateProxy';
@@ -430,10 +463,11 @@ function collectValidatedFormConfig() {
     username: proxyUsernameEl.value.trim(),
     password: proxyPasswordEl.value,
     useGlobalWhitelist: useGlobalWhitelistEl.checked,
-    whitelist: window.ProxyFoxConfig.parseWhitelistText(whitelistEl.value)
+    whitelist: []
   };
 
   try {
+    configData.whitelist = window.ProxyFoxConfig.parseWhitelistText(whitelistEl.value);
     const normalized = window.ProxyFoxConfig.normalizeConfig(configData);
     if (isNewDraft) delete normalized.id;
     return normalized;
@@ -444,9 +478,12 @@ function collectValidatedFormConfig() {
 }
 
 async function saveCurrentConfig(activateAfterSave) {
+  if (formBusy) return;
   const config = collectValidatedFormConfig();
   if (!config) return;
   setFormBusy(true);
+  let nextId = null;
+  let saved = false;
 
   try {
     const saveResponse = await chrome.runtime.sendMessage({
@@ -458,25 +495,26 @@ async function saveCurrentConfig(activateAfterSave) {
 
     isNewDraft = false;
     selectedConfigId = savedConfig.id;
-    const nextId = pendingSelectionId;
+    nextId = pendingSelectionId;
     pendingSelectionId = null;
     await loadProxyConfigs();
     selectConfig(savedConfig.id);
     showStatusMessage(fetchMessage(activateAfterSave ? 'status_savedAndActivated' : 'status_configSaved'));
-
-    if (nextId) {
-      if (nextId === '__new__') startNewDraft();
-      else selectConfig(nextId);
-    }
+    saved = true;
   } catch (error) {
     console.error('Failed to save proxy configuration:', error);
     showStatusMessage(`${fetchMessage('status_error')}: ${error.message}`, 'error');
   } finally {
     setFormBusy(false);
   }
+  if (saved && nextId) {
+    if (nextId === '__new__') startNewDraft();
+    else selectConfig(nextId);
+  }
 }
 
 async function testCurrentProxy() {
+  if (formBusy) return;
   const config = collectValidatedFormConfig();
   if (!config) return;
   testProxyBtn.disabled = true;
@@ -521,14 +559,29 @@ function getFiniteLatency(value) {
 }
 
 function setFormBusy(busy) {
+  formBusy = busy;
   proxyForm.setAttribute('aria-busy', String(busy));
   for (const control of proxyForm.querySelectorAll('button, input, select, textarea')) {
     control.disabled = busy;
   }
-  if (!busy) updateDirtyState();
+  for (const control of [addProxyBtn, emptyAddProxyBtn, importBtn, activateSystemBtn,
+    saveGlobalWhitelistBtn, globalWhitelistInputEl, ...languageButtons, ...proxyListEl.querySelectorAll('button'),
+    ...proxyTestSettingsPopover.querySelectorAll('input, select, button')]) {
+    control.disabled = busy;
+  }
+  if (!busy) {
+    updateDirtyState();
+    const selected = proxyConfigs.find(config => config.id === selectedConfigId);
+    if (selected?.isSystem) showSystemEditor(selected);
+    if (proxyStateRefreshPending) {
+      proxyStateRefreshPending = false;
+      refreshProxyState().catch(handleActionError);
+    }
+  }
 }
 
 function discardChanges() {
+  if (formBusy) return;
   const nextId = pendingSelectionId;
   pendingSelectionId = null;
   editorActions.classList.remove('needs-attention');
@@ -554,6 +607,7 @@ function discardChanges() {
 }
 
 async function deleteCurrentConfig() {
+  if (formBusy) return;
   const config = proxyConfigs.find(item => item.id === selectedConfigId);
   if (!config || config.isSystem) return;
   const wasActive = config.id === activeConfigId;
@@ -584,8 +638,9 @@ async function deleteCurrentConfig() {
 }
 
 async function activateSelectedSystemConfig() {
+  if (formBusy) return;
   const configId = systemConfigPanel.dataset.configId;
-  activateSystemBtn.disabled = true;
+  setFormBusy(true);
   systemConfigPanel.setAttribute('aria-busy', 'true');
   try {
     const response = await chrome.runtime.sendMessage({ action: 'activateConfig', configId });
@@ -597,6 +652,7 @@ async function activateSelectedSystemConfig() {
     selectConfig(configId);
     showStatusMessage(fetchMessage('status_proxySwitched'));
   } finally {
+    setFormBusy(false);
     systemConfigPanel.setAttribute('aria-busy', 'false');
     const currentConfig = proxyConfigs.find(config => config.id === configId);
     if (currentConfig && selectedConfigId === configId) showSystemEditor(currentConfig);
@@ -607,12 +663,14 @@ async function activateSelectedSystemConfig() {
 async function loadGlobalWhitelist() {
   const data = await chrome.storage.local.get(['globalWhitelist', 'globalWhitelistRaw']);
   globalWhitelist = data.globalWhitelist || [];
-  globalWhitelistInputEl.value = data.globalWhitelistRaw || globalWhitelist.join('\n');
+  globalWhitelistInputEl.value = data.globalWhitelistRaw ?? globalWhitelist.join('\n');
+  globalWhitelistSnapshot = globalWhitelistInputEl.value;
 }
 
 async function saveGlobalWhitelist() {
+  if (formBusy) return;
   const rawInput = globalWhitelistInputEl.value;
-  saveGlobalWhitelistBtn.disabled = true;
+  setFormBusy(true);
   try {
     const response = await chrome.runtime.sendMessage({ action: 'saveGlobalWhitelist', rawInput });
     if (!response?.success) {
@@ -620,9 +678,10 @@ async function saveGlobalWhitelist() {
       return;
     }
     globalWhitelist = response.rules || [];
+    globalWhitelistSnapshot = rawInput;
     showStatusMessage(fetchMessage('status_globalWhitelistSaved'));
   } finally {
-    saveGlobalWhitelistBtn.disabled = false;
+    setFormBusy(false);
   }
 }
 
@@ -710,7 +769,7 @@ async function exportConfigurations() {
     includesCredentials: includeCredentialsToggleEl.checked,
     proxyConfigs: exportedConfigs,
     globalWhitelist: data.globalWhitelist || [],
-    globalWhitelistRaw: data.globalWhitelistRaw || '',
+    globalWhitelistRaw: data.globalWhitelistRaw ?? (data.globalWhitelist || []).join('\n'),
     activeConfigId: data.activeConfigId || 'direct'
   }, null, 2);
   const url = URL.createObjectURL(new Blob([exportData], { type: 'application/json' }));
@@ -725,11 +784,12 @@ async function exportConfigurations() {
 async function importConfigurations(event) {
   const file = event.target.files[0];
   if (!file) return;
-  if (isFormDirty()) {
+  if (formBusy || hasUnsavedChanges()) {
     showStatusMessage(fetchMessage('status_unsavedSelection'), 'error');
     event.target.value = '';
     return;
   }
+  setFormBusy(true);
   try {
     const importedData = JSON.parse(await file.text());
     const importedConfigs = Array.isArray(importedData) ? importedData : importedData?.proxyConfigs;
@@ -740,7 +800,7 @@ async function importConfigurations(event) {
       && (mode === 'replace' || confirm(fetchMessage('confirm_importWhitelist')));
     let globalWhitelistRaw = '';
     if (importGlobalWhitelist) {
-      if (typeof importedData.globalWhitelistRaw === 'string') {
+      if (typeof importedData.globalWhitelistRaw === 'string' && importedData.globalWhitelistRaw.trim()) {
         globalWhitelistRaw = importedData.globalWhitelistRaw;
       } else if (Array.isArray(importedData.globalWhitelist)) {
         globalWhitelistRaw = importedData.globalWhitelist.join('\n');
@@ -765,6 +825,7 @@ async function importConfigurations(event) {
     showStatusMessage(`${fetchMessage('status_error')}: ${error.message}`, 'error');
   } finally {
     event.target.value = '';
+    setFormBusy(false);
   }
 }
 
@@ -809,12 +870,18 @@ function bindEvents() {
     updateDirtyState();
   });
   proxyForm.addEventListener('keydown', event => {
-    if (event.key === 'Escape') {
+    if (event.key === 'Escape' && isFormDirty()) {
       event.preventDefault();
       discardChanges();
     }
   });
-  languageButtons.forEach(button => button.addEventListener('click', handleLanguageButtonClick));
+  proxyForm.addEventListener('submit', event => {
+    event.preventDefault();
+    if (!formBusy) saveCurrentConfig(selectedConfigId === activeConfigId);
+  });
+  languageButtons.forEach(button => button.addEventListener('click', event => {
+    handleLanguageButtonClick(event).catch(handleActionError);
+  }));
 }
 
 function activateTab(tabId) {
@@ -858,8 +925,9 @@ function setActiveLanguageButton(language) {
 }
 
 async function handleLanguageButtonClick(event) {
+  if (formBusy) return;
   const selectedLanguage = event.currentTarget.dataset.lang;
-  if (isFormDirty()) {
+  if (hasUnsavedChanges()) {
     showStatusMessage(fetchMessage('status_unsavedSelection'), 'error');
     return;
   }

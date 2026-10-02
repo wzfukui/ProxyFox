@@ -301,6 +301,13 @@ test('release version is consistent across extension metadata and visible pages'
   assert.match(optionsHtml, new RegExp(`v${manifest.version.replaceAll('.', '\\.')}`));
   assert.match(readme, new RegExp(`v${manifest.version.replaceAll('.', '\\.')}`));
   assert.match(readmeEn, new RegExp(`v${manifest.version.replaceAll('.', '\\.')}`));
+  const releaseTitleKey = `updateHistory_v${manifest.version.replaceAll('.', '_')}`;
+  const currentRelease = optionsHtml.match(/<article class="current-release">([\s\S]*?)<\/article>/)?.[1];
+  assert.ok(currentRelease?.includes(`__MSG_${releaseTitleKey}__`), 'Latest release must use its matching localized title');
+  for (const locale of fs.readdirSync(path.join(projectRoot, '_locales'))) {
+    const messages = JSON.parse(fs.readFileSync(path.join(projectRoot, '_locales', locale, 'messages.json'), 'utf8'));
+    assert.ok(messages[releaseTitleKey]?.message, `${locale} must include the current release title`);
+  }
 });
 
 test('background registers MV3 wake-up listeners synchronously at top level', () => {
@@ -804,4 +811,87 @@ test('keeps the popup usable when one stored configuration is invalid', async ()
   assert.notEqual(response.success, false);
   assert.ok(response.configs.some(config => config.id === 'broken'));
   assert.equal(response.activeConfigId, 'direct');
+});
+
+test('activates and recognizes merged, expanded whitelist limits', async () => {
+  const rules = prefix => Array.from({ length: 10000 }, (_, i) => `*.${prefix}${i}.example.com`);
+  const harness = createBackgroundHarness({ storageData: { globalWhitelist: rules('global') } });
+  const response = await harness.send({
+    action: 'saveAndActivateConfig',
+    config: { id: 'large', name: 'Large', type: 'http', host: 'proxy.example.com', port: 8080, whitelist: rules('local') }
+  });
+  assert.equal(response.success, true, response.error);
+  assert.equal(harness.getCurrentProxyValue().rules.bypassList.length, 40000);
+  assert.equal((await harness.send({ action: 'syncState' })).activeConfigId, 'large');
+});
+
+test('reimports an exported collection with 1000 custom and two builtin profiles', async () => {
+  const harness = createBackgroundHarness();
+  const configs = (await harness.send({ action: 'getConfigs' })).configs.filter(config => config.isSystem);
+  configs.push(...Array.from({ length: 1000 }, (_, i) => ({
+    id: `p${i}`, name: `Proxy ${i}`, type: 'http', host: 'proxy.example.com', port: 8080
+  })));
+  const response = await harness.send({ action: 'importConfigs', configs, mode: 'replace' });
+  assert.equal(response.success, true, response.error);
+  assert.equal(harness.storageData.proxyConfigs.length, 1002);
+});
+
+test('merge resolves exact IDs before an earlier name collision', async () => {
+  const harness = createBackgroundHarness();
+  const response = await harness.send({ action: 'importConfigs', mode: 'merge', configs: [
+    { id: 'b', name: 'A', type: 'https', host: 'updated.example.com', port: 443 }
+  ] });
+  assert.equal(response.success, true, response.error);
+  assert.equal(harness.storageData.proxyConfigs.find(config => config.id === 'a').host, 'a.example.com');
+  assert.equal(harness.storageData.proxyConfigs.find(config => config.id === 'b').host, 'updated.example.com');
+});
+
+test('importing profiles preserves an externally controlled connection', async () => {
+  const harness = createBackgroundHarness({ levelOfControl: 'controlled_by_other_extensions' });
+  const response = await harness.send({ action: 'importConfigs', mode: 'replace', configs: [
+    { id: 'c', name: 'C', type: 'http', host: 'c.example.com', port: 8080 }
+  ] });
+  assert.equal(response.success, true, response.error);
+  assert.equal(harness.storageData.activeConfigId, 'external');
+  assert.equal(harness.getLevelOfControl(), 'controlled_by_other_extensions');
+  assert.equal(harness.appliedValues.length, 0);
+});
+
+test('connection tests restore per-protocol proxy settings', async () => {
+  const currentProxyValue = { mode: 'fixed_servers', rules: {
+    proxyForHttp: { host: 'http.example.com', port: 80 },
+    proxyForHttps: { scheme: 'https', host: 'tls.example.com', port: 443 },
+    fallbackProxy: { scheme: 'socks5', host: 'fallback.example.com', port: 1080 },
+    bypassList: ['localhost']
+  } };
+  const harness = createBackgroundHarness({ currentProxyValue });
+  const response = await harness.send({ action: 'testConfig', config: {
+    name: 'Probe', type: 'http', host: 'probe.example.com', port: 8080
+  } });
+  assert.equal(response.success, true, response.error);
+  assert.deepEqual(harness.getCurrentProxyValue(), currentProxyValue);
+  assert.equal(harness.storageData.proxyTestRecovery, undefined);
+});
+
+test('effective proxy comparison handles default ports and malformed bypass data', () => {
+  const value = { mode: 'fixed_servers', rules: { proxyForHttps: { scheme: 'https', host: 'tls.example.com' } } };
+  assert.equal(proxyValuesMatch(value, { ...value, rules: {
+    proxyForHttps: { ...value.rules.proxyForHttps, port: 443 }
+  } }), true);
+  assert.equal(proxyValuesMatch(value, { ...value, rules: { singleProxy: { host: 'tls.example.com', port: 443 } } }), false);
+  const single = { mode: 'fixed_servers', rules: { singleProxy: { host: 'proxy.example.com', port: 80 } } };
+  assert.equal(proxyValuesMatch({ ...single, rules: { ...single.rules, bypassList: 'invalid' } }, single), false);
+});
+
+test('connection probe releases the response body after receiving headers', async () => {
+  let cancelled = false;
+  const harness = createBackgroundHarness({ fetch: async () => ({
+    status: 200,
+    body: { async cancel() { cancelled = true; } }
+  }) });
+  const response = await harness.send({ action: 'testConfig', config: {
+    name: 'Probe', type: 'http', host: 'probe.example.com', port: 8080
+  } });
+  assert.equal(response.success, true, response.error);
+  assert.equal(cancelled, true);
 });

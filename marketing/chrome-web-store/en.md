@@ -41,10 +41,11 @@ Configure, test, and quickly switch Chrome proxy settings selected by the user.
 - `webRequest` and `webRequestAuthProvider`: respond to authentication challenges for the exact active proxy endpoint.
 - `<all_urls>`: allow Chrome to surface proxy-authentication challenges regardless of the requested destination; ProxyFox does not read or modify page content.
 
-## v1.4.2 release notes
+## v1.4.3 release notes
 
-- Faster popup startup and large-profile handling.
-- Atomic, rollback-safe imports for profiles and global bypass rules.
-- Stricter credential selection during proxy activation.
-- Safer migration of legacy and invalid stored configurations.
-- Added cold-start, scale, rollback, authentication-race, and migration regression tests.
+- Protect unsaved edits and prevent conflicting editor operations
+- Fix full-size and legacy backup imports, prioritize matching IDs, and preserve external proxy connections
+- Handle large combined bypass lists and compare rules without sorting
+- Restore per-protocol proxy settings after tests and release probe response streams
+- Retry failed popup loads and preserve keyboard focus after switching
+- Reflow the editor for narrow windows and keep connection-test results visible

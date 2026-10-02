@@ -52,7 +52,7 @@
     "description": "プロキシ編集フォームのタイトル"
   },
   "form_name": {
-    "message": "設定名（引用符、中括弧{}などの特殊文字を使用しないでください）",
+    "message": "設定名",
     "description": "プロキシ名入力欄のプレースホルダー"
   },
   "form_host": {
@@ -435,6 +435,13 @@
     "message": "セキュリティと信頼性の更新",
     "description": "v1.3.4バージョンアップデートタイトル"
   },
+  "updateHistory_v1_4_3": {"message": "信頼性と編集操作の改善", "description": "v1.4.3 version update title"},
+  "feature_draftProtection": {"message": "未保存の変更を保護し、編集中の操作の競合を防止"},
+  "feature_backupCompatibility": {"message": "上限数の設定と旧形式のバックアップの読み込みを修正し、ID の一致を優先して外部プロキシ接続を維持"},
+  "feature_largeWhitelist": {"message": "大規模なバイパスリストの結合と展開に対応し、ソートせずにルールを比較"},
+  "feature_probeRestoration": {"message": "テスト後にプロトコル別のプロキシ設定を正しく復元し、テスト応答のストリームを解放"},
+  "feature_popupRecovery": {"message": "ポップアップの読み込み失敗時に再試行でき、切り替え後もキーボードのフォーカスを維持"},
+  "feature_responsiveEditor": {"message": "狭いウィンドウでも編集しやすい配置に調整し、接続テストの結果を保持"},
   "updateHistory_v1_4_2": {
     "message": "より高速で安全なプロキシ切り替え",
     "description": "v1.4.2 version update title"
@@ -509,7 +516,7 @@
   "rule_reference": { "message": "ルール早見表" },
   "system_direct_desc": { "message": "プロキシを使用せずに直接接続します。設定済みプロキシをすべて迂回するときに使用します。" },
   "system_proxy_desc": { "message": "OSまたは管理ポリシーが提供するプロキシ設定を使用します。" },
-  "status_unsavedSelection": { "message": "未保存の変更があります。別の設定を開く前に保存または破棄してください。" },
+  "status_unsavedSelection": { "message": "未保存の変更があります。続行する前に保存するか、変更を破棄してください。" },
   "status_savedAndActivated": { "message": "プロキシを保存して有効にしました" },
   "status_configRestored": { "message": "プロキシを復元しました" },
   "form_type": { "message": "プロトコル" },
@@ -532,5 +539,6 @@
   "test_target_custom": { "message": "カスタム対象" },
   "test_latency_network": { "message": "ネットワーク" },
   "test_latency_apply": { "message": "適用" },
-  "test_latency_total": { "message": "合計" }
+  "test_latency_total": { "message": "合計" },
+  "btn_retry": { "message": "再試行" }
 }

@@ -17,7 +17,7 @@ ProxyFox is an open-source, local-first Chrome proxy switcher for developers, te
 
 ## Organic launch sequence
 
-1. Publish the v1.4.2 release and update the Chrome Web Store listing only after maintainer approval.
+1. Publish the v1.4.3 release and update the Chrome Web Store listing only after maintainer approval.
 2. Use one technical launch post first; lead with the workflow problem and the permission model, not generic “productivity” claims.
 3. Link to one matching guide page instead of sending every audience to the homepage.
 4. Reuse the same factual screenshots and disclosure across channels.

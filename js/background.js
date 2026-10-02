@@ -597,14 +597,14 @@ async function deleteProxyConfig(configId) {
 
 function normalizeImportedConfigs(newConfigs) {
   if (!Array.isArray(newConfigs)) throw new Error('Imported proxy configurations must be an array');
-  if (newConfigs.length > MAX_CUSTOM_CONFIGS) {
+  const customConfigs = newConfigs.filter(config => !config || !SYSTEM_CONFIG_IDS.has(config.id));
+  if (customConfigs.length > MAX_CUSTOM_CONFIGS) {
     throw new Error(`Imported configuration cannot exceed ${MAX_CUSTOM_CONFIGS} proxy entries`);
   }
 
   const normalized = [];
   const ids = new Set();
-  for (const config of newConfigs) {
-    if (config && SYSTEM_CONFIG_IDS.has(config.id)) continue;
+  for (const config of customConfigs) {
     const item = normalizeConfig({ ...config, id: config && config.id ? config.id : createConfigId() });
     if (ids.has(item.id)) throw new Error(`Duplicate proxy configuration ID: ${item.id}`);
     ids.add(item.id);
@@ -639,9 +639,10 @@ async function importProxyBundle(bundle, mode = 'merge') {
   } else {
     nextConfigs = [...currentConfigs];
     for (const importedConfig of imported) {
-      const index = nextConfigs.findIndex(config =>
-        !config.isSystem && (config.id === importedConfig.id || config.name === importedConfig.name)
-      );
+      let index = nextConfigs.findIndex(config => !config.isSystem && config.id === importedConfig.id);
+      if (index < 0) {
+        index = nextConfigs.findIndex(config => !config.isSystem && config.name === importedConfig.name);
+      }
       if (index >= 0) {
         nextConfigs[index] = { ...importedConfig, id: nextConfigs[index].id };
       } else {
@@ -651,6 +652,19 @@ async function importProxyBundle(bundle, mode = 'merge') {
   }
 
   assertConfigCollectionSize(nextConfigs);
+  const storageUpdates = {
+    proxyConfigs: nextConfigs,
+    ...(whitelistImport ? {
+      globalWhitelist: whitelistImport.rules,
+      globalWhitelistRaw: whitelistImport.rawValue
+    } : {})
+  };
+  // Managing saved profiles must not take over an external connection.
+  if (activeConfigId === 'external') {
+    await chrome.storage.local.set(storageUpdates);
+    setCachedProxyConfigs(nextConfigs);
+    return true;
+  }
   let nextActiveConfig = nextConfigs.find(config => config.id === activeConfigId);
   if (!nextActiveConfig) nextActiveConfig = nextConfigs.find(config => config.id === 'direct');
   const storageKeys = ['proxyConfigs', 'activeConfigId', 'lastProxyConfig', 'proxyControlLevel'];
@@ -663,13 +677,7 @@ async function importProxyBundle(bundle, mode = 'merge') {
         whitelistImport ? whitelistImport.rules : undefined,
         proxySnapshot
       );
-      await persistActiveConfig(normalizedActive, {
-        proxyConfigs: nextConfigs,
-        ...(whitelistImport ? {
-          globalWhitelist: whitelistImport.rules,
-          globalWhitelistRaw: whitelistImport.rawValue
-        } : {})
-      });
+      await persistActiveConfig(normalizedActive, storageUpdates);
     }
   ));
   return true;
@@ -805,10 +813,12 @@ async function testProxyConfig(config) {
       redirect: 'follow',
       signal: controller.signal
     });
+    const finishedAt = performance.now();
+    // The probe measures response headers; do not keep downloading arbitrary targets.
+    await response.body?.cancel();
     if (response.status < 200 || response.status >= 400) {
       throw new Error(`Connectivity probe returned HTTP ${response.status}`);
     }
-    const finishedAt = performance.now();
     return {
       success: true,
       latencyMs: Math.max(1, Math.round(finishedAt - startedAt)),

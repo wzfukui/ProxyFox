@@ -1,6 +1,6 @@
 # Channel-ready copy
 
-Replace only the version/state details that have been verified at posting time. Do not post these drafts before v1.4.2 is actually available through the linked channel.
+Replace only the version/state details that have been verified at posting time. Do not post these drafts before v1.4.3 is actually available through the linked channel.
 
 ## V2EX / 掘金 / 少数派式中文长帖
 

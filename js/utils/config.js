@@ -40,10 +40,10 @@
     return port;
   }
 
-  function normalizeWhitelist(value) {
+  function normalizeWhitelist(value, maxRules = MAX_WHITELIST_RULES) {
     if (value == null) return [];
     assert(Array.isArray(value), 'Whitelist must be an array');
-    assert(value.length <= MAX_WHITELIST_RULES, `Whitelist cannot exceed ${MAX_WHITELIST_RULES} rules`);
+    assert(value.length <= maxRules, `Whitelist cannot exceed ${maxRules} rules`);
 
     const normalized = [];
     const seen = new Set();
@@ -75,7 +75,8 @@
   }
 
   function expandWhitelist(value) {
-    const rules = normalizeWhitelist(value);
+    // A proxy can combine two independently validated lists before expansion.
+    const rules = normalizeWhitelist(value, MAX_WHITELIST_RULES * 2);
     const expanded = [...rules];
     for (const rule of rules) {
       if (rule.startsWith('*.') || rule.startsWith('.')) {
@@ -154,29 +155,32 @@
 
     const actualRules = actual.rules || {};
     const expectedRules = expected.rules || {};
-    const actualProxy = actualRules.singleProxy;
-    const expectedProxy = expectedRules.singleProxy;
-    if (!actualProxy || !expectedProxy) return false;
-
     try {
-      if (String(actualProxy.scheme || 'http').toLowerCase() !== String(expectedProxy.scheme || 'http').toLowerCase()
-          || normalizeHost(actualProxy.host) !== normalizeHost(expectedProxy.host)
-          || normalizePort(actualProxy.port) !== normalizePort(expectedProxy.port)) {
-        return false;
+      const proxyKeys = ['singleProxy', 'proxyForHttp', 'proxyForHttps', 'proxyForFtp', 'fallbackProxy'];
+      const defaultPorts = { http: 80, https: 443, socks4: 1080, socks5: 1080, quic: 443 };
+      for (const key of proxyKeys) {
+        const actualProxy = actualRules[key];
+        const expectedProxy = expectedRules[key];
+        if (!actualProxy && !expectedProxy) continue;
+        if (!actualProxy || !expectedProxy) return false;
+        const actualScheme = String(actualProxy.scheme || 'http').toLowerCase();
+        const expectedScheme = String(expectedProxy.scheme || 'http').toLowerCase();
+        if (actualScheme !== expectedScheme
+            || normalizeHost(actualProxy.host) !== normalizeHost(expectedProxy.host)
+            || normalizePort(actualProxy.port ?? defaultPorts[actualScheme])
+              !== normalizePort(expectedProxy.port ?? defaultPorts[expectedScheme])) {
+          return false;
+        }
       }
+
+      // Each of the two source lists can double when wildcard roots are added.
+      const actualBypass = normalizeWhitelist(actualRules.bypassList, MAX_WHITELIST_RULES * 4);
+      const expectedBypass = new Set(normalizeWhitelist(expectedRules.bypassList, MAX_WHITELIST_RULES * 4));
+      return actualBypass.length === expectedBypass.size
+        && actualBypass.every(rule => expectedBypass.has(rule));
     } catch (_error) {
       return false;
     }
-
-    if (actualRules.proxyForHttp || actualRules.proxyForHttps || actualRules.proxyForFtp || actualRules.fallbackProxy) {
-      return false;
-    }
-
-    const normalizeBypassList = value => [...new Set(normalizeWhitelist(value || []))].sort();
-    const actualBypass = normalizeBypassList(actualRules.bypassList);
-    const expectedBypass = normalizeBypassList(expectedRules.bypassList);
-    return actualBypass.length === expectedBypass.length
-      && actualBypass.every((rule, index) => rule === expectedBypass[index]);
   }
 
   function authChallengeMatches(details, config) {

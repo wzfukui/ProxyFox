@@ -4,7 +4,7 @@
 
 [Chrome 应用商店](https://chromewebstore.google.com/detail/proxyfox/ejgcljmgjglpeacggbhccbhhojjmkjci) · [官方网站](https://proxyfox.io) · [English](README_en.md) · [隐私政策](https://proxyfox.io/privacy.html)
 
-> 当前源码与候选包版本为 v1.4.2；Chrome 商店当前稳定版为 v1.4.1。ProxyFox 不提供代理服务器，不是 VPN，也不支持按网站自动选择不同代理。
+> 当前源码与候选包版本为 v1.4.3；Chrome 商店页面标注版本为 v1.4.2（2026-10-03 核对）。ProxyFox 不提供代理服务器，不是 VPN，也不支持按网站自动选择不同代理。
 
 <img src="images/proxyfox-logo.png" alt="ProxyFox 狐狸标志" width="240">
 
@@ -117,6 +117,15 @@ npm run check
 `npm run check` 会执行 JavaScript 语法检查、配置规则测试、认证主机严格匹配测试、权限检查和多语言完整性检查。`build.sh` 会先运行同样的检查，并确保 `manifest.json` 位于发布 ZIP 根目录。
 
 ## 更新历史
+
+### v1.4.3 (2026-10-03)
+- 保护尚未保存的修改，避免编辑操作相互冲突
+- 修复满额及旧格式备份导入，优先匹配配置 ID，并保留外部代理连接
+- 支持大型白名单合并与展开，使用集合比较减少排序开销
+- 测试后正确恢复按协议设置的代理，并释放测试响应连接
+- 弹窗加载失败时支持重试，切换后保留键盘焦点
+- 优化窄窗口编辑布局，保留连接测试结果
+- 新增 19 项回归测试，全部 46 项测试通过
 
 ### v1.4.2 (2026-08-29)
 - Popup 的语言、设置和后台配置请求改为并行加载，后台冷启动合并存储与代理状态读取

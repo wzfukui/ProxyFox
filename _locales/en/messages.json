@@ -52,7 +52,7 @@
     "description": "Edit proxy form title"
   },
   "form_name": {
-    "message": "Configuration name (do not use quotes, braces {} or other special characters)",
+    "message": "Configuration name",
     "description": "Proxy name input field placeholder"
   },
   "form_host": {
@@ -435,6 +435,13 @@
     "message": "Security and Reliability Update",
     "description": "v1.3.4 version update title"
   },
+  "updateHistory_v1_4_3": {"message": "Reliability and Editing Improvements", "description": "v1.4.3 version update title"},
+  "feature_draftProtection": {"message": "Protect unsaved edits and prevent conflicting editor operations"},
+  "feature_backupCompatibility": {"message": "Fix full-size and legacy backup imports, prioritize matching IDs, and preserve external proxy connections"},
+  "feature_largeWhitelist": {"message": "Handle large combined bypass lists and compare rules without sorting"},
+  "feature_probeRestoration": {"message": "Restore per-protocol proxy settings after tests and release probe response streams"},
+  "feature_popupRecovery": {"message": "Retry failed popup loads and preserve keyboard focus after switching"},
+  "feature_responsiveEditor": {"message": "Reflow the editor for narrow windows and keep connection-test results visible"},
   "updateHistory_v1_4_2": {
     "message": "Faster and Safer Switching",
     "description": "v1.4.2 version update title"
@@ -509,7 +516,7 @@
   "rule_reference": { "message": "Rule reference" },
   "system_direct_desc": { "message": "Connect directly without using a proxy. Use this when you want Chrome to bypass all configured proxy servers." },
   "system_proxy_desc": { "message": "Follow the proxy settings provided by your operating system or managed device policy." },
-  "status_unsavedSelection": { "message": "This proxy has unsaved changes. Discard or save them before opening another configuration." },
+  "status_unsavedSelection": { "message": "You have unsaved changes. Save or discard them before continuing." },
   "status_savedAndActivated": { "message": "Proxy saved and activated" },
   "status_configRestored": { "message": "Proxy restored" },
   "form_type": { "message": "Protocol" },
@@ -532,5 +539,6 @@
   "test_target_custom": { "message": "Custom target" },
   "test_latency_network": { "message": "Network" },
   "test_latency_apply": { "message": "Apply" },
-  "test_latency_total": { "message": "Total" }
+  "test_latency_total": { "message": "Total" },
+  "btn_retry": { "message": "Retry" }
 }

@@ -12,8 +12,8 @@ Canonical, review-ready locale copy now lives in:
 Version boundary
 ----------------
 
-Live Chrome Web Store version: v1.4.1
-Candidate source and ZIP: v1.4.2
+Chrome Web Store version checked 2026-10-03: v1.4.2
+Candidate source and ZIP: v1.4.3
 
 Single purpose
 --------------
@@ -33,11 +33,12 @@ provide anonymity, read or modify page content, or automatically choose a
 different proxy per website. Configurations are stored locally, but optional
 proxy credentials should still be treated as sensitive data.
 
-v1.4.2 release notes
+v1.4.3 release notes
 --------------------
 
-- Faster popup startup and large-profile handling.
-- Atomic, rollback-safe imports for profiles and global bypass rules.
-- Stricter credential selection during proxy activation.
-- Safer migration of legacy and invalid stored configurations.
-- Added cold-start, scale, rollback, authentication-race, and migration tests.
+- Protect unsaved edits and prevent conflicting editor operations
+- Fix full-size and legacy backup imports, prioritize matching IDs, and preserve external proxy connections
+- Handle large combined bypass lists and compare rules without sorting
+- Restore per-protocol proxy settings after tests and release probe response streams
+- Retry failed popup loads and preserve keyboard focus after switching
+- Reflow the editor for narrow windows and keep connection-test results visible

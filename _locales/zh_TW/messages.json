@@ -52,7 +52,7 @@
     "description": "編輯代理表單標題"
   },
   "form_name": {
-    "message": "配置名稱（請勿使用引號、花括號{}等特殊字符）",
+    "message": "設定名稱",
     "description": "代理名稱輸入框的佔位符"
   },
   "form_host": {
@@ -395,6 +395,13 @@
     "message": "安全與可靠性更新",
     "description": "v1.3.4版本更新標題"
   },
+  "updateHistory_v1_4_3": {"message": "可靠性與編輯體驗改進", "description": "v1.4.3 version update title"},
+  "feature_draftProtection": {"message": "保護尚未儲存的修改，避免編輯操作互相衝突"},
+  "feature_backupCompatibility": {"message": "修正滿額及舊格式備份匯入，優先比對設定 ID，並保留外部代理連線"},
+  "feature_largeWhitelist": {"message": "支援大型白名單合併與展開，以集合比對減少排序負擔"},
+  "feature_probeRestoration": {"message": "測試後正確還原依通訊協定設定的代理，並釋放測試回應連線"},
+  "feature_popupRecovery": {"message": "彈出視窗載入失敗時可重試，切換後保留鍵盤焦點"},
+  "feature_responsiveEditor": {"message": "改善窄視窗的編輯版面，保留連線測試結果"},
   "updateHistory_v1_4_2": {
     "message": "更快、更可靠的代理切換",
     "description": "v1.4.2 版本更新標題"
@@ -479,7 +486,7 @@
   "rule_reference": { "message": "規則參考" },
   "system_direct_desc": { "message": "不經過任何代理直接連線。需要完全略過已設定代理時使用此模式。" },
   "system_proxy_desc": { "message": "使用作業系統或裝置管理政策提供的代理設定。" },
-  "status_unsavedSelection": { "message": "目前代理有未儲存變更，請先儲存或捨棄變更，再開啟其他設定。" },
+  "status_unsavedSelection": { "message": "有尚未儲存的修改，請先儲存或放棄修改再繼續。" },
   "status_savedAndActivated": { "message": "代理已儲存並啟用" },
   "status_configRestored": { "message": "代理已復原" },
   "form_type": { "message": "通訊協定" },
@@ -502,5 +509,6 @@
   "test_target_custom": { "message": "自訂目標" },
   "test_latency_network": { "message": "網路" },
   "test_latency_apply": { "message": "套用" },
-  "test_latency_total": { "message": "總耗時" }
+  "test_latency_total": { "message": "總耗時" },
+  "btn_retry": { "message": "重試" }
 }

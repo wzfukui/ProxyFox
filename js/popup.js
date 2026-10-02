@@ -8,6 +8,7 @@ const popupTitleEl = document.getElementById('popupTitle');
 const popupVersionEl = document.getElementById('popupVersion');
 const openSettingsBtn = document.getElementById('openSettingsBtn');
 const statusMessageEl = document.getElementById('statusMessage');
+const retryLoadBtn = document.getElementById('retryLoadBtn');
 performance.mark('proxyfox-popup-script-start');
 
 let proxyConfigs = [];
@@ -19,6 +20,7 @@ let statusHideTimer = null;
 let switchingConfigId = null;
 let proxyRefreshTimer = null;
 let lastProxyDiagnostics = null;
+let configLoadSequence = 0;
 
 document.addEventListener('DOMContentLoaded', async () => {
   bindEvents();
@@ -48,6 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   } catch (error) {
     console.error('Failed to initialize popup:', error);
+    showLoadError();
     showStatusMessage(`${fetchMessage('status_error')}: ${error.message}`, 'error');
   }
 });
@@ -100,14 +103,39 @@ function applyProxyConfigResponse(response) {
   renderProxyList();
   updateCurrentProxy();
   proxyListEl.setAttribute('aria-busy', 'false');
+  retryLoadBtn.hidden = true;
 }
 
 async function loadProxyConfigs() {
+  const sequence = ++configLoadSequence;
   proxyListEl.setAttribute('aria-busy', 'true');
-  applyProxyConfigResponse(await requestProxyConfigs());
+  retryLoadBtn.disabled = true;
+  try {
+    const response = await requestProxyConfigs();
+    if (sequence === configLoadSequence && switchingConfigId === null) applyProxyConfigResponse(response);
+  } catch (error) {
+    if (sequence === configLoadSequence) showLoadError();
+    throw error;
+  } finally {
+    if (sequence === configLoadSequence) {
+      proxyListEl.setAttribute('aria-busy', 'false');
+      retryLoadBtn.disabled = false;
+    }
+  }
+}
+
+function showLoadError() {
+  proxyListEl.setAttribute('aria-busy', 'false');
+  retryLoadBtn.hidden = false;
+  connectionStateEl.textContent = fetchMessage('status_error');
+  if (proxyConfigs.length === 0) {
+    proxyListEl.replaceChildren();
+    currentProxyEl.textContent = fetchMessage('status_error');
+  }
 }
 
 function renderProxyList() {
+  const focusedId = proxyListEl.contains(document.activeElement) ? document.activeElement.dataset.id : null;
   const fragment = document.createDocumentFragment();
   const systemConfigs = proxyConfigs.filter(config => config.isSystem);
   const customConfigs = proxyConfigs.filter(config => !config.isSystem);
@@ -121,6 +149,9 @@ function renderProxyList() {
   }
 
   proxyListEl.replaceChildren(fragment);
+  if (focusedId) {
+    [...proxyListEl.querySelectorAll('.proxy-item')].find(item => item.dataset.id === focusedId)?.focus();
+  }
   proxyCountEl.textContent = String(proxyConfigs.length);
 }
 
@@ -196,6 +227,9 @@ function updateCurrentProxy() {
 function bindEvents() {
   proxyListEl.addEventListener('click', handleProxyItemClick);
   openSettingsBtn.addEventListener('click', openOptionsPage);
+  retryLoadBtn.addEventListener('click', () => loadProxyConfigs().catch(error => {
+    showStatusMessage(`${fetchMessage('status_error')}: ${error.message}`, 'error');
+  }));
 }
 
 async function handleProxyItemClick(event) {
@@ -203,7 +237,10 @@ async function handleProxyItemClick(event) {
   if (!item || switchingConfigId !== null || item.dataset.id === activeConfigId) return;
 
   switchingConfigId = item.dataset.id;
-  renderProxyList();
+  const requestedConfigId = switchingConfigId;
+  ++configLoadSequence;
+  proxyListEl.setAttribute('aria-busy', 'true');
+  for (const button of proxyListEl.querySelectorAll('button')) button.disabled = true;
   try {
     const response = await chrome.runtime.sendMessage({
       action: 'activateConfig',
@@ -222,6 +259,13 @@ async function handleProxyItemClick(event) {
   } finally {
     switchingConfigId = null;
     renderProxyList();
+    try {
+      await loadProxyConfigs();
+    } catch (error) {
+      console.error('Failed to read proxy state after switching:', error);
+    }
+    [...proxyListEl.querySelectorAll('.proxy-item')]
+      .find(button => button.dataset.id === requestedConfigId)?.focus({ preventScroll: true });
   }
 }
 

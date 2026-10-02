@@ -559,6 +559,8 @@ h2 {
   flex-direction: column;
   border-radius: var(--radius-md);
   overflow: hidden;
+  container-type: inline-size;
+  container-name: editor;
 }
 
 .editor-empty {
@@ -611,6 +613,11 @@ h2 {
   background: var(--paper);
 }
 
+.editor-title-row > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .state-badge {
   flex: 0 0 auto;
   padding: 4px 9px;
@@ -647,6 +654,7 @@ h2 {
 
 .form-section {
   position: relative;
+  min-width: 0;
   margin: 0;
   padding: var(--space-6) 0;
   border: 0;
@@ -748,7 +756,7 @@ h2 {
 
 .endpoint-row {
   display: grid;
-  grid-template-columns: minmax(96px, 0.7fr) minmax(180px, 2fr) minmax(90px, 0.7fr);
+  grid-template-columns: minmax(80px, 0.7fr) minmax(0, 2fr) minmax(80px, 0.7fr);
   gap: var(--space-3);
   margin-top: var(--space-4);
 }
@@ -1321,6 +1329,52 @@ h2 {
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-weight: 800;
+}
+
+@container editor (max-width: 620px) {
+  .connection-test-control {
+    position: static;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    margin-bottom: var(--space-4);
+  }
+
+  .endpoint-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .host-field {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .editor-actions .action-spacer {
+    display: none;
+  }
+
+  .editor-actions .button {
+    flex: 1 1 auto;
+  }
+
+  .mode-illustration {
+    padding-inline: var(--space-3);
+  }
+
+  .mode-node {
+    flex-shrink: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 899px) {
+  .proxy-list {
+    max-height: 300px;
+  }
+
+  .editor-panel {
+    scroll-margin-top: 110px;
+  }
 }
 
 @media (min-width: 680px) {

@@ -116,7 +116,7 @@
     "description": "编辑代理表单标题"
   },
   "form_name": {
-    "message": "配置名称(不要使用引号、大括号{}等特殊字符)",
+    "message": "配置名称",
     "description": "代理名称字段"
   },
   "form_type": {
@@ -463,6 +463,13 @@
     "message": "安全与可靠性更新",
     "description": "v1.3.4版本更新标题"
   },
+  "updateHistory_v1_4_3": {"message": "可靠性与编辑体验改进", "description": "v1.4.3 version update title"},
+  "feature_draftProtection": {"message": "保护尚未保存的修改，避免编辑操作相互冲突"},
+  "feature_backupCompatibility": {"message": "修复满额及旧格式备份导入，优先匹配配置 ID，并保留外部代理连接"},
+  "feature_largeWhitelist": {"message": "支持大型白名单合并与展开，使用集合比较减少排序开销"},
+  "feature_probeRestoration": {"message": "测试后正确恢复按协议设置的代理，并释放测试响应连接"},
+  "feature_popupRecovery": {"message": "弹窗加载失败时支持重试，切换后保留键盘焦点"},
+  "feature_responsiveEditor": {"message": "优化窄窗口编辑布局，保留连接测试结果"},
   "updateHistory_v1_4_2": {
     "message": "更快、更可靠的代理切换",
     "description": "v1.4.2 版本更新标题"
@@ -548,7 +555,7 @@
   "rule_reference": { "message": "规则参考" },
   "system_direct_desc": { "message": "不经过任何代理直接连接网络。需要完全绕过已配置代理时使用此模式。" },
   "system_proxy_desc": { "message": "使用操作系统或设备管理策略提供的代理设置。" },
-  "status_unsavedSelection": { "message": "当前代理有未保存修改，请先保存或放弃修改，再打开其他配置。" },
+  "status_unsavedSelection": { "message": "有尚未保存的修改，请先保存或放弃修改再继续。" },
   "status_savedAndActivated": { "message": "代理已保存并启用" },
   "status_configRestored": { "message": "代理已恢复" },
   "btn_testProxy": { "message": "测试连接" },
@@ -569,5 +576,6 @@
   "test_target_custom": { "message": "自定义目标" },
   "test_latency_network": { "message": "网络" },
   "test_latency_apply": { "message": "应用" },
-  "test_latency_total": { "message": "总耗时" }
+  "test_latency_total": { "message": "总耗时" },
+  "btn_retry": { "message": "重试" }
 }

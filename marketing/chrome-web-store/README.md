@@ -4,9 +4,9 @@ This directory is a review-ready source pack. It does not publish or modify the 
 
 ## Version boundary
 
-- Live Chrome Web Store version: **v1.4.1**
-- Candidate source and ZIP: **v1.4.2**
-- Upload v1.4.2 only after the maintainer approves a store release.
+- Chrome Web Store version checked 2026-10-03: **v1.4.2**
+- Candidate source and ZIP: **v1.4.3**
+- Upload v1.4.3 only after the maintainer approves a store release.
 
 ## Recommended screenshot order
 
@@ -18,7 +18,7 @@ Use the English or Chinese set from `../assets/`:
 4. `04-languages` — five interface languages
 5. `05-release-history` — visible version and release history
 
-All screenshots are 1280×800 and were rendered from the real v1.4.2 options-page code with local mock data. They contain no real proxy endpoints or credentials.
+All screenshots are 1280×800 and were rendered from the real v1.4.2 options-page code with local mock data. They contain no real proxy endpoints or credentials. Refresh version-bearing screenshots before submitting v1.4.3.
 
 ## Promotional images
 

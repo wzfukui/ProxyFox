@@ -4,7 +4,7 @@
 
 [Chrome Web Store](https://chromewebstore.google.com/detail/proxyfox/ejgcljmgjglpeacggbhccbhhojjmkjci) · [Website](https://proxyfox.io/en/) · [中文](README.md) · [Privacy](https://proxyfox.io/en/privacy.html)
 
-> The source and candidate package are v1.4.2; the Chrome Web Store currently carries stable v1.4.1. ProxyFox does not provide proxy servers, is not a VPN, and does not automatically choose different proxies by website.
+> The source and candidate package are v1.4.3; the Chrome Web Store lists v1.4.2 (checked 2026-10-03). ProxyFox does not provide proxy servers, is not a VPN, and does not automatically choose different proxies by website.
 
 <img src="images/proxyfox-logo.png" alt="ProxyFox fox mark" width="240">
 
@@ -117,6 +117,15 @@ npm run check
 `npm run check` validates JavaScript syntax, proxy configuration rules, strict authentication host matching, manifest permissions, and locale coverage. `build.sh` runs the same checks and verifies that `manifest.json` is at the archive root.
 
 ## Update History
+
+### v1.4.3 (2026-10-03)
+- Protect unsaved edits and prevent conflicting editor operations
+- Fix full-size and legacy backup imports, prioritize matching IDs, and preserve external proxy connections
+- Handle large combined bypass lists and compare rules without sorting
+- Restore per-protocol proxy settings after tests and release probe response streams
+- Retry failed popup loads and preserve keyboard focus after switching
+- Reflow the editor for narrow windows and keep connection-test results visible
+- Added 19 regression tests; all 46 tests pass
 
 ### v1.4.2 (2026-08-29)
 - Parallelized popup language, settings, and background requests while combining cold-start storage and proxy reads
